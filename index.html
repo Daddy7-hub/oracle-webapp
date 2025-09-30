@@ -1,455 +1,532 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Oracle Quest — мини-апп</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-  :root{
-    --bg:#0b0f1c; --panel:#0f1530; --card:#121a3a; --line:rgba(255,255,255,.06);
-    --text:#eef1ff; --muted:#a9b6ff; --acc:#7aa2ff; --acc2:#74f1d1; --warn:#ffd166; --err:#ff6b6b; --ok:#38d39f;
-    --glow:0 10px 30px rgba(122,162,255,.25);
-    --r:18px; --g:16px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; background:
-      radial-gradient(1200px 900px at 120% -20%, #1a2250 0,#0b0f1c 60%) fixed,
-      radial-gradient(900px 700px at -30% 120%, #0f1330 0,#0b0f1c 55%) fixed,
-      linear-gradient(180deg,#0c1022,#0b0f1c);
-    color:var(--text);
-    font:16px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
-  }
-  .app{max-width:980px;margin:0 auto;padding:18px}
-  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .brand{display:flex;align-items:center;gap:10px}
-  .logo{
-    width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
-    background:conic-gradient(from 190deg,#74f1d1,#7aa2ff 45%,#74f1d1 100%); color:#0b0f1c;font-weight:900;
-    box-shadow:0 10px 35px rgba(116,241,209,.25);
-  }
-  .title{font-weight:800;letter-spacing:.2px}
-  .chip{border:1px solid var(--line);background:#0e1330;padding:6px 10px;border-radius:999px;color:var(--muted);font-size:12px}
-
-  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--g)}
-  .card{
-    grid-column:span 12;background:linear-gradient(135deg,var(--card),#0f1530);
-    border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--glow); padding:14px;
-  }
-  @media(min-width:860px){ .half{grid-column:span 6} .third{grid-column:span 4} .wide{grid-column:span 12} }
-
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .stat{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:#0d1330;border:1px solid var(--line)}
-  .stat b{font-size:18px}
-  .bar{height:10px;border-radius:999px;background:#0c122a;border:1px solid var(--line);position:relative;overflow:hidden}
-  .bar>i{position:absolute;inset:0 0 0 0;width:0%;background:linear-gradient(90deg,#7aa2ff,#74f1d1);border-radius:999px;transition:width .3s ease}
-
-  .tap{
-    display:grid;place-items:center;aspect-ratio:1/1;border-radius:20px;border:1px solid var(--line);
-    background:
-      radial-gradient(600px 300px at 50% 0%, rgba(122,162,255,.15), transparent 70%),
-      linear-gradient(135deg,#131c40,#0f1530);
-    box-shadow: var(--glow), inset 0 0 0 1px rgba(255,255,255,.02);
-    user-select:none; cursor:pointer; position:relative; overflow:hidden;
-  }
-  .tap .score{font-size:42px;font-weight:900;letter-spacing:.5px}
-  .tap .lbl{color:var(--muted);font-size:12px}
-  .pulse{position:absolute;border-radius:50%;pointer-events:none;border:2px solid rgba(116,241,209,.5);transform:scale(0);opacity:.9;animation:pulse .6s ease-out forwards}
-  @keyframes pulse{to{transform:scale(8);opacity:0}}
-
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:10px 12px;border-radius:14px;
-    border:1px solid var(--line);background:linear-gradient(135deg,#1a2350,#121a3a);color:var(--text);cursor:pointer;user-select:none}
-  .btn:active{transform:translateY(1px)}
-  .btn.ok{background:linear-gradient(135deg,#1a4f3a,#153b2c);border-color:rgba(56,211,159,.35)}
-  .btn.pay{background:linear-gradient(135deg,#24307a,#1a2350);border-color:rgba(122,162,255,.35)}
-  .btn.ghost{background:#0d1330}
-  .btn.full{width:100%}
-
-  .shop{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .pack{padding:12px;border-radius:14px;background:#0d1330;border:1px solid var(--line);text-align:center}
-  .pack b{font-size:18px}
-  .pack .stars{color:#ffe27a}
-
-  .task{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:12px;border:1px solid var(--line);background:#0e1330}
-  .task.done{opacity:.6}
-  .task .t{font-weight:600}
-  .task .r{color:var(--muted);font-size:12px}
-  .badge{padding:4px 8px;border-radius:999px;background:#0b1229;border:1px solid var(--line);color:var(--muted);font-size:12px}
-
-  .notice{padding:12px;border:1px dashed var(--line);border-radius:14px;background:#0e1330;color:var(--muted)}
-  .hint{color:var(--muted);font-size:12px}
-
-  .preview{white-space:pre-wrap;background:#0d1330;border:1px dashed var(--line);border-radius:12px;padding:12px;margin-top:8px}
-  .hidden{display:none}
-
-  /* Light mode via TG theme */
-  .light .card{background:linear-gradient(135deg,#ffffff,#f5f7ff);border-color:#e7ebff}
-  .light body{background:linear-gradient(180deg,#eff2ff,#e9edff)}
-  .light .tap{background:linear-gradient(135deg,#f1f3ff,#e9edff)}
-  .light .btn{background:linear-gradient(135deg,#eef1ff,#e7ebff);color:#141936}
-  .light .btn.pay{background:linear-gradient(135deg,#e5ebff,#dde4ff)}
-  .light .btn.ok{background:linear-gradient(135deg,#e6fbf3,#d7f6ea)}
-  .light .stat,.light .pack,.light .task,.light .notice,.light .preview{background:#fff;border-color:#e7ebff}
-  .light .chip{background:#fff;border-color:#e7ebff;color:#3a408e}
-</style>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"
+  />
+  <title>Oracle Quest — WebApp</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root{
+      --bg:#0b0f1c; --card:#0f1530; --card2:#121a3a; --line:rgba(255,255,255,.08);
+      --text:#eef1ff; --muted:#a9b6ff; --ok:#38d39f; --danger:#ff6b6b;
+      --r:18px; --pad:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:
+        radial-gradient(1200px 900px at 120% -20%, #1a2250 0,#0b0f1c 60%) fixed,
+        radial-gradient(900px 700px at -30% 120%, #0f1330 0,#0b0f1c 55%) fixed,
+        linear-gradient(180deg,#0c1022,#0b0f1c);
+      color:var(--text);
+      font:16px/1.45 Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+    }
+    .app{max-width:980px;margin:0 auto;padding:12px 12px 84px}
+    .app__header{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px}
+    .brand{display:flex;gap:10px;align-items:center}
+    .brand__logo{
+      width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+      background:conic-gradient(from 190deg,#74f1d1,#7aa2ff 45%,#74f1d1 100%); color:#0b0f1c;font-weight:900;
+      box-shadow:0 10px 35px rgba(116,241,209,.25);
+    }
+    .brand__title{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px}
+    .brand__desc{margin:0;font-size:12px;color:var(--muted)}
+    .chip{border:1px solid var(--line);background:#0e1330;padding:6px 10px;border-radius:999px;color:var(--muted);font-size:12px}
+    .router{display:block}
+    .page{display:block}
+    .card{
+      background:linear-gradient(135deg,var(--card2),var(--card));
+      border:1px solid var(--line); border-radius:var(--r); padding:var(--pad); margin-bottom:12px;
+      box-shadow:0 10px 30px rgba(122,162,255,.12);
+    }
+    .grid{display:grid;gap:12px}
+    .grid--2{grid-template-columns:repeat(2,1fr)}
+    .grid--3{grid-template-columns:repeat(3,1fr)}
+    @media(max-width:780px){.grid--2,.grid--3{grid-template-columns:1fr}}
+    .label{font-size:12px;color:var(--muted);margin-bottom:4px;display:block}
+    input,select,textarea{
+      width:100%;background:#0d1330;border:1px solid var(--line);color:var(--text);
+      border-radius:12px;padding:10px 12px;outline:none
+    }
+    textarea{resize:vertical}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;padding:10px 12px;border-radius:14px;
+      border:1px solid var(--line);background:linear-gradient(135deg,#1a2350,#121a3a);color:var(--text);
+      cursor:pointer;user-select:none;transition:transform .05s ease;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn--ok{background:linear-gradient(135deg,#1a4f3a,#153b2c);border-color:rgba(56,211,159,.35)}
+    .btn--pay{background:linear-gradient(135deg,#24307a,#1a2350);border-color:rgba(122,162,255,.35)}
+    .btn--danger{background:linear-gradient(135deg,#4b1a1a,#3b1313);border-color:rgba(255,107,107,.35)}
+    .stats{display:flex;gap:10px;flex-wrap:wrap}
+    .stat{display:flex;gap:8px;align-items:center;padding:10px;border-radius:14px;background:#0d1330;border:1px solid var(--line)}
+    .stat b{font-size:18px}
+    .energy .bar{height:10px;border-radius:999px;background:#0c122a;border:1px solid var(--line);overflow:hidden;min-width:200px}
+    .energy .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7aa2ff,#74f1d1);transition:width .3s ease}
+    .tap{
+      margin:12px 0; display:grid;place-items:center;aspect-ratio:1/1;border-radius:20px;border:1px solid var(--line);
+      background: radial-gradient(600px 300px at 50% 0%, rgba(122,162,255,.15), transparent 70%),
+                  linear-gradient(135deg,#131c40,#0f1530);
+      box-shadow: 0 10px 30px rgba(122,162,255,.18), inset 0 0 0 1px rgba(255,255,255,.02);
+      user-select:none; cursor:pointer; position:relative; overflow:hidden;
+    }
+    .tap__label{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .tap__score{font-size:42px;font-weight:900;letter-spacing:.5px}
+    .pulse{position:absolute;border-radius:50%;pointer-events:none;border:2px solid rgba(116,241,209,.5);transform:scale(0);opacity:.9;animation:pulse .6s ease-out forwards}
+    @keyframes pulse{to{transform:scale(8);opacity:0}}
+    .shop{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .pack{padding:12px;border-radius:14px;background:#0d1330;border:1px solid var(--line);text-align:center}
+    .pack b{font-size:18px}
+    .stars{color:#ffe27a;margin:4px 0}
+    .note{padding:12px;border:1px dashed var(--line);border-radius:14px;background:#0e1330;color:var(--muted)}
+    .muted{color:var(--muted);font-size:12px}
+    .hidden{display:none}
+    .tasks{display:grid;gap:10px}
+    .task{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:12px;border:1px solid var(--line);background:#0e1330}
+    .task.done{opacity:.6}
+    .task .t{font-weight:600}
+    .task .r{color:var(--muted);font-size:12px}
+    .tabs{
+      position:fixed;left:0;right:0;bottom:0;z-index:40;
+      display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:8px;
+      background:linear-gradient(180deg,rgba(11,15,28,.2),rgba(11,15,28,.8) 30%,rgba(11,15,28,.95));
+      backdrop-filter: blur(8px); border-top:1px solid var(--line);
+    }
+    .tab{
+      appearance:none;border:1px solid var(--line);background:#0e1330;border-radius:14px;padding:8px 4px;
+      color:var(--text);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;cursor:pointer
+    }
+    .tab.active{outline:2px solid rgba(122,162,255,.5)}
+    .light body{background:#f2f4ff}
+    .light .card,.light .task,.light .pack,.light .note{background:#fff;border-color:#e6ebff;color:#111}
+    .light .chip{background:#fff;color:#334}
+    .light .tab{background:#fff}
+    .light .tap{background:linear-gradient(135deg,#f1f3ff,#e9edff)}
+  </style>
 </head>
 <body>
-<div class="app">
-  <div class="top">
-    <div class="brand">
-      <div class="logo">🔮</div>
-      <div>
-        <div class="title">Oracle Quest</div>
-        <div class="hint">Тапай кристалл, улучшайся, получай чтения. Как у «хомяка», но про Оракул 😎</div>
-      </div>
-    </div>
-    <div class="chip" id="envChip">WebApp</div>
-  </div>
-
-  <div class="grid">
-    <!-- STATS -->
-    <div class="card wide">
-      <div class="row">
-        <div class="stat"><span>💎</span><div><div class="r">Кредиты</div><b id="credits">0</b></div></div>
-        <div class="stat"><span>⚡</span><div><div class="r">Энергия</div><div class="bar" style="width:180px"><i id="energyBar"></i></div></div><b id="energy" style="margin-left:8px">0</b></div>
-        <div class="stat"><span>⬆️</span><div><div class="r">Множитель</div><b id="mult">x1</b></div></div>
-        <div class="stat"><span>🎯</span><div><div class="r">Уровень</div><b id="lvl">1</b></div></div>
-      </div>
-    </div>
-
-    <!-- TAP -->
-    <div class="card half">
-      <div id="tap" class="tap">
-        <div>
-          <div class="lbl" style="text-align:center;margin-bottom:6px">тапай чтобы добыть «инсайты»</div>
-          <div class="score" id="score">0</div>
+  <div id="app" class="app">
+    <header class="app__header">
+      <div class="brand">
+        <div class="brand__logo">🔮</div>
+        <div class="brand__meta">
+          <h1 class="brand__title">Oracle Quest</h1>
+          <p class="brand__desc">кликер + чтения + магазин ⭐</p>
         </div>
       </div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn ok" id="btnClaim">🎁 Получить мини-чтение</button>
-        <button class="btn ghost" id="btnDeep">✨ Глубокое чтение</button>
-      </div>
-      <div class="hint" style="margin-top:6px">Мини-чтение бесплатное (по лимиту). Глубокое списывает 1 кредит (или демо раз в 7 дней).</div>
-    </div>
+      <div class="chip" id="envChip">…</div>
+    </header>
 
-    <!-- UPGRADES / SHOP -->
-    <div class="card half">
-      <div class="row">
-        <div class="badge">Магазин</div>
-        <div class="hint">Покупка в ⭐ через бота</div>
+    <main id="router" class="router"></main>
+
+    <nav class="tabs">
+      <button class="tab" data-route="home"><span>🏠</span><b>Главная</b></button>
+      <button class="tab" data-route="readings"><span>📜</span><b>Чтения</b></button>
+      <button class="tab" data-route="shop"><span>⭐</span><b>Магазин</b></button>
+      <button class="tab" data-route="quests"><span>🎯</span><b>Квесты</b></button>
+      <button class="tab" data-route="profile"><span>👤</span><b>Анкета</b></button>
+    </nav>
+  </div>
+
+  <!-- TEMPLATES -->
+  <template id="tpl-home">
+    <section class="page">
+      <div class="stats">
+        <div class="stat"><span>💎</span><div><div>Кредиты</div><b data-bind="credits">0</b></div></div>
+        <div class="stat energy">
+          <span>⚡</span>
+          <div>
+            <div>Энергия</div>
+            <div class="bar"><i data-bind="energyBar" style="width:0%"></i></div>
+          </div>
+          <b data-bind="energy">0</b>
+        </div>
+        <div class="stat"><span>⬆️</span><div><div>Множитель</div><b data-bind="mult">x1.0</b></div></div>
+        <div class="stat"><span>🎚️</span><div><div>Уровень</div><b data-bind="lvl">1</b></div></div>
       </div>
-      <div class="shop" style="margin-top:10px">
+
+      <div class="tap" data-action="tap">
+        <div class="tap__label">Тапай, чтобы добыть «инсайты»</div>
+        <div class="tap__score" data-bind="score">0</div>
+      </div>
+
+      <div class="grid grid--2">
+        <button class="btn btn--ok" data-action="toReadingsMini">🎁 Бесплатное мини-чтение</button>
+        <button class="btn" data-action="toReadingsDeep">✨ Глубокое чтение</button>
+      </div>
+
+      <p class="muted">Мини-чтение — бесплатно (или по лимиту). Глубокое — 1 кредит или демо раз в 7 дней.</p>
+    </section>
+  </template>
+
+  <template id="tpl-readings">
+    <section class="page">
+      <h2>Чтения</h2>
+      <div class="card">
+        <div class="grid grid--3">
+          <div>
+            <label class="label">Тема</label>
+            <select data-model="topic">
+              <option value="career">Карьера</option>
+              <option value="love">Любовь</option>
+              <option value="finance">Финансы</option>
+              <option value="health">Здоровье</option>
+              <option value="overall" selected>Общее</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Дата рождения</label>
+            <input type="date" data-model="dob" />
+          </div>
+          <div>
+            <label class="label">Пол</label>
+            <select data-model="gender">
+              <option value="">—</option>
+              <option value="male">м</option>
+              <option value="female">ж</option>
+              <option value="other">другой</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label class="label">Контекст (1–2 предложения)</label>
+          <textarea rows="4" data-model="context" placeholder="Коротко опиши ситуацию…"></textarea>
+        </div>
+
+        <div class="grid grid--2" style="margin-top:12px">
+          <button class="btn btn--ok" data-action="mini">🔮 Сгенерировать мини-чтение</button>
+          <button class="btn" data-action="deep">✨ Сгенерировать глубокое</button>
+        </div>
+      </div>
+
+      <div class="card hidden" id="preview">
+        <div class="label">PREVIEW (браузер): JSON, который уйдёт боту</div>
+        <pre id="previewJson"></pre>
+      </div>
+
+      <div class="note">⚠️ Развлекательный сервис. Не заменяет мед/фин/юр консультации.</div>
+    </section>
+  </template>
+
+  <template id="tpl-shop">
+    <section class="page">
+      <h2>Магазин ⭐</h2>
+      <div class="shop">
         <div class="pack">
-          <div class="r">Пакет</div>
           <b>1 кредит</b>
-          <div class="stars" style="margin:6px 0">50 ⭐</div>
-          <button class="btn pay full" data-pack="1">Купить</button>
+          <div class="stars">50 ⭐</div>
+          <button class="btn btn--pay" data-pack="1">Купить</button>
         </div>
         <div class="pack">
-          <div class="r">Пакет</div>
           <b>5 кредитов</b>
-          <div class="stars" style="margin:6px 0">240 ⭐</div>
-          <button class="btn pay full" data-pack="5">Купить</button>
+          <div class="stars">240 ⭐</div>
+          <button class="btn btn--pay" data-pack="5">Купить</button>
         </div>
         <div class="pack">
-          <div class="r">Пакет</div>
           <b>10 кредитов</b>
-          <div class="stars" style="margin:6px 0">450 ⭐</div>
-          <button class="btn pay full" data-pack="10">Купить</button>
+          <div class="stars">450 ⭐</div>
+          <button class="btn btn--pay" data-pack="10">Купить</button>
         </div>
       </div>
-      <div class="sep" style="margin:12px 0"></div>
-      <div class="row">
-        <button class="btn full" id="btnBoost">⚡ Энергия +50</button>
-        <button class="btn full" id="btnMult">⬆️ Множитель +0.1</button>
+
+      <div class="grid grid--2" style="margin-top:12px">
+        <button class="btn" data-action="boostEnergy">⚡ Энергия +50</button>
+        <button class="btn" data-action="boostMult">⬆️ Множитель +0.1</button>
       </div>
-      <div class="hint" style="margin-top:8px">Бусты бесплатные в демо-режиме (для фана), реальные кредиты — через ⭐.</div>
-    </div>
 
-    <!-- TASKS -->
-    <div class="card wide">
-      <div class="row">
-        <div class="badge">Квесты</div>
-        <div class="hint">Делай задания — забирай кредиты</div>
+      <p class="muted">Оплата происходит в боте через ⭐. Нажми «Купить» — мы отправим сигнал в чат с ботом.</p>
+    </section>
+  </template>
+
+  <template id="tpl-quests">
+    <section class="page">
+      <h2>Квесты</h2>
+      <div id="tasks" class="tasks"></div>
+    </section>
+  </template>
+
+  <template id="tpl-profile">
+    <section class="page">
+      <h2>Анкета и интеграция</h2>
+      <div class="card">
+        <div class="grid grid--3">
+          <div>
+            <label class="label">Дата рождения</label>
+            <input type="date" data-model="dob" />
+          </div>
+          <div>
+            <label class="label">Пол</label>
+            <select data-model="gender">
+              <option value="">—</option>
+              <option value="male">м</option>
+              <option value="female">ж</option>
+              <option value="other">другой</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Тема по умолчанию</label>
+            <select data-model="topic">
+              <option value="career">Карьера</option>
+              <option value="love">Любовь</option>
+              <option value="finance">Финансы</option>
+              <option value="health">Здоровье</option>
+              <option value="overall">Общее</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label class="label">Контекст по умолчанию</label>
+          <textarea rows="3" data-model="context" placeholder="Сохранится локально"></textarea>
+        </div>
+
+        <div class="grid grid--2" style="margin-top:12px">
+          <button class="btn btn--ok" data-action="saveProfile">💾 Сохранить</button>
+          <button class="btn btn--danger" data-action="reset">♻️ Сбросить прогресс</button>
+        </div>
       </div>
-      <div id="tasks" style="margin-top:10px"></div>
-    </div>
 
-    <!-- PROFILE -->
-    <div class="card wide">
-      <div class="row" style="justify-content:space-between">
-        <div>
-          <div class="badge">Анкета</div>
-          <div class="hint">Сохраняется локально и передаётся в бота вместе с запросом</div>
-        </div>
-        <div class="chip" id="previewMode" style="display:none">Browser preview</div>
+      <div class="note">
+        WebApp отправляет payload через <code>WebApp.sendData</code> —
+        твой бот поймает его в <code>@dp.message(F.web_app_data)</code>.
       </div>
-      <div class="row" style="margin-top:10px">
-        <div style="flex:1;min-width:220px">
-          <div class="hint">Тема</div>
-          <select id="topic" style="width:100%">
-            <option value="career">Карьера</option>
-            <option value="love">Любовь</option>
-            <option value="finance">Финансы</option>
-            <option value="health">Здоровье</option>
-            <option value="overall" selected>Общее</option>
-          </select>
-        </div>
-        <div>
-          <div class="hint">Дата рождения</div>
-          <input id="dob" type="date">
-        </div>
-        <div>
-          <div class="hint">Пол</div>
-          <select id="gender">
-            <option value="">—</option>
-            <option value="male">м</option>
-            <option value="female">ж</option>
-            <option value="other">другой</option>
-          </select>
-        </div>
-      </div>
-      <div style="margin-top:10px">
-        <div class="hint">Контекст (1–2 предложения)</div>
-        <textarea id="context" rows="4" placeholder="Коротко опиши ситуацию / вопрос… (до 500 символов)"></textarea>
-      </div>
-      <div class="preview hidden" id="debugPreview"></div>
-    </div>
+    </section>
+  </template>
 
-    <!-- DISCLAIMER -->
-    <div class="card wide">
-      <div class="notice">⚠️ Дисклеймер: развлекательный сервис. Не заменяет медицинские, юридические и финансовые консультации.</div>
-    </div>
-  </div>
-</div>
+  <script type="module">
+    // ---------- TG helpers ----------
+    const tg = window.Telegram?.WebApp || null;
+    const inTG = !!(tg && tg.initDataUnsafe);
+    const envChipEl = document.getElementById('envChip');
 
-<script>
-  // ===== Telegram SDK =====
-  const tg = window.Telegram?.WebApp;
-  const inTG = !!(tg && tg.initDataUnsafe);
-  const envChip = document.getElementById('envChip');
-  const prevChip = document.getElementById('previewMode');
-
-  function applyTheme(){
-    if(!inTG) { envChip.textContent = 'Browser'; return; }
-    tg.ready?.(); tg.expand?.();
-    const tp = tg.themeParams||{};
-    const isLight = (tg.colorScheme==='light') || (tp.bg_color && luminance(tp.bg_color)>0.8);
-    if (isLight) document.documentElement.classList.add('light');
-    envChip.textContent = `WebApp • ${isLight?'light':'dark'}`;
-  }
-  function luminance(hex){
-    const c=(hex||'').replace('#',''); if(c.length<6) return .1;
-    const [r,g,b]=[0,2,4].map(i=>parseInt(c.slice(i,i+2),16)/255);
-    const L=[r,g,b].map(v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4));
-    return 0.2126*L[0]+0.7152*L[1]+0.0722*L[2];
-  }
-  applyTheme();
-
-  // ===== State =====
-  const els = {
-    credits: $('#credits'), energy: $('#energy'), energyBar: $('#energyBar'),
-    mult: $('#mult'), lvl: $('#lvl'), score: $('#score'),
-    tap: $('#tap'), btnClaim: $('#btnClaim'), btnDeep: $('#btnDeep'),
-    btnBoost: $('#btnBoost'), btnMult: $('#btnMult'),
-    topic: $('#topic'), dob: $('#dob'), gender: $('#gender'), ctx: $('#context'),
-    tasks: $('#tasks'), debug: $('#debugPreview')
-  };
-  const KEY='oracleq_v1';
-  const state = load() || {
-    credits: 0, score: 0, lvl: 1, mult: 1.0,
-    energy: 100, energyMax: 100, regen: 6,   // +6/сек до energyMax
-    lastTick: Date.now(),
-    tasks: [
-      {id:'daily',   t:'Забери ежедневный бонус',   r:'+1 кредит',      done:false},
-      {id:'profile', t:'Заполни анкету',            r:'+1 кредит',      done:false},
-      {id:'follow',  t:'Подпишись на канал',        r:'+1 кредит',      done:false},
-      {id:'invite',  t:'Введи реф.код друга',       r:'+1 кредит',      done:false},
-    ]
-  };
-  save();
-
-  // ===== UI sync =====
-  function fmt(n){return Math.floor(n).toLocaleString('ru-RU')}
-  function sync(){
-    els.credits.textContent = fmt(state.credits);
-    els.score.textContent   = fmt(state.score);
-    els.lvl.textContent     = fmt(state.lvl);
-    els.mult.textContent    = 'x'+state.mult.toFixed(1);
-    els.energy.textContent  = fmt(state.energy);
-    const p = Math.max(0, Math.min(100, 100*state.energy/state.energyMax));
-    els.energyBar.style.width = p+'%';
-    renderTasks();
-  }
-  function renderTasks(){
-    els.tasks.innerHTML='';
-    state.tasks.forEach(task=>{
-      const wrap = div('task'+(task.done?' done':''),`
-        <div>
-          <div class="t">${task.t}</div>
-          <div class="r">${task.r}</div>
-        </div>
-        <div>
-          <button class="btn ${task.done?'ghost':''}" data-task="${task.id}" ${task.done?'disabled':''}>${task.done?'✓ Выполнено':'Забрать'}</button>
-        </div>
-      `);
-      els.tasks.appendChild(wrap);
-    });
-  }
-
-  // ===== Engine (energy regen) =====
-  function tick(){
-    const now=Date.now(), dt=(now-state.lastTick)/1000; state.lastTick=now;
-    state.energy = Math.min(state.energyMax, state.energy + state.regen*dt);
-    sync(); save();
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-
-  // ===== Tap logic =====
-  els.tap.addEventListener('click', (e)=>{
-    if(state.energy<1){ toast('Нет энергии'); haptic('error'); return; }
-    const gain = 1*state.mult;
-    state.score += gain;
-    state.energy = Math.max(0, state.energy-1);
-    pulse(e);
-    levelUpIfNeeded();
-    sync(); save();
-  });
-  function levelUpIfNeeded(){
-    const need = state.lvl*100;
-    if(state.score>=need){ state.lvl++; state.mult = +(state.mult+0.1).toFixed(1); confetti(); haptic('success'); }
-  }
-  function pulse(e){
-    const p = document.createElement('span'); p.className='pulse';
-    const r = e.currentTarget.getBoundingClientRect();
-    p.style.left=(e.clientX-r.left)+'px'; p.style.top=(e.clientY-r.top)+'px';
-    e.currentTarget.appendChild(p); setTimeout(()=>p.remove(),600);
-  }
-  function confetti(){
-    if(!inTG || !tg.HapticFeedback) return;
-    tg.HapticFeedback.impactOccurred('rigid');
-  }
-
-  // ===== Tasks click =====
-  els.tasks.addEventListener('click', (e)=>{
-    const b = e.target.closest('button[data-task]'); if(!b) return;
-    const id = b.dataset.task; const task = state.tasks.find(t=>t.id===id);
-    if(!task || task.done) return;
-    if(id==='daily'){ state.credits+=1; task.done=true; }
-    if(id==='profile'){ if(!els.dob.value || !els.gender.value){ return toast('Заполни ДР и пол'); } state.credits+=1; task.done=true; }
-    if(id==='follow'){ toast('Открой канал из бота — там кнопка «подписаться»'); state.credits+=1; task.done=true; }
-    if(id==='invite'){
-      const code = prompt('Введи реф.код'); if(!code) return;
-      // Просто отмечаем выполненным локально; реальную валидацию сделает бот после sendData (по желанию)
-      state.credits+=1; task.done=true;
-    }
-    sync(); save(); haptic('success');
-  });
-
-  // ===== Boosts (demo only) =====
-  els.btnBoost.addEventListener('click', ()=>{ state.energy=Math.min(state.energyMax, state.energy+50); sync(); save(); haptic('impact'); });
-  els.btnMult .addEventListener('click', ()=>{ state.mult=+(state.mult+0.1).toFixed(1); sync(); save(); haptic('impact'); });
-
-  // ===== Reading buttons =====
-  els.btnClaim.addEventListener('click', ()=> {
-    sendToBot({action:'gen', mode:'mini', ...profilePayload()});
-  });
-  els.btnDeep.addEventListener('click', ()=> {
-    // Мягкая валидация: просим контекст для deep
-    if(!(els.ctx.value||'').trim()) return toast('Добавь 1–2 предложения контекста — так точнее 🙌','warn');
-    sendToBot({action:'gen', mode:'deep', ...profilePayload()});
-  });
-
-  // ===== Shop buttons (Stars) =====
-  document.querySelectorAll('button.pay[data-pack]').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const qty = +b.dataset.pack;
-      sendToBot({action:'pay', pack:qty});
-    });
-  });
-
-  // ===== Telegram helpers =====
-  function sendToBot(obj){
-    const payload = JSON.stringify(obj);
-    if (!inTG || !tg.sendData){
-      // preview mode
-      prevChip.style.display='inline-flex';
-      els.debug.classList.remove('hidden');
-      els.debug.textContent = 'PREVIEW — JSON, который отправится боту:\n\n' + payload;
-      console.log('[preview send]', obj);
-      return;
-    }
-    tg.MainButton.setParams({text:'Отправляю…',is_visible:true}); tg.MainButton.showProgress?.();
-    try{
-      tg.sendData(payload);
-      toast('Запрос отправлен. Ответ придёт в чат с ботом.','ok');
-      haptic('impact');
-    } finally {
-      setTimeout(()=>{ tg.MainButton.hideProgress?.(); tg.MainButton.setParams({text:'✨ Глубокое чтение'}); }, 500);
-    }
-  }
-
-  function profilePayload(){
-    return {
-      topic: (els.topic.value||'overall').trim(),
-      dob: (els.dob.value||'').trim(),          // YYYY-MM-DD
-      gender: (els.gender.value||'').trim(),
-      context: (els.ctx.value||'').trim().slice(0,500)
-    };
-  }
-
-  function toast(message, kind='info'){
-    if(!inTG || !tg.showPopup){ console.log(`[${kind}]`, message); return; }
-    const title = kind==='ok'?'Готово': kind==='warn'?'Подсказка': kind==='error'?'Ошибка':'Оракл';
-    tg.showPopup({title, message, buttons:[{id:'ok',type:'ok',text:'ОК'}]});
-  }
-  function haptic(type){
-    try{
-      if(!tg?.HapticFeedback) return;
-      if(type==='impact') tg.HapticFeedback.impactOccurred('medium');
-      if(type==='success') tg.HapticFeedback.notificationOccurred('success');
-      if(type==='error') tg.HapticFeedback.notificationOccurred('error');
-    }catch(e){}
-  }
-
-  // ===== Persistence =====
-  function save(){
-    localStorage.setItem(KEY, JSON.stringify({
-      credits:state.credits, score:state.score, lvl:state.lvl, mult:state.mult,
-      energy:state.energy, energyMax:state.energyMax, regen:state.regen,
-      lastTick:state.lastTick, tasks:state.tasks,
-      topic:els.topic.value, dob:els.dob.value, gender:els.gender.value, context:els.ctx.value
-    }));
-  }
-  function load(){
-    try{
-      const v = JSON.parse(localStorage.getItem(KEY)||'null');
-      if(v){
-        els.topic.value  = v.topic||'overall';
-        els.dob.value    = v.dob||'';
-        els.gender.value = v.gender||'';
-        els.ctx.value    = v.context||'';
-        return {
-          credits:v.credits||0, score:v.score||0, lvl:v.lvl||1, mult:v.mult||1,
-          energy:v.energy??100, energyMax:v.energyMax||100, regen:v.regen||6, lastTick:v.lastTick||Date.now(),
-          tasks:v.tasks||[]
-        };
+    function initTheme() {
+      if (!inTG) {
+        envChipEl.textContent = 'Browser preview';
+        document.documentElement.classList.remove('light');
+        return;
       }
-    }catch(e){}
-    return null;
-  }
-  ['change','input'].forEach(ev=>{
-    [els.topic,els.dob,els.gender,els.ctx].forEach(x=>x.addEventListener(ev, save));
-  });
+      tg.ready?.(); tg.expand?.();
+      const tp = tg.themeParams || {};
+      const isLight = (tg.colorScheme === 'light') || (tp.bg_color && luminance(tp.bg_color) > 0.8);
+      if (isLight) document.documentElement.classList.add('light');
+      envChipEl.textContent = `WebApp • ${isLight ? 'light' : 'dark'}`;
+    }
+    function luminance(hex) {
+      const c = (hex || '').replace('#', '');
+      if (c.length < 6) return .1;
+      const [r, g, b] = [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16) / 255);
+      const L = [r, g, b].map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4));
+      return 0.2126 * L[0] + 0.7152 * L[1] + 0.0722 * L[2];
+    }
+    function popup(message, kind='info', title) {
+      if (!inTG || !tg.showPopup) { console.log(`[${kind}]`, message); return; }
+      tg.showPopup({ title: title || 'Оракул', message, buttons:[{id:'ok', type:'ok', text:'ОК'}] });
+    }
+    function haptic(type) {
+      try{
+        if (!tg?.HapticFeedback) return;
+        if (type==='impact') tg.HapticFeedback.impactOccurred('medium');
+        if (type==='success') tg.HapticFeedback.notificationOccurred('success');
+        if (type==='error') tg.HapticFeedback.notificationOccurred('error');
+      }catch(e){}
+    }
+    function sendPayload(obj) {
+      const payload = JSON.stringify(obj);
+      const prev = document.getElementById('preview');
+      const pre = document.getElementById('previewJson');
+      if (!inTG || !tg.sendData) {
+        if (prev && pre) { prev.classList.remove('hidden'); pre.textContent = payload; }
+        console.log('[preview send]', obj);
+        return;
+      }
+      tg.MainButton.setParams({ text:'Отправляю…', is_visible:true }); tg.MainButton.showProgress?.();
+      try{
+        tg.sendData(payload);
+        popup('Запрос отправлен. Ответ придёт в чат с ботом.','ok');
+        haptic('impact');
+      } finally {
+        setTimeout(()=>{ tg.MainButton.hideProgress?.(); tg.MainButton.setParams({text:'Готово',is_visible:false}); }, 600);
+      }
+    }
 
-  sync();
+    // ---------- State ----------
+    const KEY = 'oracleq_v2';
+    const defaults = {
+      credits: 0, score: 0, lvl: 1, mult: 1.0,
+      energy: 100, energyMax: 100, regen: 6, lastTick: Date.now(),
+      profile: { topic:'overall', dob:'', gender:'', context:'' },
+      tasks: [
+        { id:'daily', t:'Забери ежедневный бонус', r:'+1 кредит', done:false },
+        { id:'readMini', t:'Сделай мини-чтение', r:'+50 очков', done:false },
+        { id:'tap100', t:'Накликай 100 очков', r:'Энергия +50', done:false },
+      ]
+    };
+    let S = load();
+    function load(){ try{ return {...structuredClone(defaults), ...JSON.parse(localStorage.getItem(KEY)||'{}')} }catch(e){ return structuredClone(defaults) } }
+    function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+    function addCredits(n){ S.credits=Math.max(0,(S.credits||0)+n); save(); bindStats(); }
+    function addScore(n){ S.score=(S.score||0)+n; if(S.score>= (S.lvl*200)){ S.lvl++; S.mult=+(S.mult+0.1).toFixed(1);} save(); bindStats(); }
+    function setProfile(p){ S.profile={...S.profile,...p}; save(); }
+    function regenEnergy(){
+      const now=Date.now(); const dt=Math.max(0, Math.floor((now-S.lastTick)/1000)); if(!dt) return;
+      S.lastTick=now; S.energy=Math.min(S.energyMax, S.energy + dt*S.regen); save(); bindStats();
+    }
+    setInterval(regenEnergy, 1000);
 
-  // ===== small helpers =====
-  function $(s){return document.querySelector(s)}
-  function div(cls,html){const d=document.createElement('div');d.className=cls;d.innerHTML=html;return d}
-</script>
+    // ---------- Router & Screens ----------
+    const $router = document.getElementById('router');
+    const T = id => document.getElementById(id).content.cloneNode(true);
+
+    function route(name){ window.location.hash = '#'+name; render(name); }
+    function render(name){
+      $router.innerHTML = '';
+      const tabs=[...document.querySelectorAll('.tab')];
+      tabs.forEach(t=>t.classList.toggle('active', t.dataset.route===name));
+
+      if(name==='home'){ renderHome(); return;}
+      if(name==='readings'){ renderReadings(); return;}
+      if(name==='shop'){ renderShop(); return;}
+      if(name==='quests'){ renderQuests(); return;}
+      if(name==='profile'){ renderProfile(); return;}
+      renderHome();
+    }
+
+    // --- Home
+    function renderHome(){
+      const node=T('tpl-home'); $router.appendChild(node);
+      bindStats();
+      const tap = $router.querySelector('[data-action="tap"]');
+      tap.addEventListener('click', ev=>{
+        if (S.energy < 1) { popup('Мало энергии. Попробуй бусты в Магазине ⭐','warn'); return; }
+        S.energy = Math.max(0, S.energy-1); const gain = Math.round(1 * S.mult);
+        addScore(gain); pulse(tap, ev);
+        save(); bindStats(); haptic('impact');
+        // quest
+        if (S.score>=100 && !isDone('tap100')) { markDone('tap100'); S.energy=Math.min(S.energyMax,S.energy+50); popup('Квест «Накликай 100 очков» выполнен! Энергия +50','ok'); save(); }
+      });
+      $router.querySelector('[data-action="toReadingsMini"]').onclick=()=>{ route('readings'); setTimeout(()=>trigger('mini'),50); };
+      $router.querySelector('[data-action="toReadingsDeep"]').onclick=()=>{ route('readings'); setTimeout(()=>trigger('deep'),50); };
+    }
+    function pulse(el, ev){
+      const p=document.createElement('i'); p.className='pulse';
+      const r= Math.max(el.clientWidth, el.clientHeight); const x=(ev.offsetX||el.clientWidth/2), y=(ev.offsetY||el.clientHeight/2);
+      p.style.left=(x-8)+'px'; p.style.top=(y-8)+'px'; p.style.width='16px'; p.style.height='16px';
+      el.appendChild(p); setTimeout(()=>p.remove(),650);
+    }
+    function bindStats(){
+      const q=sel=>$router.querySelector(`[data-bind="${sel}"]`);
+      if(!q('credits')) return;
+      q('credits').textContent = S.credits;
+      q('score').textContent = S.score.toLocaleString('ru-RU');
+      q('lvl').textContent = S.lvl;
+      q('mult').textContent = 'x'+S.mult.toFixed(1);
+      q('energy').textContent = Math.floor(S.energy);
+      const w = Math.round(100 * (S.energy / S.energyMax));
+      q('energyBar').style.width = w+'%';
+    }
+
+    // --- Readings
+    function renderReadings(){
+      const node=T('tpl-readings'); $router.appendChild(node);
+      // init models from state
+      setValue('[data-model="topic"]', S.profile.topic || 'overall');
+      setValue('[data-model="dob"]', S.profile.dob || '');
+      setValue('[data-model="gender"]', S.profile.gender || '');
+      setValue('[data-model="context"]', S.profile.context || '');
+
+      $router.querySelector('[data-action="mini"]').onclick = ()=> trigger('mini');
+      $router.querySelector('[data-action="deep"]').onclick = ()=> trigger('deep');
+    }
+    function getModel(){
+      const topic = getValue('[data-model="topic"]');
+      const dob = getValue('[data-model="dob"]');
+      const gender = getValue('[data-model="gender"]');
+      const context = getValue('[data-model="context"]').slice(0,500);
+      setProfile({topic,dob,gender,context});
+      return { topic, dob, gender, context };
+    }
+    function trigger(mode){
+      const m = getModel();
+      if (mode==='mini') { addScore(50); if(!isDone('readMini')) { markDone('readMini'); popup('Квест «Сделай мини-чтение» выполнен! +50 очков','ok'); } }
+      const payload = { action:'gen', mode, ...m };
+      sendPayload(payload);
+    }
+
+    // --- Shop
+    function renderShop(){
+      const node=T('tpl-shop'); $router.appendChild(node);
+      $router.querySelectorAll('[data-pack]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const pack = parseInt(btn.dataset.pack,10);
+          // отправляем сигнал боту открыть кнопки Stars
+          sendPayload({ action:'pay', pack });
+        });
+      });
+      $router.querySelector('[data-action="boostEnergy"]').onclick=()=>{
+        S.energy = Math.min(S.energyMax, S.energy + 50); save(); bindStats(); haptic('success');
+      };
+      $router.querySelector('[data-action="boostMult"]').onclick=()=>{
+        S.mult = +(S.mult + 0.1).toFixed(1); save(); bindStats(); haptic('success');
+      };
+      bindStats();
+    }
+
+    // --- Quests
+    function renderQuests(){
+      const node=T('tpl-quests'); $router.appendChild(node);
+      const $tasks = $router.querySelector('#tasks'); $tasks.innerHTML='';
+      S.tasks.forEach(t=>{
+        const row = document.createElement('div'); row.className='task'+(t.done?' done':'');
+        const left = document.createElement('div'); left.innerHTML = `<div class="t">${t.t}</div><div class="r">${t.r}</div>`;
+        const right = document.createElement('div');
+        const b = document.createElement('button'); b.className='btn'; b.textContent = t.done?'Готово':'Забрать';
+        b.disabled = t.done;
+        b.onclick=()=>claim(t.id);
+        right.appendChild(b);
+        row.appendChild(left); row.appendChild(right);
+        $tasks.appendChild(row);
+      });
+    }
+    function isDone(id){ return !!S.tasks.find(x=>x.id===id)?.done; }
+    function markDone(id){ const t=S.tasks.find(x=>x.id===id); if(t) t.done=true; save(); render('quests'); }
+    function claim(id){
+      const t = S.tasks.find(x=>x.id===id); if(!t || t.done) return;
+      if (id==='daily'){ addCredits(1); popup('Ежедневный бонус: +1 кредит','ok'); }
+      if (id==='readMini'){ addScore(50); }
+      if (id==='tap100'){ S.energy=Math.min(S.energyMax,S.energy+50); }
+      t.done=true; save(); render('quests');
+    }
+
+    // --- Profile
+    function renderProfile(){
+      const node=T('tpl-profile'); $router.appendChild(node);
+      setValue('[data-model="topic"]', S.profile.topic || 'overall');
+      setValue('[data-model="dob"]', S.profile.dob || '');
+      setValue('[data-model="gender"]', S.profile.gender || '');
+      setValue('[data-model="context"]', S.profile.context || '');
+      $router.querySelector('[data-action="saveProfile"]').onclick=()=>{
+        const m=getModel(); setProfile(m); popup('Сохранено','ok'); haptic('success');
+      };
+      $router.querySelector('[data-action="reset"]').onclick=()=>{
+        if (confirm('Сбросить локальный прогресс?')) { localStorage.removeItem(KEY); S=load(); render('home'); }
+      };
+    }
+
+    // helpers for models
+    function getValue(sel){ const el=$router.querySelector(sel); return (el?.value||'').trim(); }
+    function setValue(sel, val){ const el=$router.querySelector(sel); if(el) el.value=val||''; }
+
+    // tabs
+    document.querySelectorAll('.tab').forEach(b=> b.addEventListener('click', ()=>route(b.dataset.route)));
+    window.addEventListener('hashchange', ()=> render((location.hash||'#home').slice(1)));
+
+    // boot
+    initTheme();
+    render((location.hash||'#home').slice(1) || 'home');
+  </script>
 </body>
 </html>
