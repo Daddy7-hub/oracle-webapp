@@ -1,510 +1,364 @@
-<!doctype html>
+<!doctype html><!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>CryptoATM.tech — Mini App</title>
-  <meta name="color-scheme" content="dark light">
-
-  <!-- Telegram WebApp SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Inter font (легко меняется) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <style>
-    :root{
-      --bg: #0b0d12;
-      --panel: #11151d;
-      --card: rgba(255,255,255,0.04);
-      --muted: #98a2b3;
-      --txt: #e6e9f0;
-      --brand: #7c4dff;     /* фиолет */
-      --brand-2:#00e5ff;    /* неон-голубой */
-      --accent:#27e1a7;     /* мята */
-      --danger:#ff5c7c;
-      --gold: #f4c95d;
-
-      --radius-xl: 18px;
-      --radius-lg: 14px;
-      --radius-md: 12px;
-      --radius-sm: 10px;
-
-      --shadow-1: 0 10px 30px rgba(0,0,0,.35);
-      --shadow-2: 0 12px 40px rgba(124,77,255,.20);
-      --shadow-3: 0 10px 40px rgba(0,229,255,.15);
-      --glass: rgba(255,255,255,0.06);
-      --glass-brd: 1px solid rgba(255,255,255,0.08);
-      --grad-1: linear-gradient(135deg, rgba(124,77,255,.2), rgba(0,229,255,.15));
-      --grad-2: linear-gradient(135deg, rgba(39,225,167,.15), rgba(124,77,255,.15));
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height:100%; }
-    body{
-      margin:0; background: radial-gradient(1200px 600px at 80% -10%, rgba(124,77,255,.12), transparent),
-                 radial-gradient(1200px 800px at -20% 120%, rgba(0,229,255,.10), transparent),
-                 var(--bg);
-      color: var(--txt); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    }
-
-    .wrap{ max-width:980px; margin:0 auto; padding:20px 16px 28px; }
-    header{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; padding:12px; margin:8px 0 16px;
-      background: var(--glass); border: var(--glass-brd); border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-1);
-      backdrop-filter: blur(8px);
-    }
-    .brand{
-      display:flex; gap:12px; align-items:center;
-    }
-    .logo{
-      width:44px; height:44px; border-radius:12px;
-      background: conic-gradient(from 210deg, var(--brand), var(--brand-2), var(--accent), var(--brand));
-      box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, var(--shadow-2);
-    }
-    .brand h1{ font-size:18px; margin:0 0 2px; letter-spacing:.2px; }
-    .brand p{ margin:0; color: var(--muted); font-size:12px; }
-    .balance{
-      display:flex; gap:10px; align-items:center; background: var(--card); padding:10px 12px; border-radius:12px;
-      border: var(--glass-brd);
-    }
-    .chip{
-      padding:6px 10px; border-radius:999px; background: rgba(124,77,255,.18);
-      border: 1px solid rgba(124,77,255,.35); color:#d7c9ff; font-weight:600; font-size:12px;
-    }
-
-    /* Tabs */
-    .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin: 14px 0 18px; }
-    .tab{
-      appearance:none; border:0; background: var(--card);
-      color:var(--txt); padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
-      border: var(--glass-brd);
-      transition: transform .15s ease, background .2s ease, box-shadow .2s ease;
-    }
-    .tab:hover{ transform: translateY(-1px); }
-    .tab.active{ background: var(--grad-1); box-shadow: var(--shadow-2); }
-
-    /* Grid/cards */
-    .grid{ display:grid; grid-template-columns: repeat(12,1fr); gap:14px; }
-    .col-12{ grid-column: span 12; }
-    .col-6{ grid-column: span 6; }
-    .col-4{ grid-column: span 4; }
-    .card{
-      background: var(--glass); border: var(--glass-brd); border-radius: var(--radius-xl);
-      padding:16px; box-shadow: var(--shadow-1);
-    }
-    .card h3{ margin:0 0 10px; font-size:16px; }
-    .muted{ color: var(--muted); font-size:13px; }
-
-    .cta{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:10px 14px; border-radius:12px; font-weight:700; color:#0b0d12;
-      background: linear-gradient(135deg, var(--brand-2), var(--accent));
-      border: 0; cursor:pointer; box-shadow: var(--shadow-3);
-      transition: transform .12s ease, box-shadow .2s ease;
-    }
-    .cta:hover{ transform: translateY(-1px); }
-    .cta.ghost{
-      background: transparent; color: var(--txt); border: 1px dashed rgba(255,255,255,.25);
-    }
-
-    /* Forms */
-    .field{ display:flex; flex-direction:column; gap:6px; margin:10px 0 12px; }
-    label{ font-size:12px; color: var(--muted); }
-    input, select, textarea{
-      width:100%; padding:12px 12px; border-radius:12px; border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04); color: var(--txt); outline: none;
-      transition: border-color .15s ease, background .2s ease;
-      font-family: inherit; font-size:14px;
-    }
-    textarea{ min-height:110px; resize: vertical; }
-    input:focus, select:focus, textarea:focus{
-      border-color: rgba(124,77,255,.6); background: rgba(255,255,255,.06);
-      box-shadow: 0 0 0 3px rgba(124,77,255,.15) inset;
-    }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; }
-
-    .bot-tag{
-      display:inline-flex; align-items:center; gap:6px; font-size:12px;
-      color:#cde9ff; background: rgba(0,229,255,.12); border:1px solid rgba(0,229,255,.35);
-      padding:5px 10px; border-radius:999px; font-weight:600;
-    }
-
-    .notice{
-      padding:12px 14px; border-radius:12px; background: rgba(39,225,167,.12);
-      border:1px solid rgba(39,225,167,.35); color:#d5ffef; font-size:13px;
-    }
-    .danger{ background: rgba(255,92,124,.12); border-color: rgba(255,92,124,.35); color:#ffd6df; }
-
-    .footer{
-      margin: 22px 0 8px; color:var(--muted); font-size:12px; text-align:center;
-    }
-
-    @media (max-width: 900px){
-      .col-6{ grid-column: span 12; }
-      .col-4{ grid-column: span 12; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CryptoATM.tech — Mini App</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#121621; --card:#161b28; --muted:#9aa3b2; --txt:#e8edf4;
+    --brand:#7c4dff; --acc:#00e5ff; --green:#27e1a7; --danger:#ff6a88; --gold:#ffd76a;
+    --r-lg:14px; --r-xl:18px; --b1:1px solid rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.45 system-ui, -apple-system, Inter, Segoe UI, Roboto, sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:18px 14px 28px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:rgba(255,255,255,.03);border:var(--b1);border-radius:var(--r-xl)}
+  .brand{display:flex;gap:10px;align-items:center}
+  .logo{width:40px;height:40px;border-radius:12px;background:conic-gradient(from 210deg,var(--brand),var(--acc),var(--green),var(--brand))}
+  .brand h1{margin:0;font-size:18px}
+  .brand p{margin:0;color:var(--muted);font-size:12px}
+  .pill{padding:6px 10px;background:rgba(124,77,255,.18);border:1px solid rgba(124,77,255,.4);border-radius:999px;font-weight:700;color:#d9ccff}
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
+  .tab{border:var(--b1);border-radius:12px;background:#141927;color:var(--txt);padding:8px 12px;font-weight:700;cursor:pointer}
+  .tab.active{background:linear-gradient(135deg,rgba(124,77,255,.2),rgba(0,229,255,.15))}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .col-12{grid-column:span 12}.col-6{grid-column:span 6}.col-4{grid-column:span 4}
+  @media(max-width:900px){.col-6,.col-4{grid-column:span 12}}
+  .card{background:var(--card);border:var(--b1);border-radius:var(--r-xl);padding:14px}
+  .card h3{margin:0 0 8px}.muted{color:var(--muted)}
+  .btn{appearance:none;border:0;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+  .btn.primary{background:linear-gradient(135deg,var(--acc),var(--green));color:#0b0d12}
+  .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.3);color:var(--txt)}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .price{font-weight:900}
+  .chip{display:inline-flex;gap:6px;align-items:center;background:rgba(255,255,255,.05);border:var(--b1);border-radius:999px;padding:6px 10px}
+  input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:#121726;color:var(--txt)}
+  .line{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.1);padding-top:10px;margin-top:10px}
+  .warn{background:rgba(255,106,136,.12);border:1px solid rgba(255,106,136,.35);border-radius:12px;padding:10px;color:#ffdbe4}
+  .ok{background:rgba(39,225,167,.12);border:1px solid rgba(39,225,167,.35);border-radius:12px;padding:10px;color:#d9ffef}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1>CryptoATM.tech</h1>
-          <p>подписки • токены • задания • розыгрыши</p>
-        </div>
-      </div>
-      <div class="balance">
-        <span class="chip" id="chip-user">guest</span>
-        <span class="chip" id="chip-tokens">0 токенов</span>
-      </div>
-    </header>
-
-    <!-- Tabs -->
-    <div class="tabs" role="tablist" aria-label="Главная навигация">
-      <button class="tab active" data-tab="home">🏠 Главная</button>
-      <button class="tab" data-tab="pricing">💎 Тарифы</button>
-      <button class="tab" data-tab="bots">🤖 Боты</button>
-      <button class="tab" data-tab="buy">💸 Токены</button>
-      <button class="tab" data-tab="sub">🧾 Подписка</button>
-      <button class="tab" data-tab="tasks">🧩 Задания</button>
-      <button class="tab" data-tab="ref">👥 Реферал</button>
-      <button class="tab" data-tab="raffle">🏆 Розыгрыш</button>
-      <button class="tab" data-tab="faq">❓ FAQ</button>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo"></div>
+      <div><h1>CryptoATM.tech</h1><p>Подписки • Монеты • Рефералы • Задания</p></div>
     </div>
+    <div class="row">
+      <div class="chip"><b id="u-name">@guest</b></div>
+      <div class="chip">ATM: <b id="u-atm">0</b></div>
+      <div class="chip">Корзина: <b id="u-cart">0</b></div>
+    </div>
+  </header>
 
-    <!-- Panels -->
-    <section id="tab-home" class="grid">
-      <div class="col-12 card" style="background:var(--grad-2);">
-        <h3>Добро пожаловать 👋</h3>
-        <p class="muted">Это мини-приложение работает внутри Telegram. За покупки и выполнение заданий вы получаете токены — они повышают шанс выиграть приз в ежемесячном розыгрыше.</p>
-        <div class="row" style="margin-top:8px;">
-          <button class="cta" onclick="openTab('buy')">Купить токены</button>
-          <button class="cta ghost" onclick="openTab('tasks')">К заданиям</button>
-        </div>
-      </div>
-
-      <div class="col-6 card">
-        <h3>Ваш статус</h3>
-        <div class="muted" id="status-box">
-          Загрузили из Telegram: <span id="whoami">…</span><br/>
-          Реф-код: <code id="refcode">—</code>
-        </div>
-      </div>
-
-      <div class="col-6 card">
-        <h3>Быстрые действия</h3>
-        <div class="row">
-          <button class="cta" onclick="sendInfo('pricing')">Показать тарифы в чате</button>
-          <button class="cta" onclick="sendInfo('bots')">Показать ботов в чате</button>
-          <button class="cta" onclick="sendInfo('faq')">Показать FAQ</button>
-        </div>
-      </div>
-    </section>
-
-    <section id="tab-pricing" class="grid" hidden>
-      <div class="col-12 card">
-        <h3>Тарифы</h3>
-        <p class="muted">Выберите подходящий план, оформите подписку и получите доступ ко всем нужным ботам.</p>
-      </div>
-      <div id="pricing-cards" class="col-12 grid"></div>
-    </section>
-
-    <section id="tab-bots" class="grid" hidden>
-      <div class="col-12 card">
-        <h3>Наши продукты</h3>
-        <div id="bots-cards" class="grid"></div>
-      </div>
-    </section>
-
-    <section id="tab-buy" class="grid" hidden>
-      <div class="col-12 card">
-        <h3>Покупка токенов</h3>
-        <div class="notice">Оплата USDT. После перевода мы зачислим монеты на ваш аккаунт в течение проверки.</div>
-        <div class="row">
-          <div class="field" style="flex:1;">
-            <label for="buy-amount">Сумма (USDT)</label>
-            <input id="buy-amount" type="number" min="5" step="1" value="25" placeholder="например, 25">
-          </div>
-          <div class="field" style="flex:1;">
-            <label for="buy-chain">Сеть</label>
-            <select id="buy-chain">
-              <option value="TRC20">TRON (TRC20)</option>
-              <option value="BEP20">BNB Smart Chain (BEP20)</option>
-              <option value="ERC20">Ethereum (ERC20)</option>
-            </select>
-          </div>
-        </div>
-        <button class="cta" onclick="buyTokens()">Создать заявку и получить адрес</button>
-      </div>
-
-      <div class="col-12 card">
-        <h3>Как это работает?</h3>
-        <ol class="muted">
-          <li>Укажите сумму и сеть, нажмите «Создать заявку».</li>
-          <li>Бот пришлёт адрес и MEMO в чат. Переведите USDT с указанным MEMO.</li>
-          <li>Ответьте «Оплатил(а)» — мы проверим и зачислим токены.</li>
-        </ol>
-      </div>
-    </section>
-
-    <section id="tab-sub" class="grid" hidden>
-      <div class="col-12 card">
-        <h3>Оформление подписки</h3>
-        <div id="sub-plans" class="grid"></div>
-      </div>
-      <div class="col-12 card">
-        <h3>Оплата и активация</h3>
-        <p class="muted">После нажатия «Оформить», бот пришлёт реквизиты в чат (адрес USDT и MEMO) — оплатите и напишите «Оплатил(а)» для ускорения.</p>
-      </div>
-    </section>
-
-    <section id="tab-tasks" class="grid" hidden>
-      <div class="col-12 card">
-        <h3>Ежедневные задания</h3>
-        <p class="muted">Выполняйте задания, прикладывайте пруф — модератор подтвердит и начислит токены.</p>
-        <div class="row" style="gap:8px;margin-bottom:6px;">
-          <button class="cta ghost" onclick="requestTaskList()">Показать список в чате</button>
-        </div>
-        <div id="tasks-cards" class="grid"></div>
-      </div>
-    </section>
-
-    <section id="tab-ref" class="grid" hidden>
-      <div class="col-12 card">
-        <h3>Реферальная программа</h3>
-        <p class="muted">Отправьте вашему другу код вида <b>REF&lt;вашID&gt;</b>. А сюда можно привязать свой реферал-код, если вас кто-то пригласил.</p>
-        <div class="row">
-          <div class="field" style="flex:1;">
-            <label for="ref-code">Реф-код (например, REF123456789)</label>
-            <input id="ref-code" type="text" placeholder="REF123...">
-          </div>
-          <div style="display:flex;align-items:flex-end;">
-            <button class="cta" onclick="bindRef()">Привязать</button>
-          </div>
-        </div>
-        <div class="notice" id="my-refcode">Ваш код: —</div>
-      </div>
-    </section>
-
-    <section id="tab-raffle" class="grid" hidden>
-      <div class="col-12 card">
-        <h3>Ежемесячный розыгрыш</h3>
-        <p class="muted">Каждая монета повышает шанс победить. Нажмите «Участвовать», чтобы попасть в список текущего месяца.</p>
-        <button class="cta" onclick="raffleOptIn()">Участвовать</button>
-        <div class="notice" style="margin-top:10px;">Результаты публикуются в чате/канале. Победителю пишет модератор.</div>
-      </div>
-    </section>
-
-    <section id="tab-faq" class="grid" hidden>
-      <div class="col-12 card">
-        <h3>FAQ</h3>
-        <div id="faq-cards" class="grid"></div>
-      </div>
-    </section>
-
-    <div class="footer">© CryptoATM.tech — мини-приложение Telegram • v1.0</div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="shop">🛒 Магазин</button>
+    <button class="tab" data-tab="wallet">💰 Кошелёк</button>
+    <button class="tab" data-tab="tasks">🧩 Задания</button>
+    <button class="tab" data-tab="ref">👥 Рефералы</button>
+    <button class="tab" data-tab="raffle">🏆 Розыгрыш</button>
+    <button class="tab" data-tab="faq">❓ FAQ</button>
   </div>
 
-  <script>
-    // ====== Telegram WebApp boot ======
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.expand();
-      // адаптация под тему Telegram
-      const th = tg.themeParams || {};
-      if (th.bg_color) document.body.style.backgroundColor = th.bg_color;
-    }
+  <!-- SHOP -->
+  <section id="tab-shop" class="grid">
+    <div class="col-12 card">
+      <h3>Тарифы</h3>
+      <p class="muted">Добавьте бота(ов) или выберите пакет.</p>
+    </div>
+    <div id="tariffs" class="col-12 grid"></div>
 
-    // ====== Данные (должны отражать бэкенд) ======
-    const SUBSCRIPTION_PLANS = [
-      { code:'BASIC',   title:'Basic',   price_usd:19, period:'месяц', features:['Доступ к боту A','Поддержка в чате'] },
-      { code:'PRO',     title:'Pro',     price_usd:39, period:'месяц', features:['Боты A+B','Приоритетная поддержка','Больше лимитов'] },
-      { code:'PREMIUM', title:'Premium', price_usd:79, period:'месяц', features:['Все боты','Премиум-канал','Частная сессия 1/мес'] },
-    ];
+    <div class="col-12 card">
+      <h3>Корзина</h3>
+      <div id="cart-list" class="muted">Пусто</div>
+      <div class="line">
+        <div>Итого: <span class="price">€<span id="cart-total">0</span></span> • или <span class="price"><span id="cart-total-atm">0</span> ATM</span></div>
+        <div class="row">
+          <button class="btn ghost" onclick="clearCart()">Очистить</button>
+          <button class="btn primary" onclick="checkout('eur')">Оплатить €</button>
+          <button class="btn primary" onclick="checkout('atm')">Оплатить ATM</button>
+        </div>
+      </div>
+      <div class="warn" style="margin-top:10px">Оплата ATM сложнее, чем собрать бесплатно — помните, что монеты ценны для розыгрыша.</div>
+    </div>
+  </section>
 
-    const BOTS_CATALOG = [
-      { slug:'atm-finder', name:'Crypto ATM Finder', desc:'Найдите ближайший крипто-ATM и постройте маршрут.' },
-      { slug:'p2p-guard',  name:'P2P Guard',         desc:'Умные подсказки и анти-фрод при P2P-сделках.' },
-      { slug:'autopay',    name:'AutoPay Script',    desc:'Скрипты автоплатежей для ваших кошельков.' },
-    ];
+  <!-- WALLET -->
+  <section id="tab-wallet" class="grid" hidden>
+    <div class="col-12 card">
+      <h3>Баланс ATM</h3>
+      <div class="row">
+        <div class="chip">Баланс: <b id="atm-balance">0</b></div>
+        <div class="chip">Сегодня кликер: <b id="atm-tap-left">100</b></div>
+      </div>
+      <div class="line">
+        <div class="row">
+          <button class="btn primary" onclick="dailyClaim()">Ежедневная награда +1</button>
+          <button class="btn ghost" onclick="tapOnce()">Тапнуть +1 (лимит)</button>
+        </div>
+        <div class="row">
+          <input id="buy-usdt" type="number" value="25" min="5" step="1" placeholder="Сумма USDT">
+          <select id="buy-chain">
+            <option value="TRC20">TRC20</option><option value="BEP20">BEP20</option><option value="ERC20">ERC20</option>
+          </select>
+          <button class="btn primary" onclick="buyATM()">Купить ATM</button>
+        </div>
+      </div>
+      <div class="ok" id="wallet-log" style="margin-top:10px">Логи операций появятся здесь.</div>
+    </div>
+  </section>
 
-    const TASKS_POOL = [
-      { id:1, title:'Подписка на Instagram', type:'link',  reward:10, active:true,  hint:'Ссылка на профиль из подписок' },
-      { id:2, title:'Репост сторис',         type:'link',  reward:15, active:true,  hint:'Ссылка на сторис/аккаунт' },
-      { id:3, title:'Пригласи друга',        type:'text',  reward:25, active:true,  hint:'Укажи @username друга' },
-      { id:4, title:'Наклейка на авто',      type:'photo', reward:50, active:false, hint:'Пока загрузите ссылку на фото' },
-    ];
+  <!-- TASKS -->
+  <section id="tab-tasks" class="grid" hidden>
+    <div class="col-12 card">
+      <h3>Задания</h3>
+      <div id="tasks" class="grid"></div>
+    </div>
+  </section>
 
-    const FAQ_ITEMS = [
-      { q:'Как оплатить подписку?', a:'Сейчас — USDT (TRC20/BEP20/ERC20). Реквизиты и MEMO вы получаете в чате после нажатия «Оформить».' },
-      { q:'Что за токены?', a:'Внутренние монеты — даются за покупки и задания; повышают шанс в розыгрыше.' },
-      { q:'Есть рефералка?', a:'Да: код формата REF<ID>. Привяжите код пригласившего — и получайте бонусы.' },
-    ];
+  <!-- REF -->
+  <section id="tab-ref" class="grid" hidden>
+    <div class="col-12 card">
+      <h3>Рефералы</h3>
+      <p class="muted">Ваш код: <b id="ref-my">REF0</b></p>
+      <div class="row">
+        <input id="ref-code" placeholder="REF123456">
+        <button class="btn primary" onclick="bindRef()">Привязать</button>
+      </div>
+      <div class="ok" style="margin-top:10px">За оплату подписки другом вы получаете ATM.</div>
+    </div>
+  </section>
 
-    // ====== Шаблоны отрисовки ======
-    const q = (sel) => document.querySelector(sel);
-    const mk = (tag, props={}) => Object.assign(document.createElement(tag), props);
+  <!-- RAFFLE -->
+  <section id="tab-raffle" class="grid" hidden>
+    <div class="col-12 card">
+      <h3>Розыгрыш</h3>
+      <p class="muted">Шанс зависит от вашего баланса ATM. Участвуют только подтвердившие участие.</p>
+      <button class="btn primary" onclick="raffleOptIn()">Участвовать</button>
+      <div class="ok" id="raffle-log" style="margin-top:10px">Статус участия появится здесь.</div>
+    </div>
+  </section>
 
-    function renderPricing(){
-      const holder = q('#pricing-cards');
-      holder.innerHTML = '';
-      SUBSCRIPTION_PLANS.forEach(p=>{
-        const card = mk('div', { className:'col-4 card' });
-        const feats = p.features.map(f => `<span class="bot-tag">${f}</span>`).join(' ');
-        card.innerHTML = `
-          <h3>${p.title}</h3>
-          <div class="muted">\$${p.price_usd}/${p.period}</div>
-          <div style="margin:10px 0 12px; display:flex; gap:8px; flex-wrap:wrap;">${feats}</div>
-          <button class="cta" onclick="subscribe('${p.code}')">Оформить</button>
-        `;
-        holder.appendChild(card);
-      });
-    }
+  <!-- FAQ -->
+  <section id="tab-faq" class="grid" hidden>
+    <div class="col-12 card">
+      <h3>FAQ</h3>
+      <ul class="muted">
+        <li>Подписки: помесячно по каждому боту или пакеты Premium/Enterprise.</li>
+        <li>Оплата: € или ATM-монеты. Покупка ATM — USDT (TRC20/BEP20/ERC20).</li>
+        <li>Рефералы: код REF&lt;вашID&gt; + бонусы за оплату приглашённых.</li>
+        <li>Задания: загружайте пруф; после проверки монеты начисляются.</li>
+        <li>Розыгрыш: раз в месяц, вес ∝ вашему балансу ATM.</li>
+      </ul>
+    </div>
+  </section>
+</div>
 
-    function renderBots(){
-      const holder = q('#bots-cards');
-      holder.innerHTML = '';
-      BOTS_CATALOG.forEach(b=>{
-        const card = mk('div', { className:'col-6 card' });
-        card.innerHTML = `
-          <h3>${b.name}</h3>
-          <p class="muted">${b.desc}</p>
-          <span class="bot-tag">Доступ по подписке</span>
-        `;
-        holder.appendChild(card);
-      });
-    }
+<script>
+  const tg = window.Telegram?.WebApp;
+  if (tg){ tg.expand(); }
 
-    function renderTasks(){
-      const holder = q('#tasks-cards');
-      holder.innerHTML = '';
-      TASKS_POOL.filter(t=>t.active).forEach(t=>{
-        const card = mk('div', { className:'col-6 card' });
-        card.innerHTML = `
-          <h3>#${t.id} — ${t.title}</h3>
-          <p class="muted">Пруф: <b>${t.type}</b> • Награда: +${t.reward} токенов</p>
-          <div class="field">
-            <label>Ваш пруф (${t.type === 'text' ? 'текст' : 'ссылка'})</label>
-            <input id="task-proof-${t.id}" type="text" placeholder="${t.hint}">
+  // ===== Данные каталога (можно подхватывать с бэка позже)
+  const ITEMS = [
+    {type:'bot', code:'ATM_FINDER', name:'Crypto ATM Finder', price_eur:15, price_atm:600, desc:'Поиск ближайших крипто-ATM.'},
+    {type:'bot', code:'P2P_GUARD',  name:'P2P Guard',         price_eur:15, price_atm:600, desc:'Проверки и анти-фрод в P2P.'},
+    {type:'bot', code:'AUTOPAY',    name:'AutoPay Script',    price_eur:19, price_atm:800, desc:'Скрипты автоплатежей.'},
+    {type:'pack',code:'PREMIUM',    name:'Premium (все боты)', price_eur:39, price_atm:1600, desc:'Все боты. Лучшее соотношение.'},
+    {type:'pack',code:'ENTERPRISE', name:'Enterprise',         price_eur:79, price_atm:3600, desc:'Все боты + приоритет + бонусы.'},
+  ];
+
+  const TASKS = [
+    {id:1, title:'Подписка на Instagram', reward:10, type:'link', hint:'Ссылка на профиль'},
+    {id:2, title:'Репост сторис',         reward:15, type:'link', hint:'Ссылка на сторис'},
+    {id:3, title:'Пригласить друга',      reward:25, type:'text', hint:'@username друга'},
+  ];
+
+  // ===== Состояние (локальная симуляция вне Telegram)
+  const state = {
+    user: { id: tg?.initDataUnsafe?.user?.id || 0, name: tg?.initDataUnsafe?.user?.username || 'guest' },
+    atm: 0, cart: [], taps_left: 100, daily_claimed: false
+  };
+
+  // ===== UI helpers
+  const $ = sel => document.querySelector(sel);
+
+  function toast(text){ console.log('[toast]', text); }
+
+  // ===== render: тарифы
+  function renderTariffs(){
+    const holder = $('#tariffs'); holder.innerHTML = '';
+    ITEMS.forEach(it=>{
+      const col = document.createElement('div');
+      col.className = 'col-4 card';
+      col.innerHTML = `
+        <h3>${it.name}</h3>
+        <p class="muted">${it.desc}</p>
+        <div class="row">
+          <span class="chip">€ <b>${it.price_eur}</b>/мес</span>
+          <span class="chip"><b>${it.price_atm}</b> ATM</span>
+        </div>
+        <div class="line">
+          <span class="muted">${it.type==='pack'?'пакет':'бот'}</span>
+          <button class="btn primary" onclick="addToCart('${it.code}')">В корзину</button>
+        </div>`;
+      holder.appendChild(col);
+    });
+  }
+
+  function addToCart(code){
+    const item = ITEMS.find(x=>x.code===code);
+    if(!item) return;
+    // В корзине допускаем только 1 позицию каждого типа (месячная подписка)
+    if(state.cart.some(x=>x.code===code)){ toast('Уже в корзине'); return; }
+    state.cart.push({ code: item.code, name:item.name, price_eur:item.price_eur, price_atm:item.price_atm });
+    updateCartUI();
+    // в TG отправим событие
+    sendData({ action:'cart_add', code });
+  }
+
+  function removeFromCart(code){
+    state.cart = state.cart.filter(x=>x.code!==code);
+    updateCartUI();
+    sendData({ action:'cart_remove', code });
+  }
+
+  function clearCart(){
+    state.cart = []; updateCartUI();
+    sendData({ action:'cart_clear' });
+  }
+
+  function updateCartUI(){
+    $('#u-cart').textContent = String(state.cart.length);
+    const list = $('#cart-list');
+    if(state.cart.length===0){ list.textContent='Пусто'; }
+    else{
+      list.innerHTML = state.cart.map(x=>`
+        <div class="line">
+          <div>${x.name}</div>
+          <div class="row">
+            <span class="muted">€${x.price_eur} / ${x.price_atm} ATM</span>
+            <button class="btn ghost" onclick="removeFromCart('${x.code}')">убрать</button>
           </div>
-          <button class="cta" onclick="submitTask(${t.id})">Отправить</button>
-        `;
-        holder.appendChild(card);
-      });
+        </div>`).join('');
     }
+    const totalE = state.cart.reduce((s,x)=>s+x.price_eur,0);
+    const totalA = state.cart.reduce((s,x)=>s+x.price_atm,0);
+    $('#cart-total').textContent = totalE;
+    $('#cart-total-atm').textContent = totalA;
+  }
 
-    function renderFAQ(){
-      const holder = q('#faq-cards');
-      holder.innerHTML = '';
-      FAQ_ITEMS.forEach(item=>{
-        const card = mk('div', { className: 'col-12 card' });
-        card.innerHTML = `<h3>${item.q}</h3><p class="muted">${item.a}</p>`;
-        holder.appendChild(card);
-      });
-    }
-
-    // ====== Навигация ======
-    function openTab(name){
-      document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
-      document.querySelectorAll('section[id^="tab-"]').forEach(s=>s.hidden = s.id !== 'tab-' + name);
-      // отложенная отрисовка
-      if (name==='pricing') renderPricing();
-      if (name==='bots') renderBots();
-      if (name==='tasks') renderTasks();
-      if (name==='faq') renderFAQ();
-      if (name==='sub') renderPricing(); // планы используются и здесь
-    }
-    window.openTab = openTab;
-
-    // ====== Отправка экшенов в бот ======
-    function sendData(obj){
-      const payload = JSON.stringify(obj);
-      if (tg && typeof tg.sendData === 'function'){
-        tg.sendData(payload);
-        toast('Отправлено боту. Проверьте диалог.');
+  function checkout(method){
+    if(state.cart.length===0) return toast('Корзина пуста');
+    const payload = { action:'checkout', method, items: state.cart.map(x=>x.code) };
+    sendData(payload);
+    if(!tg){ // оффлайн-демо
+      if(method==='atm'){
+        const need = state.cart.reduce((s,x)=>s+x.price_atm,0);
+        if(state.atm>=need){ state.atm -= need; updateATMUI(); toast('Списали ATM (демо)'); clearCart(); }
+        else toast('Не хватает ATM (демо)');
       }else{
-        alert('Не в Telegram. payload:\n' + payload);
+        toast('Выслан счёт в € (демо)');
+        clearCart();
       }
     }
+  }
 
-    function sendInfo(topic){ sendData({ action:'info', topic }); }
-    window.sendInfo = sendInfo;
-
-    function buyTokens(){
-      const amount = parseInt(q('#buy-amount').value || '0', 10);
-      const chain = q('#buy-chain').value;
-      if (!amount || amount < 5){ return toast('Минимум 5 USDT', true); }
-      sendData({ action:'buy_tokens', amount, chain });
+  // ===== Wallet
+  function updateATMUI(){
+    $('#u-atm').textContent = String(state.atm);
+    $('#atm-balance').textContent = String(state.atm);
+    $('#atm-tap-left').textContent = String(state.taps_left);
+  }
+  function dailyClaim(){
+    sendData({ action:'daily_claim' });
+    if(!tg){
+      if(!state.daily_claimed){ state.daily_claimed = true; state.atm += 1; updateATMUI(); toast('Ежедневный +1 (демо)'); }
+      else toast('Сегодня уже получено (демо)');
     }
-    window.buyTokens = buyTokens;
-
-    function subscribe(plan){
-      sendData({ action:'subscribe', plan });
+  }
+  function tapOnce(){
+    sendData({ action:'tap' });
+    if(!tg){
+      if(state.taps_left>0){ state.taps_left -= 1; state.atm += 1; updateATMUI(); }
+      else toast('Лимит кликов исчерпан (демо)');
     }
-    window.subscribe = subscribe;
+  }
+  function buyATM(){
+    const usdt = parseInt($('#buy-usdt').value||'0',10), chain = $('#buy-chain').value;
+    if(!usdt || usdt<5) return toast('Мин. 5 USDT');
+    sendData({ action:'buy_atm', usdt, chain });
+    if(!tg){ toast(`Создана заявка на покупку ${usdt} USDT (${chain}) — см. чат (демо)`); }
+  }
 
-    function requestTaskList(){
-      sendData({ action:'tasks_list' });
-    }
-    window.requestTaskList = requestTaskList;
+  // ===== Tasks
+  function renderTasks(){
+    const holder = $('#tasks'); holder.innerHTML = '';
+    TASKS.forEach(t=>{
+      const col = document.createElement('div'); col.className='col-6 card';
+      col.innerHTML = `
+        <h3>#${t.id} ${t.title}</h3>
+        <p class="muted">Награда: <b>+${t.reward} ATM</b></p>
+        <input id="proof-${t.id}" placeholder="${t.hint}">
+        <div class="line">
+          <span class="muted">Проверка модератором</span>
+          <button class="btn primary" onclick="submitTask(${t.id})">Отправить</button>
+        </div>`;
+      holder.appendChild(col);
+    });
+  }
+  function submitTask(id){
+    const proof = ($('#proof-'+id).value||'').trim();
+    if(!proof) return toast('Добавьте пруф');
+    sendData({ action:'task_submit', task_id:id, proof });
+    if(!tg){ toast('Задание отправлено (демо). Начислит модератор'); $('#proof-'+id).value=''; }
+  }
 
-    function submitTask(task_id){
-      const el = q('#task-proof-'+task_id);
-      const payload = (el?.value || '').trim();
-      if (!payload) return toast('Заполните поле с пруфом', true);
-      sendData({ action:'task_submit', task_id, payload });
-      el.value = '';
-    }
-    window.submitTask = submitTask;
+  // ===== Referral
+  function bindRef(){
+    const code = ($('#ref-code').value||'').trim();
+    if(!code) return toast('Введите код');
+    sendData({ action:'ref_bind', code });
+    if(!tg){ toast('Код отправлен (демо)'); }
+  }
 
-    function bindRef(){
-      const code = (q('#ref-code').value || '').trim();
-      if (!code) return toast('Введите реф-код', true);
-      sendData({ action:'ref_bind', code });
-    }
-    window.bindRef = bindRef;
+  // ===== Raffle
+  function raffleOptIn(){
+    sendData({ action:'raffle_optin' });
+    if(!tg){ $('#raffle-log').textContent='Вы участвуете (демо)'; }
+  }
 
-    function raffleOptIn(){
-      sendData({ action:'raffle_optin' });
-    }
-    window.raffleOptIn = raffleOptIn;
+  // ===== sendData универсально
+  function sendData(obj){
+    const payload = JSON.stringify(obj);
+    if(tg && typeof tg.sendData === 'function'){ tg.sendData(payload); }
+    else console.log('[offline send]', payload);
+  }
 
-    // ====== UX: Toasts ======
-    const toastBox = mk('div',{style:'position:fixed;bottom:22px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:99;'}); 
-    document.body.appendChild(toastBox);
-    function toast(msg, danger=false){
-      const t = mk('div',{className:'notice'+(danger?' danger':''), textContent: msg});
-      t.style.boxShadow='var(--shadow-1)'; t.style.pointerEvents='auto';
-      t.style.maxWidth='92%'; t.style.backdropFilter='blur(6px)';
-      toastBox.appendChild(t);
-      setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(6px)';
-        setTimeout(()=>t.remove(), 300);
-      }, 1800);
-    }
+  // ===== Навигация
+  document.querySelectorAll('.tab').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const name = b.dataset.tab;
+      document.querySelectorAll('section[id^="tab-"]').forEach(s=>s.hidden = s.id !== 'tab-' + name);
+      if(name==='shop') renderTariffs();
+      if(name==='wallet') updateATMUI();
+      if(name==='tasks') renderTasks();
+      if(name==='ref') $('#ref-my').textContent = 'REF'+(state.user.id||0);
+    });
+  });
 
-    // ====== Bootstrap UI ======
-    function boot(){
-      // user chip
-      const userId = tg?.initDataUnsafe?.user?.id || 'guest';
-      const userName = tg?.initDataUnsafe?.user?.username || tg?.initDataUnsafe?.user?.first_name || 'guest';
-      q('#chip-user').textContent = '@' + String(userName);
-      q('#whoami').textContent = 'ID ' + String(userId);
-      q('#my-refcode').innerHTML = 'Ваш код: <b>REF'+String(userId)+'</b>';
-      // open default tab
-      openTab('home');
-
-      // если открыто не в Telegram — предупредим
-      if (!tg){
-        toast('Откройте через Telegram для полной функциональности', true);
-      }
-    }
-    boot();
-  </script>
+  // ===== boot
+  (function boot(){
+    $('#u-name').textContent = '@'+(state.user.name);
+    $('#ref-my').textContent = 'REF'+(state.user.id||0);
+    renderTariffs(); updateCartUI(); updateATMUI();
+  })();
+</script>
 </body>
 </html>
+
+
