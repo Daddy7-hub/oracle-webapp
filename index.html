@@ -1,737 +1,252 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <title>CryptoATM.tech — Mini App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Tailwind (CDN) -->
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>CryptoATM.tech — Welcome Hub</title>
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Telegram Mini Apps SDK -->
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    :root {
-      --bg: #0b0f17;
-      --card: #0f1522;
-      --card-2: #0e121b;
-      --text: #f3f6ff;
-      --muted: #a7b0c0;
-      --brand: #6ee7b7;
-      --brand-2: #22d3ee;
-      --accent: #fde047;
-      --danger: #fb7185;
-      --ok: #34d399;
-    }
-    html, body { background: var(--bg); color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-    .glass { background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.09); }
-    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.07); border-radius: 18px; }
-    .chip { border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: 4px 10px; }
-    .btn { display: inline-flex; align-items: center; gap: .5rem; border-radius: 12px; padding: .7rem 1rem; font-weight: 600; }
-    .btn-primary { background: linear-gradient(90deg, var(--brand), var(--brand-2)); color: #001015; }
-    .btn-muted { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); }
-    .btn-danger { background: rgba(251, 113, 133, .18); border: 1px solid rgba(251, 113, 133, .4); color: #fecdd3; }
-    .btn-success { background: rgba(52, 211, 153, .18); border: 1px solid rgba(52, 211, 153, .4); color: #d1fae5; }
-    .tab-active { background: rgba(255,255,255,.1); }
-    .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); color: var(--muted); }
-    .grid-cards { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 14px; }
-    .shadow-soft { box-shadow: 0 20px 80px rgba(0,0,0,.35); }
-    .hidden-el { display: none; }
-    .monos { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
-    .divider { height: 1px; background: rgba(255,255,255,.08); margin: 10px 0; }
-    .ring-focus:focus { outline: none; box-shadow: 0 0 0 3px rgba(34,211,238,.35); }
-    .tag { font-size:12px; color: var(--muted); padding:2px 8px;border-radius:999px;border:1px dashed rgba(255,255,255,.18)}
-    .blink { animation: blink 1.4s infinite }
-    @keyframes blink { 50% { opacity: .4 } }
+    :root { color-scheme: light dark; }
+    .card { @apply rounded-2xl p-4 shadow-lg bg-white/70 dark:bg-zinc-900/70 backdrop-blur border border-white/20 dark:border-zinc-800; }
+    .btn  { @apply px-4 py-2 rounded-xl font-medium shadow; }
+    .btn-primary { @apply btn bg-indigo-600 text-white hover:bg-indigo-500; }
+    .btn-ghost   { @apply btn bg-transparent border border-indigo-400/30 text-indigo-600 dark:text-indigo-300; }
+    .tag { @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200; }
   </style>
 </head>
-<body>
-  <div id="app" class="max-w-6xl mx-auto px-4 pb-28 pt-6">
-    <!-- HEADER -->
-    <header class="flex items-center justify-between gap-4 mb-6">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-300 to-cyan-300"></div>
-        <div>
-          <div class="text-xl font-extrabold tracking-tight">CryptoATM.tech</div>
-          <div class="text-xs text-[var(--muted)]">крипто-сервис и комьюнити</div>
-        </div>
-        <span id="demoBadge" class="badge ml-2 hidden-el">DEMO</span>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-rose-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-black text-zinc-900 dark:text-zinc-100 min-h-screen">
+  <div id="app" class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+    <!-- Header -->
+    <header class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold">CryptoATM.tech</h1>
+        <p class="text-sm opacity-70">Welcome Hub • тарифы, подключение, рефералка и кликер</p>
       </div>
-      <div class="flex items-center gap-2">
-        <span id="subStatusChip" class="chip">Подписка: —</span>
-        <button id="openPayTop" class="btn btn-primary">Оплатить / Подписка</button>
-      </div>
+      <button id="btnOpenInTG" class="btn-ghost hidden sm:inline-flex">Открыть в Telegram</button>
     </header>
 
-    <!-- KPI STRIP -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-      <div class="card p-4">
-        <div class="text-xs text-[var(--muted)]">Баланс монет</div>
-        <div class="text-2xl font-bold flex items-baseline gap-2"><span id="coins">0</span><span class="text-xs text-[var(--muted)]">ATM</span></div>
-      </div>
-      <div class="card p-4">
-        <div class="text-xs text-[var(--muted)]">Билеты в розыгрыше (мес.)</div>
-        <div class="text-2xl font-bold" id="tickets">0</div>
-      </div>
-      <div class="card p-4">
-        <div class="text-xs text-[var(--muted)]">Рефералы</div>
-        <div class="text-2xl font-bold" id="refs">0</div>
-      </div>
-      <div class="card p-4">
-        <div class="text-xs text-[var(--muted)]">Шанс выигрыша</div>
-        <div class="text-2xl font-bold flex items-center gap-2"><span id="winChance">0.0%</span><span class="tag">оценка</span></div>
+    <!-- Nav -->
+    <nav class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <button data-tab="catalog" class="tab btn-primary">Каталог</button>
+      <button data-tab="plans" class="tab btn-ghost">Тарифы</button>
+      <button data-tab="ref" class="tab btn-ghost">Рефералка</button>
+      <button data-tab="quests" class="tab btn-ghost">Кликер</button>
+    </nav>
+
+    <!-- Catalog -->
+    <section id="catalog" class="card space-y-4">
+      <h2 class="text-xl font-semibold">Каталог ботов</h2>
+      <div id="bots" class="grid sm:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- Plans -->
+    <section id="plans" class="card space-y-4 hidden">
+      <h2 class="text-xl font-semibold">Тарифы</h2>
+      <div id="plansWrap" class="grid sm:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- Referral -->
+    <section id="ref" class="card space-y-4 hidden">
+      <h2 class="text-xl font-semibold">Реферальная программа</h2>
+      <div>
+        <p class="opacity-80 mb-2">Приглашай друзей — получай CATM. Чем больше активных друзей, тем выше шансы в розыгрышах.</p>
+        <div class="flex items-center gap-2">
+          <input id="refLink" class="flex-1 rounded-xl px-3 py-2 bg-white/70 dark:bg-zinc-800/70 border border-white/20 dark:border-zinc-700" placeholder="Ваша ссылка" readonly>
+          <button id="copyRef" class="btn-primary">Скопировать</button>
+        </div>
       </div>
     </section>
 
-    <!-- TABS -->
-    <nav class="flex gap-2 mb-4 overflow-x-auto">
-      <button class="chip tab-active" data-tab="home">Главная</button>
-      <button class="chip" data-tab="pricing">Тарифы</button>
-      <button class="chip" data-tab="clicker">Кликер</button>
-      <button class="chip" data-tab="tasks">Задания</button>
-      <button class="chip" data-tab="raffle">Розыгрыш</button>
-      <button class="chip" data-tab="ref">Рефералка</button>
-      <button class="chip" data-tab="help">Профиль/Help</button>
-    </nav>
-
-    <!-- TABS CONTENT -->
-    <main class="space-y-6">
-      <!-- HOME -->
-      <section id="tab-home" class="space-y-4">
-        <div class="card p-5">
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div>
-              <div class="text-lg font-semibold">Добро пожаловать 👋</div>
-              <p class="text-sm text-[var(--muted)]">Это мини-приложение сообщества CryptoATM.tech. Здесь вы оформляете подписку, выполняете задания и копите монеты 🪙 ATM — они увеличивают шансы выиграть ежемесячные призы.</p>
-            </div>
-            <div class="flex gap-2">
-              <button class="btn btn-success" id="btnStartTasks">Начать задания</button>
-              <button class="btn btn-muted" id="btnOpenClicker">Кликер</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid-cards">
-          <div class="col-span-12 md:col-span-7 card p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <h3 class="font-semibold text-lg">Новости / Анонсы</h3>
-              <span class="badge">ежемесячно</span>
-            </div>
-            <ul id="newsList" class="space-y-3 text-sm">
-              <li class="p-3 rounded-lg glass">🎁 В конце месяца — розыгрыш призов среди активных участников.</li>
-              <li class="p-3 rounded-lg glass">📣 Подписка увеличивает множитель билетов.</li>
-              <li class="p-3 rounded-lg glass">🛠 Скоро: новые задания с автопроверкой.</li>
-            </ul>
-          </div>
-
-          <div class="col-span-12 md:col-span-5 card p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="font-semibold text-lg">Быстрые действия</h3>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <button class="btn btn-primary w-full" id="btnSubscribe">Оформить подписку</button>
-              <button class="btn btn-muted w-full" id="btnPayCrypto">Оплатить криптой</button>
-              <button class="btn btn-muted w-full" id="btnInvoice">Инвойс на фирму</button>
-              <button class="btn btn-muted w-full" id="btnSupport">Поддержка</button>
-            </div>
-            <div class="divider"></div>
-            <div class="text-xs text-[var(--muted)]">После оплаты нажмите “Я оплатил(а)” — заявка уйдёт модератору.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- PRICING -->
-      <section id="tab-pricing" class="hidden-el space-y-5">
-        <div class="grid-cards">
-          <!-- Cards will be injected -->
-        </div>
-        <div class="text-xs text-[var(--muted)]">*Оплата пока вручную: криптовалютой (USDT/USDC) или инвойсом на фирму. Добавим автоматический биллинг позже.</div>
-      </section>
-
-      <!-- CLICKER -->
-      <section id="tab-clicker" class="hidden-el space-y-4">
-        <div class="card p-6 text-center space-y-4">
-          <div class="text-sm text-[var(--muted)]">Клики → монеты ATM. Есть кулдаун и дневной лимит.</div>
-          <div id="clickerCounter" class="text-5xl font-black tracking-tight">0</div>
-          <button id="clickBtn" class="btn btn-primary text-xl px-6 py-4 mx-auto">КЛИК ⚡️</button>
-          <div id="clickerHint" class="text-xs text-[var(--muted)]"></div>
-        </div>
-        <div class="card p-4">
-          <div class="font-semibold mb-2">История кликов</div>
-          <div id="clickHistory" class="text-xs text-[var(--muted)] space-y-1"></div>
-        </div>
-      </section>
-
-      <!-- TASKS -->
-      <section id="tab-tasks" class="hidden-el space-y-4">
-        <div class="card p-5">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="font-semibold text-lg">Задания</div>
-              <div class="text-xs text-[var(--muted)]">Выполняйте задания, отправляйте пруфы — получайте монеты и шанс на приз.</div>
-            </div>
-            <span class="badge">модерация</span>
-          </div>
-          <div id="tasksList" class="mt-4 space-y-3"></div>
-        </div>
-      </section>
-
-      <!-- RAFFLE -->
-      <section id="tab-raffle" class="hidden-el space-y-4">
-        <div class="card p-5 space-y-3">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="font-semibold text-lg">Ежемесячный розыгрыш</div>
-              <div class="text-xs text-[var(--muted)]">Билеты = монеты × множитель подписки. Чем больше ATM, тем выше шанс.</div>
-            </div>
-            <div class="tag" id="raffleMonth">месяц — …</div>
-          </div>
-          <div class="grid md:grid-cols-3 gap-3">
-            <div class="glass p-4 rounded-xl">
-              <div class="text-xs text-[var(--muted)]">Призовой фонд</div>
-              <div id="prizePool" class="text-2xl font-bold">—</div>
-            </div>
-            <div class="glass p-4 rounded-xl">
-              <div class="text-xs text-[var(--muted)]">Ваши билеты</div>
-              <div id="yourTickets" class="text-2xl font-bold">0</div>
-            </div>
-            <div class="glass p-4 rounded-xl">
-              <div class="text-xs text-[var(--muted)]">Вероятность (оценка)</div>
-              <div id="yourChance" class="text-2xl font-bold">0%</div>
-            </div>
-          </div>
-          <div class="divider"></div>
-          <div class="text-sm text-[var(--muted)]">Итоги — в конце месяца. Мы уведомим в Telegram.</div>
-        </div>
-      </section>
-
-      <!-- REFERRAL -->
-      <section id="tab-ref" class="hidden-el space-y-4">
-        <div class="card p-5 space-y-3">
-          <div class="font-semibold text-lg">Реферальная программа</div>
-          <div class="text-sm text-[var(--muted)]">Приглашайте друзей — получайте бонусные монеты и билеты.</div>
-          <div class="grid md:grid-cols-2 gap-3">
-            <div class="glass p-4 rounded-xl">
-              <div class="text-xs text-[var(--muted)] mb-1">Личная ссылка (чат)</div>
-              <div class="flex items-center gap-2">
-                <input id="refLink" class="w-full p-2 rounded-lg bg-transparent border border-white/10 monos ring-focus" readonly />
-                <button id="copyRef" class="btn btn-muted">Копировать</button>
-              </div>
-              <div class="text-xs text-[var(--muted)] mt-1">Используйте в чате: <span class="monos">t.me/<span id="botU1">BOT_USERNAME</span>?start=ref_<span id="refCode1">—</span></span></div>
-            </div>
-            <div class="glass p-4 rounded-xl">
-              <div class="text-xs text-[var(--muted)] mb-1">Личная ссылка (mini app)</div>
-              <div class="flex items-center gap-2">
-                <input id="refLinkApp" class="w-full p-2 rounded-lg bg-transparent border border-white/10 monos ring-focus" readonly />
-                <button id="copyRefApp" class="btn btn-muted">Копировать</button>
-              </div>
-              <div class="text-xs text-[var(--muted)] mt-1">Открытие мини-аппа: <span class="monos">t.me/<span id="botU2">BOT_USERNAME</span>?startapp=ref_<span id="refCode2">—</span></span></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- HELP -->
-      <section id="tab-help" class="hidden-el space-y-4">
-        <div class="card p-5 space-y-2">
-          <div class="font-semibold text-lg">Профиль</div>
-          <div class="text-sm text-[var(--muted)]">ID: <span id="uid">—</span></div>
-          <div class="text-sm text-[var(--muted)]">Username: <span id="uname">—</span></div>
-          <div class="text-sm text-[var(--muted)]">Подписка до: <span id="subUntil">—</span></div>
-        </div>
-        <div class="card p-5 space-y-2">
-          <div class="font-semibold text-lg">Поддержка</div>
-          <div class="text-sm text-[var(--muted)]">Нажмите, чтобы отправить тикет модератору.</div>
-          <button id="openSupport" class="btn btn-muted">Открыть поддержку</button>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- MODALS -->
-  <div id="modal" class="fixed inset-0 hidden-el items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/60"></div>
-    <div class="relative max-w-xl w-full card p-5 shadow-soft">
-      <div id="modalContent"></div>
-      <div class="mt-4 text-right">
-        <button id="closeModal" class="btn btn-muted">Закрыть</button>
+    <!-- Quests -->
+    <section id="quests" class="card space-y-4 hidden">
+      <h2 class="text-xl font-semibold">Кликер-квесты</h2>
+      <p class="opacity-80">Выполняй задания и получай <b>CATM</b>. В конце месяца — розыгрыш призов среди активных.</p>
+      <div id="tasks" class="space-y-3"></div>
+      <div class="flex items-center justify-between border-t border-white/20 dark:border-zinc-800 pt-3">
+        <div>Баланс: <b id="balance">0</b> CATM</div>
+        <button id="btnBalance" class="btn-ghost">Обновить баланс</button>
       </div>
-    </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-xs opacity-60 text-center py-6">
+      © CryptoATM.tech • Это не финсовет • <a class="underline" href="#" id="openPay">Оплатить тариф</a>
+    </footer>
   </div>
 
 <script>
-/** =========================
- *  CONFIG (под себя)
- *  ========================= */
-const CONFIG = {
-  botUsername: "BOT_USERNAME_HERE", // 👈 ЗАМЕНИТЕ на имя вашего бота без @
-  networks: [
-    { key: "USDT-TRC20", title: "USDT (TRC-20)", address: "TRxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", note: "Укажите memo: ваш Telegram ID" },
-    { key: "USDT-ERC20", title: "USDT (ERC-20)", address: "0xYourEthAddressHere", note: "Оплата газа на вас" },
-    { key: "USDC-TRC20", title: "USDC (TRC-20)", address: "TRyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy", note: "" },
-  ],
-  tariffs: [
-    { id: "basic", name: "Basic", price: 10, currency: "USDT", per: "мес", perks: ["Доступ в хаб", "Ежемесячный розыгрыш", "+0% множитель"], subMult: 1.0 },
-    { id: "pro",   name: "Pro",   price: 25, currency: "USDT", per: "мес", perks: ["Все из Basic", "Pro-канал", "+50% множитель"], subMult: 1.5 },
-    { id: "vip",   name: "VIP",   price: 60, currency: "USDT", per: "мес", perks: ["Все из Pro", "VIP-чат", "+120% множитель"], subMult: 2.2 },
-  ],
-  clicker: { cooldownSec: 5, dailyLimit: 200, coinPerClick: 1 },
-  tasks: [
-    { id: "inst_follow", title: "Подписка на Instagram", reward: 50, type: "link", proofHint: "Укажите ваш ник @username и скрин/ссылку на профиль.", link: "https://instagram.com/yourpage" },
-    { id: "story_repost", title: "Репост сторис о нас", reward: 40, type: "upload", proofHint: "Прикрепите ссылку на сторис/скриншот (ссылка на облако).", link: "" },
-    { id: "car_sticker", title: "Наклейка на авто", reward: 200, type: "upload", proofHint: "Фото авто с наклейкой и город.", link: "" },
-    { id: "invite_friend", title: "Пригласить друга", reward: 100, type: "ref", proofHint: "Друг должен открыть бота по вашей ссылке.", link: "" },
-  ],
-  raffle: { monthlyPool: "1000 USDT", day: 28 },
-};
+const tg = window.Telegram?.WebApp;
+const IS_TG = !!tg;
+const WEBAPP_URL = location.href.split('#')[0];
 
-/** =========================
- *  Mini App helpers
- *  ========================= */
-const isTg = !!window.Telegram?.WebApp?.initData;
-const tg = window.Telegram?.WebApp ?? null;
+// Данные (должны совпадать с бэком)
+const BOTS = [
+  {id:"atm_pro", title:"CryptoATM Pro", short:"Автопродажи, платёжные шлюзы, рефералка, аналитика",
+    bullets:["Платежи: крипта / банковские / Stars","Витрины и цифровые товары","Реферальная программа и скидки","Аналитика и роли команды"], badge:"Топ"},
+  {id:"atm_starter", title:"CryptoATM Starter", short:"Быстрый запуск продаж и выдача товаров",
+    bullets:["Простая витрина","Автовыдача","Лёгкая настройка"], badge:"Хит"},
+  {id:"atm_support", title:"CryptoATM Support", short:"Саппорт-бот и тикеты в Telegram",
+    bullets:["Тикеты","Теги/статусы","Хэндовер оператору"], badge:""}
+];
+const PLANS = [
+  {id:"pro_month",bot_id:"atm_pro",name:"Pro — Месяц",period:"month",price_usd:79,crypto:"USDT/BTC/ETH",features:["Все модули","1 workspace","Поддержка"]},
+  {id:"pro_year",bot_id:"atm_pro",name:"Pro — Год",period:"year",price_usd:790,crypto:"USDT/BTC/ETH",features:["Все модули","1 workspace","Приоритет","2 мес. в подарок"]},
+  {id:"starter_month",bot_id:"atm_starter",name:"Starter — Месяц",period:"month",price_usd:19,crypto:"USDT",features:["Быстрый старт","Простая витрина","E-mail поддержка"]},
+  {id:"support_month",bot_id:"atm_support",name:"Support — Месяц",period:"month",price_usd:29,crypto:"USDT",features:["Тикеты","Команда","Базовая аналитика"]},
+];
 
-// State (сохраняем локально; сервер подтвердит через sendData)
-const STATE_KEY = "cryptoatm_state_v1";
-const state = loadState();
-const nowTs = () => Math.floor(Date.now()/1000);
-function loadState(){
-  try {
-    const s = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
-    return {
-      uid: s.uid || (tg?.initDataUnsafe?.user?.id ?? 0),
-      uname: s.uname || (tg?.initDataUnsafe?.user?.username ?? ""),
-      coins: s.coins ?? 0,
-      tickets: s.tickets ?? 0,
-      refs: s.refs ?? 0,
-      sub: s.sub || { plan: null, until: null, mult: 1.0 },
-      clicker: s.clicker || { last: 0, today: 0, dayKey: dayKey() },
-      tasks: s.tasks || {}, // id -> {status: "pending|approved|rejected|null", proof?}
-      refCode: s.refCode || genRef(),
-    };
-  } catch(e){ return { coins:0, tickets:0, refs:0, sub:{ plan:null, until:null, mult:1.0 }, clicker:{ last:0, today:0, dayKey:dayKey() }, tasks:{}, refCode: genRef(), uid:0, uname:"" }; }
-}
-function saveState(){ localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
-function dayKey(){ const d=new Date(); return [d.getFullYear(),d.getMonth()+1,d.getDate()].join("-"); }
-function genRef(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
-
-function sendToBot(payload){
-  const data = JSON.stringify(payload);
-  if(tg){
-    tg.sendData(data);
-  }else{
-    console.log("DEMO sendData ->", data);
-  }
+// UI helpers
+function $id(id){return document.getElementById(id)}
+function showTab(name){
+  ["catalog","plans","ref","quests"].forEach(t=>{
+    $id(t).classList.toggle("hidden", t!==name);
+    document.querySelector(`[data-tab="${t}"]`)?.classList.toggle("btn-primary", t===name);
+    document.querySelector(`[data-tab="${t}"]`)?.classList.toggle("btn-ghost", t!==name);
+  });
 }
 
-function fmtDate(ts){
-  if(!ts) return "—";
-  const d = new Date(ts*1000);
-  return d.toLocaleDateString();
-}
-
-function ensureClickerDay(){
-  const dk = dayKey();
-  if(state.clicker.dayKey !== dk){
-    state.clicker.dayKey = dk;
-    state.clicker.today = 0;
-    saveState();
-  }
-}
-
-function calcTickets(){
-  // Пример: билеты = coins * sub.mult (округление)
-  const t = Math.floor((state.coins || 0) * (state.sub?.mult || 1.0));
-  state.tickets = t;
-}
-
-/** =========================
- *  UI wiring
- *  ========================= */
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-function showTab(id){
-  $$("#app main > section").forEach(s => s.classList.add("hidden-el"));
-  $("#tab-"+id).classList.remove("hidden-el");
-  $$("#app nav .chip").forEach(b => b.classList.remove("tab-active"));
-  $(`[data-tab="${id}"]`)?.classList.add("tab-active");
-  if(id==="pricing") renderPricing();
-  if(id==="tasks") renderTasks();
-  if(id==="clicker") updateClickerUI();
-  if(id==="ref") renderRef();
-  if(id==="raffle") renderRaffle();
-}
-function openModal(html){
-  $("#modalContent").innerHTML = html;
-  $("#modal").classList.remove("hidden-el");
-}
-function closeModal(){ $("#modal").classList.add("hidden-el"); $("#modalContent").innerHTML=""; }
-
-/** =========================
- *  Initial boots
- *  ========================= */
-(function boot(){
-  if(!isTg){
-    $("#demoBadge").classList.remove("hidden-el");
-  }else{
-    tg.expand();
-    tg.disableVerticalSwipes(); // удобнее скроллить внутри
-  }
-
-  // Header fast actions
-  $("#openPayTop").addEventListener("click", ()=> showTab("pricing"));
-  $("#btnStartTasks").addEventListener("click", ()=> showTab("tasks"));
-  $("#btnOpenClicker").addEventListener("click", ()=> showTab("clicker"));
-  $("#btnSubscribe").addEventListener("click", ()=> showTab("pricing"));
-  $("#btnPayCrypto").addEventListener("click", openCryptoModal);
-  $("#btnInvoice").addEventListener("click", openInvoiceModal);
-  $("#btnSupport").addEventListener("click", openSupportModal);
-
-  // Tabs
-  $$("#app nav .chip").forEach(b=> b.addEventListener("click", ()=> showTab(b.dataset.tab)));
-
-  // Modal close
-  $("#closeModal").addEventListener("click", closeModal);
-  $("#modal").addEventListener("click", (e)=>{ if(e.target.id==="modal") closeModal(); });
-
-  // Render home KPI
-  refreshKPI();
-
-  // Render default tab
-  showTab("home");
-
-  // Prepare pricing skeleton
-  renderPricing();
-
-  // Fill profile
-  $("#uid").textContent = state.uid || "—";
-  $("#uname").textContent = state.uname || "—";
-  updateSubStatus();
-
-  // Clicker
-  $("#clickBtn").addEventListener("click", onClick);
-
-  // Copy buttons
-  $("#copyRef")?.addEventListener("click", ()=> copyInput("#refLink"));
-  $("#copyRefApp")?.addEventListener("click", ()=> copyInput("#refLinkApp"));
-
-  // Recalc raffle
-  calcTickets();
-  refreshKPI();
-})();
-
-/** =========================
- *  KPI / Profile
- *  ========================= */
-function refreshKPI(){
-  $("#coins").textContent = state.coins ?? 0;
-  $("#tickets").textContent = state.tickets ?? 0;
-  $("#refs").textContent = state.refs ?? 0;
-  const chance = estimateChance();
-  $("#winChance").textContent = (chance*100).toFixed(1)+"%";
-}
-
-function updateSubStatus(){
-  const s = state.sub;
-  const chip = $("#subStatusChip");
-  const untilLabel = s?.until ? new Date(s.until*1000).toLocaleDateString() : "—";
-  chip.textContent = `Подписка: ${s?.plan ? s.plan.toUpperCase() : "—"}`;
-  $("#subUntil").textContent = untilLabel;
-}
-
-/** =========================
- *  Pricing / Subscribe
- *  ========================= */
-function renderPricing(){
-  const wrap = $("#tab-pricing .grid-cards");
-  wrap.innerHTML = "";
-  CONFIG.tariffs.forEach(t=>{
-    const perks = t.perks.map(p=>`<li class="flex gap-2 items-start"><span class="text-emerald-300">✓</span><span>${p}</span></li>`).join("");
-    const active = (state.sub?.plan === t.id) ? `<span class="badge">активно</span>` : ``;
-    const html = `
-      <div class="col-span-12 md:col-span-4 card p-5 space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="text-lg font-semibold">${t.name}</div>
-          ${active}
-        </div>
-        <div class="text-3xl font-extrabold">${t.price} ${t.currency}<span class="text-sm text-[var(--muted)]"> / ${t.per}</span></div>
-        <div class="text-xs tag">множитель: ×${t.subMult}</div>
-        <ul class="text-sm space-y-2">${perks}</ul>
-        <div class="flex gap-2 pt-2">
-          <button class="btn btn-primary w-full" onclick='selectPlan("${t.id}")'>Оформить</button>
-          <button class="btn btn-muted w-full" onclick='openCryptoModal("${t.id}")'>Оплата криптой</button>
-        </div>
+// Render Catalog
+function renderBots(){
+  const wrap = $id("bots"); wrap.innerHTML="";
+  BOTS.forEach(b=>{
+    const li = document.createElement("div"); li.className="card space-y-2";
+    li.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="text-lg font-semibold">${b.title}</div>
+        ${b.badge ? `<span class="tag">${b.badge}</span>` : ""}
+      </div>
+      <div class="opacity-80">${b.short}</div>
+      <ul class="list-disc pl-5 text-sm opacity-80">${b.bullets.map(x=>`<li>${x}</li>`).join("")}</ul>
+      <div class="flex gap-2 pt-2">
+        <button class="btn-primary" data-bid="${b.id}">Смотреть планы</button>
+        <button class="btn-ghost" data-open="pay">Оплатить</button>
       </div>
     `;
-    wrap.insertAdjacentHTML("beforeend", html);
+    wrap.appendChild(li);
+    li.querySelector(`[data-bid="${b.id}"]`).onclick = ()=> {
+      showTab("plans");
+      renderPlans(b.id);
+    };
   });
 }
 
-function selectPlan(planId){
-  const t = CONFIG.tariffs.find(x=>x.id===planId);
-  if(!t) return;
-  openModal(`
-    <div>
-      <div class="text-lg font-semibold mb-1">Подписка: ${t.name}</div>
-      <div class="text-sm text-[var(--muted)] mb-3">Стоимость: ${t.price} ${t.currency} / ${t.per}. После оплаты нажмите «Я оплатил(а)».</div>
-      <div class="flex gap-2">
-        <button class="btn btn-primary" onclick='openCryptoModal("${t.id}")'>Оплатить криптой</button>
-        <button class="btn btn-muted" onclick="openInvoiceModal('${t.id}')">Запросить инвойс</button>
+// Render Plans
+function renderPlans(filterBotId=null){
+  const wrap = $id("plansWrap"); wrap.innerHTML="";
+  (filterBotId ? PLANS.filter(p=>p.bot_id===filterBotId) : PLANS).forEach(p=>{
+    const li = document.createElement("div"); li.className="card space-y-2";
+    li.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="text-lg font-semibold">${p.name}</div>
+        <div class="tag">$${p.price_usd} / ${p.period}</div>
       </div>
-    </div>
-  `);
-  sendToBot({ type: "subscribe_select", plan: planId });
-}
-
-/** =========================
- *  Payments
- *  ========================= */
-function openCryptoModal(planId=null){
-  const nets = CONFIG.networks.map(n=>`
-    <div class="glass p-3 rounded-xl">
-      <div class="text-sm font-semibold">${n.title}</div>
-      <div class="text-xs text-[var(--muted)] monos">${n.address}</div>
-      ${n.note?`<div class="text-xs text-[var(--muted)]">Примечание: ${n.note}</div>`:""}
-      <button class="btn btn-success mt-2" onclick='confirmCrypto("${n.key}","${planId||""}")'>Я оплатил(а)</button>
-    </div>`).join("");
-  openModal(`
-    <div>
-      <div class="text-lg font-semibold mb-2">Оплата криптовалютой</div>
-      <div class="space-y-2">${nets}</div>
-      <div class="text-xs text-[var(--muted)] mt-3">После нажатия “Я оплатил(а)” заявка уйдёт модератору. Зачисление выполняется вручную.</div>
-    </div>
-  `);
-}
-function confirmCrypto(networkKey, planId){
-  const ref = `CR-${state.uid}-${Date.now()}`;
-  sendToBot({ type: "purchase_intent", method: "crypto", network: networkKey, plan: planId, ref });
-  closeModal();
-  toast("Заявка отправлена. Мы проверим и активируем подписку.");
-}
-
-function openInvoiceModal(planId=null){
-  openModal(`
-    <div>
-      <div class="text-lg font-semibold mb-2">Инвойс на фирму</div>
-      <div class="text-sm text-[var(--muted)]">Заполните форму — наш менеджер выставит счёт.</div>
-      <div class="mt-3 space-y-2">
-        <input id="invName" class="w-full p-2 rounded-lg bg-transparent border border-white/10 ring-focus" placeholder="Название компании / ФИО"/>
-        <input id="invEmail" class="w-full p-2 rounded-lg bg-transparent border border-white/10 ring-focus" placeholder="Email для инвойса"/>
-        <input id="invNotes" class="w-full p-2 rounded-lg bg-transparent border border-white/10 ring-focus" placeholder="Комментарий (ИНН/адрес и т.п.)"/>
+      <ul class="list-disc pl-5 text-sm opacity-80">${p.features.map(x=>`<li>${x}</li>`).join("")}</ul>
+      <div class="flex gap-2 pt-2">
+        <button class="btn-primary" data-buy="${p.id}">Купить</button>
+        <button class="btn-ghost" data-bot="${p.bot_id}">О боте</button>
       </div>
-      <button class="btn btn-primary mt-3" onclick='sendInvoice("${planId||""}")'>Отправить</button>
-    </div>
-  `);
-}
-function sendInvoice(planId){
-  const name = $("#invName").value.trim();
-  const email = $("#invEmail").value.trim();
-  const notes = $("#invNotes").value.trim();
-  if(!name || !email) return toast("Укажите имя и email");
-  sendToBot({ type: "invoice_request", plan: planId, name, email, notes });
-  closeModal();
-  toast("Заявка на инвойс отправлена. Мы свяжемся по email.");
+    `;
+    wrap.appendChild(li);
+    li.querySelector(`[data-buy="${p.id}"]`).onclick = ()=> buyPlan(p.id);
+    li.querySelector(`[data-bot="${p.bot_id}"]`).onclick = ()=> {
+      showTab("catalog");
+      document.querySelector(`#bots [data-bid="${p.bot_id}"]`)?.scrollIntoView({behavior:"smooth", block:"center"});
+    };
+  });
 }
 
-/** =========================
- *  Clicker
- *  ========================= */
-function updateClickerUI(){
-  ensureClickerDay();
-  $("#clickerCounter").textContent = state.coins;
-  const rest = Math.max(0, CONFIG.clicker.dailyLimit - state.clicker.today);
-  $("#clickerHint").textContent = `Осталось сегодня: ${rest} кликов · кулдаун ${CONFIG.clicker.cooldownSec}s`;
-  renderClickHistory();
-}
-function onClick(){
-  ensureClickerDay();
-  const now = nowTs();
-  const cd = CONFIG.clicker.cooldownSec;
-  if(now - (state.clicker.last||0) < cd){
-    const left = cd - (now - (state.clicker.last||0));
-    return toast(`Кулдаун ${left}s`, true);
+// WebApp bridge
+function sendData(obj){
+  if (IS_TG){
+    tg.sendData(JSON.stringify(obj));
+  } else {
+    alert("Откройте в Telegram для взаимодействия с ботом.");
   }
-  if(state.clicker.today >= CONFIG.clicker.dailyLimit){
-    return toast("Дневной лимит исчерпан. Приходите завтра.");
-  }
-  state.clicker.last = now;
-  state.clicker.today++;
-  state.coins += CONFIG.clicker.coinPerClick;
-  calcTickets();
-  saveState();
-  updateClickerUI();
-  refreshKPI();
-  // отправим событие
-  sendToBot({ type: "click", amount: CONFIG.clicker.coinPerClick, at: now });
-}
-function renderClickHistory(){
-  const box = $("#clickHistory");
-  const items = Math.min(state.clicker.today, 10);
-  let html="";
-  for(let i=0;i<items;i++) html += `<div>+${CONFIG.clicker.coinPerClick} ATM</div>`;
-  box.innerHTML = html || "<div>Пока пусто. Сделайте первый клик!</div>";
 }
 
-/** =========================
- *  Tasks
- *  ========================= */
+function buyPlan(plan_id){
+  sendData({action:"buy_plan", plan_id});
+  tg?.HapticFeedback?.impactOccurred("medium");
+}
+
+// Referral
+function setRefLink(){
+  // генерируем локально — бот пришлёт точную по нажатию в /start
+  const pseudo = "ref_" + Math.random().toString(36).slice(2,10).toUpperCase();
+  const link = `https://t.me/${tg?.initDataUnsafe?.user?.username ? "" : "your_bot"}?start=${pseudo}`;
+  $id("refLink").value = link;
+}
+$id("copyRef").onclick = ()=>{
+  navigator.clipboard.writeText($id("refLink").value);
+  tg?.HapticFeedback?.notificationOccurred("success");
+};
+
+// Tasks (кликер)
+const TASKS = [
+  {id:"daily_tap", title:"Ежедневный тап", desc:"нажми и получи 1 CATM", reward:1, type:"click"},
+  {id:"join_insta", title:"Подписка на Instagram", desc:"Подпишись и подтвердись", reward:20, type:"external", url:"https://instagram.com"},
+  {id:"invite_friend", title:"Пригласи друга", desc:"Друг перешёл по твоей ссылке и открыл мини-апп", reward:50, type:"ref"},
+];
 function renderTasks(){
-  const wrap = $("#tasksList");
-  wrap.innerHTML = "";
-  CONFIG.tasks.forEach(task=>{
-    const st = state.tasks[task.id]?.status || "null";
-    const statusChip = renderTaskStatus(st);
-    const proof = state.tasks[task.id]?.proof || "";
-    wrap.insertAdjacentHTML("beforeend", `
-      <div class="glass p-4 rounded-xl">
-        <div class="flex items-center justify-between gap-2">
-          <div class="font-semibold">${task.title}</div>
-          ${statusChip}
+  const wrap = $id("tasks"); wrap.innerHTML="";
+  TASKS.forEach(t=>{
+    const el=document.createElement("div"); el.className="card";
+    el.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="font-semibold">${t.title}</div>
+          <div class="text-sm opacity-70">${t.desc}</div>
         </div>
-        <div class="text-xs text-[var(--muted)] mt-1">Награда: +${task.reward} ATM</div>
-        ${task.link ? `<a class="text-cyan-300 text-sm underline" href="${task.link}" target="_blank" rel="noreferrer">Перейти</a>` : ""}
-        <div class="mt-3 space-y-2">
-          <input id="proof_${task.id}" class="w-full p-2 rounded-lg bg-transparent border border-white/10 ring-focus" placeholder="${task.proofHint}" value="${proof}"/>
-          <div class="flex gap-2">
-            <button class="btn btn-primary" onclick='submitProof("${task.id}")'>Отправить на проверку</button>
-            <button class="btn btn-muted" onclick='markTaskDone("${task.id}")'>Я выполнил(а)</button>
-          </div>
-        </div>
+        <div class="tag">+${t.reward} CATM</div>
       </div>
-    `);
+      <div class="pt-2">
+        <button class="btn-primary" data-task="${t.id}">${t.type==="click" ? "Тап" : "Выполнить"}</button>
+        ${t.url ? `<a class="btn-ghost inline-block ml-2" target="_blank" href="${t.url}">Открыть</a>` : ""}
+      </div>
+    `;
+    wrap.appendChild(el);
+    el.querySelector(`[data-task="${t.id}"]`).onclick = ()=>{
+      // примитивная проверка; реальную валидацию делаем на бэке/админке
+      sendData({action:"task_done", task_id:t.id, reward:t.reward});
+      tg?.HapticFeedback?.impactOccurred("light");
+    };
   });
 }
-function renderTaskStatus(st){
-  if(st==="approved") return `<span class="badge" style="border-color:#34d399;color:#d1fae5">принято</span>`;
-  if(st==="pending") return `<span class="badge">на модерации</span>`;
-  if(st==="rejected") return `<span class="badge" style="border-color:#fb7185;color:#fecdd3">отклонено</span>`;
-  return `<span class="badge">не выполнено</span>`;
-}
-function submitProof(taskId){
-  const v = $(`#proof_${taskId}`).value.trim();
-  if(!v) return toast("Добавьте ссылку/пояснение к пруфу");
-  state.tasks[taskId] = { status: "pending", proof: v };
-  saveState();
-  renderTasks();
-  sendToBot({ type: "task_submit", id: taskId, proof: v });
-  toast("Отправлено модератору.");
-}
-function markTaskDone(taskId){
-  // быстрый “я сделал” — всё равно pending до модерации
-  state.tasks[taskId] = { status: "pending", proof: state.tasks[taskId]?.proof || "" };
-  saveState();
-  renderTasks();
-  sendToBot({ type: "task_mark", id: taskId });
-  toast("Задание отправлено на модерацию.");
-}
 
-/** =========================
- *  Raffle
- *  ========================= */
-function renderRaffle(){
-  const d = new Date();
-  $("#raffleMonth").textContent = `месяц — ${d.toLocaleString('ru-RU', {month:'long', year:'numeric'})}`;
-  $("#prizePool").textContent = CONFIG.raffle.monthlyPool;
-  $("#yourTickets").textContent = state.tickets;
-  $("#yourChance").textContent = (estimateChance()*100).toFixed(2) + "%";
-}
-function estimateChance(){
-  // заглушка: считаем общий банк как 100k билетов
-  const total = 100000;
-  const me = state.tickets || 0;
-  return Math.min(1, me / total);
-}
-
-/** =========================
- *  Referral
- *  ========================= */
-function renderRef(){
-  $("#botU1").textContent = CONFIG.botUsername;
-  $("#botU2").textContent = CONFIG.botUsername;
-  $("#refCode1").textContent = state.refCode;
-  $("#refCode2").textContent = state.refCode;
-  const link1 = `https://t.me/${CONFIG.botUsername}?start=ref_${state.refCode}`;
-  const link2 = `https://t.me/${CONFIG.botUsername}?startapp=ref_${state.refCode}`;
-  $("#refLink").value = link1;
-  $("#refLinkApp").value = link2;
-  // Сообщим боту, если мини-апп открыто с ref
-  const sp = new URLSearchParams(location.search);
-  const refOpen = sp.get("ref");
-  if(refOpen) sendToBot({ type: "ref_open", code: refOpen });
-}
-function copyInput(sel){
-  const el = $(sel);
-  el.select(); el.setSelectionRange(0, el.value.length);
-  document.execCommand("copy");
-  toast("Скопировано.");
-}
-
-/** =========================
- *  Support
- *  ========================= */
-function openSupportModal(){
-  openModal(`
-    <div>
-      <div class="text-lg font-semibold mb-2">Поддержка</div>
-      <div class="text-sm text-[var(--muted)] mb-2">Опишите проблему, мы ответим вам в Telegram.</div>
-      <textarea id="supText" rows="4" class="w-full p-2 rounded-lg bg-transparent border border-white/10 ring-focus" placeholder="Ваш вопрос..."></textarea>
-      <button class="btn btn-primary mt-3" onclick="sendSupport()">Отправить</button>
-    </div>
-  `);
-}
-function sendSupport(){
-  const txt = $("#supText").value.trim();
-  if(!txt) return toast("Опишите вопрос");
-  sendToBot({ type: "support", text: txt });
-  closeModal();
-  toast("Заявка отправлена. Мы свяжемся с вами в чате.");
-}
-
-/** =========================
- *  Toast
- *  ========================= */
-function toast(msg, danger=false){
-  const el = document.createElement("div");
-  el.className = "fixed left-1/2 -translate-x-1/2 bottom-6 z-50 px-4 py-2 rounded-xl shadow-soft " + (danger ? "bg-[rgba(251,113,133,.22)] border border-[rgba(251,113,133,.4)]" : "glass");
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(()=>{ el.remove(); }, 2200);
-}
-
-/** =========================
- *  Subscriptions activation (server → client)
- *  =========================
- *  На стороне бота после подтверждения оплаты отправляйте пользователю web_app_data
- *  или обычным сообщением команду на обновление профиля (по желанию).
- *  Ниже — функции, которые вы можете вызвать вручную в консоли для теста:
- */
-// window.__activateSub("pro", 30) // тест: активировать на 30 дней
-window.__activateSub = function(plan, days){
-  const t = CONFIG.tariffs.find(x=>x.id===plan); if(!t) return;
-  const until = Math.floor(Date.now()/1000) + days*86400;
-  state.sub = { plan, until, mult: t.subMult };
-  saveState();
-  updateSubStatus();
-  calcTickets();
-  refreshKPI();
-  toast("Подписка активирована (DEMO).");
+// Balance
+$id("btnBalance").onclick = ()=>{
+  sendData({action:"get_balance"});
 };
 
-// window.__approveTask("inst_follow", true) // тест: принять/отклонить
-window.__approveTask = function(taskId, ok=true){
-  const cur = state.tasks[taskId] || {};
-  cur.status = ok ? "approved" : "rejected";
-  state.tasks[taskId] = cur;
-  if(ok){
-    const task = CONFIG.tasks.find(t=>t.id===taskId);
-    if(task) { state.coins += task.reward; calcTickets(); }
-  }
-  saveState(); renderTasks(); refreshKPI();
-  toast(ok ? "Задание принято (DEMO)" : "Задание отклонено (DEMO)");
-};
+// Tabs
+document.querySelectorAll(".tab").forEach(b=>{
+  b.onclick = ()=> showTab(b.dataset.tab);
+});
+
+// Pay link
+$id("openPay").onclick = (e)=>{e.preventDefault(); showTab("plans");};
+
+// Open in TG button (for web preview)
+if (!IS_TG) {
+  document.getElementById("btnOpenInTG").classList.remove("hidden");
+  document.getElementById("btnOpenInTG").onclick = ()=>{
+    alert("Откройте эту страницу из Telegram мини-аппа (кнопка /app у бота).");
+  };
+} else {
+  tg.expand(); // растянуть
+  tg.setHeaderColor("secondary_bg_color");
+  tg.setBackgroundColor(tg.themeParams.bg_color || "#0b0b0b");
+}
+
+// Init
+renderBots();
+renderPlans();
+renderTasks();
+setRefLink();
+showTab("catalog");
 </script>
 </body>
 </html>
-
-
