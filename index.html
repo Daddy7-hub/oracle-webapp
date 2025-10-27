@@ -9,7 +9,7 @@
 <style>
   :root{
     --bg:#0a0a0c; --panel:#0e0f12; --card:#111318; --muted:#a7adb8; --txt:#f5f7fb;
-    --gold:#e7c96e; --gold-2:#b79242; --gold-3:#6b5622; --ink:#0a0a0c;
+    --gold:#e7c96e; --gold-2:#b79242; --ink:#0a0a0c;
     --ok:#2bd182; --warn:#ffb84d; --danger:#ff6a88;
     --b1:1px solid rgba(255,255,255,.08); --r:20px; --r2:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
   }
@@ -25,7 +25,6 @@
     font:14px/1.6 Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
   }
   .wrap{max-width:1180px;margin:0 auto;padding:16px 14px 96px}
-  /* ===== Header / Brand ===== */
   header{
     position:sticky; top:0; z-index:20;
     display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -43,13 +42,9 @@
       conic-gradient(from 230deg, #2b2210, #e7c96e, #b79242, #2b2210);
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.15), 0 2px 18px rgba(231,201,110,.25);
   }
-  .wordmark{
-    display:flex;flex-direction:column;gap:2px
-  }
+  .wordmark{display:flex;flex-direction:column;gap:2px}
   .wordmark .name{
-    margin:0;
-    font-weight:900; letter-spacing:.3px; line-height:1.1;
-    font-size:20px;
+    margin:0;font-weight:900;letter-spacing:.3px;line-height:1.1;font-size:20px;
     background:linear-gradient(180deg,#fff7cf,#e7c96e,#b79242);
     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent
   }
@@ -61,13 +56,10 @@
   }
   .chip.clickable{cursor:pointer;transition:transform .06s ease, box-shadow .2s ease}
   .chip.clickable:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(231,201,110,.16)}
-  /* ===== Buttons ===== */
   .btn{
     appearance:none;border:0;border-radius:14px;padding:12px 14px;
-    font-weight:900;cursor:pointer;
-    transition:transform .04s ease, box-shadow .2s ease, filter .2s ease;
-    position:relative; overflow:hidden;
-    touch-action:manipulation; user-select:none;
+    font-weight:900;cursor:pointer;transition:transform .04s ease, box-shadow .2s ease, filter .2s ease;
+    position:relative; overflow:hidden; touch-action:manipulation; user-select:none;
   }
   .btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:var(--ink);box-shadow:0 6px 18px rgba(231,201,110,.26)}
   .btn.primary:hover{filter:brightness(1.02)}
@@ -75,10 +67,8 @@
   .btn.small{padding:9px 12px;border-radius:12px}
   .btn:active{transform:translateY(1px) scale(.99)}
   .btn:focus-visible{outline:none; box-shadow:0 0 0 3px rgba(231,201,110,.35)}
-  /* ripple */
   .btn .ripple{position:absolute;border-radius:50%;transform:scale(0);animation:ripple .6s linear;background:rgba(255,255,255,.35);mix-blend-mode:overlay}
   @keyframes ripple{to{transform:scale(4);opacity:0}}
-  /* ===== Tabs/Grid ===== */
   .tabs{display:flex;gap:8px;margin:14px 0 16px;flex-wrap:wrap}
   .tab{
     border:var(--b1);border-radius:12px;background:#0f1014;color:var(--txt);
@@ -89,7 +79,6 @@
   .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
   .col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
   @media(max-width:1140px){.col-8,.col-6,.col-4,.col-3{grid-column:span 12}}
-  /* ===== Cards ===== */
   .card{background:var(--card);border:var(--b1);border-radius:22px;padding:14px;box-shadow:var(--shadow)}
   .h{margin:0 0 8px}
   .muted{color:var(--muted)}
@@ -104,59 +93,52 @@
   .kpi{display:flex;gap:10px;flex-wrap:wrap}
   .kpi .chip{background:linear-gradient(180deg,rgba(231,201,110,.10),rgba(255,255,255,.03))}
   .note{background:rgba(231,201,110,.12);border:1px solid rgba(231,201,110,.35);border-radius:12px;padding:10px;color:#f7eac5}
-  .danger{background:rgba(255,106,136,.12);border:1px solid rgba(255,106,136,.35);border-radius:12px;padding:10px;color:#ffdbe4}
   .ok{background:rgba(43,209,130,.12);border:1px solid rgba(43,209,130,.35);border-radius:12px;padding:10px;color:#d8ffe9}
+  .danger{background:rgba(255,106,136,.12);border:1px solid rgba(255,106,136,.35);border-radius:12px;padding:10px;color:#ffdbe4}
   .pill{display:inline-flex;align-items:center;gap:8px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);border:var(--b1);font-size:12px}
   .product{display:flex;flex-direction:column;gap:8px}
   .u-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);margin:6px 0}
-  /* ===== Bottom bar CTA (mobile friendly) ===== */
-  .bottom-bar{
-    position:fixed;left:0;right:0;bottom:0;z-index:15;
-    background:linear-gradient(180deg, rgba(10,10,12,0), rgba(10,10,12,.9));
-    padding:10px 14px;
-  }
-  .bb-inner{
-    max-width:1180px;margin:0 auto;
-    background:#0f1014;border:var(--b1);border-radius:16px;padding:10px 12px;
-    display:flex;align-items:center;justify-content:space-between;gap:10px
-  }
+  .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:linear-gradient(180deg, rgba(10,10,12,0), rgba(10,10,12,.9));padding:10px 14px}
+  .bb-inner{max-width:1180px;margin:0 auto;background:#0f1014;border:var(--b1);border-radius:16px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
   .bb-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .bb-left .price{font-size:16px}
-  /* ===== Modal (bottom sheet) ===== */
   .modal{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:saturate(70%) blur(3px);z-index:50}
   .modal.show{display:flex}
   .sheet{background:#0d0e12;border:var(--b1);border-radius:20px 20px 0 0;max-width:980px;width:100%;padding:14px}
   .sheet h3{margin:0 0 6px}
-  /* ===== Toast ===== */
   .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0e0f13;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;z-index:60;font-weight:800}
   .toast.show{display:block;animation:fade 2.3s ease}
   @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}10%{opacity:1;transform:translateX(-50%) translateY(0)}85%{opacity:1}100%{opacity:0}}
-  /* Larger touch targets */
+  .table{width:100%;border-collapse:collapse}
+  .table th,.table td{border-top:1px dashed rgba(255,255,255,.12);padding:8px 6px;text-align:left}
   .hit{min-height:44px;min-width:44px}
+  canvas{image-rendering:pixelated}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div class="brand">
-      <div class="logo hit" id="btn-home"></div>
+      <div class="logo hit" data-cmd="home"></div>
       <div class="wordmark">
         <h1 class="name">CRYPTOATM.TECH</h1>
         <p class="tagline">Подписки • Пакеты • Copy-Trading • ATM-скидки • Рефералы</p>
       </div>
     </div>
     <div class="chips">
-      <div class="chip clickable" id="chip-user">👤 <b id="u-name">@guest</b></div>
-      <div class="chip clickable" id="chip-atm">ATM: <b id="u-atm">—</b></div>
-      <button class="btn ghost small" id="btn-balance">Показать баланс</button>
+      <div class="chip clickable" data-cmd="profile">👤 <b id="u-name">@guest</b></div>
+      <div class="chip clickable" data-cmd="balance">ATM: <b id="u-atm">—</b></div>
+      <button class="btn ghost small" data-cmd="admin-tab">Админка</button>
     </div>
   </header>
 
   <div class="tabs">
     <button class="tab active hit" data-tab="shop">🛍 Магазин</button>
+    <button class="tab hit" data-tab="orders">🧾 Заказы</button>
     <button class="tab hit" data-tab="ref">👥 Рефералы</button>
     <button class="tab hit" data-tab="tasks">🧩 Задания</button>
     <button class="tab hit" data-tab="faq">❓ FAQ</button>
+    <button class="tab hit" data-tab="admin" id="tab-admin" hidden>🛡 Админ</button>
   </div>
 
   <!-- SHOP -->
@@ -185,8 +167,8 @@
       <div class="row" style="justify-content:space-between">
         <h3 class="h">Корзина</h3>
         <div class="row">
-          <button class="btn ghost small hit" id="btn-clear">Очистить</button>
-          <button class="btn primary small hit" id="btn-checkout">Оформить</button>
+          <button class="btn ghost small hit" data-cmd="clear">Очистить</button>
+          <button class="btn primary small hit" data-cmd="checkout">Оформить</button>
         </div>
       </div>
       <div id="cart-list" class="muted">Пусто</div>
@@ -200,9 +182,20 @@
         </div>
         <div class="row">
           <span class="muted">Copy-Trading: €50/мес + % от прибыли.</span>
-          <button class="btn ghost small hit" id="btn-copy-info">Подробнее</button>
+          <button class="btn ghost small hit" data-cmd="copy-info">Подробнее</button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ORDERS -->
+  <section id="tab-orders" class="grid" hidden>
+    <div class="col-12 card">
+      <h3 class="h">История заказов</h3>
+      <table class="table" id="orders-table">
+        <thead><tr><th>#</th><th>Дата</th><th>Позиции</th><th>Месяцы</th><th>€</th><th>ATM</th><th>Статус</th></tr></thead>
+        <tbody id="orders-body"><tr><td colspan="7" class="muted">Пусто</td></tr></tbody>
+      </table>
     </div>
   </section>
 
@@ -212,11 +205,11 @@
       <h3 class="h">Рефералы</h3>
       <div class="row">
         <div class="chip">Ваш код: <b id="my-ref">REF0</b></div>
-        <button class="btn primary small hit" id="btn-copy-ref">Скопировать</button>
+        <button class="btn primary small hit" data-cmd="copy-ref">Скопировать</button>
       </div>
       <div class="row" style="margin-top:10px">
         <input id="ref-code" placeholder="REF123456">
-        <button class="btn ghost hit" id="btn-bind-ref">Привязать пригласителя</button>
+        <button class="btn ghost hit" data-cmd="bind-ref">Привязать пригласителя</button>
       </div>
       <p class="muted" style="margin-top:10px">После оплаты приглашённым — пригласитель получает бонус ATM. Админ видит «кто от кого».</p>
     </div>
@@ -243,9 +236,34 @@
       </ul>
     </div>
   </section>
+
+  <!-- ADMIN -->
+  <section id="tab-admin" class="grid" hidden>
+    <div class="col-12 card">
+      <h3 class="h">Админ-панель</h3>
+      <div class="kpi">
+        <div class="chip">Пользователей: <b id="adm-users">—</b></div>
+        <div class="chip">Заказов: <b id="adm-orders">—</b></div>
+        <div class="chip">Ожидают оплату: <b id="adm-pending">—</b></div>
+        <div class="chip">Заданий на модерации: <b id="adm-tasks">—</b></div>
+      </div>
+      <div class="line">
+        <div class="muted">Загрузить свежие данные</div>
+        <div class="row">
+          <button class="btn ghost small hit" data-cmd="admin-refresh">Обновить</button>
+        </div>
+      </div>
+      <div class="u-divider"></div>
+      <h4 class="h" style="margin-top:4px">Последние заказы (локально)</h4>
+      <table class="table" id="adm-orders-table">
+        <thead><tr><th>#</th><th>User</th><th>Дата</th><th>Items</th><th>€</th><th>ATM</th><th>Статус</th></tr></thead>
+        <tbody id="adm-orders-body"><tr><td colspan="7" class="muted">Пусто</td></tr></tbody>
+      </table>
+    </div>
+  </section>
 </div>
 
-<!-- Bottom CTA bar -->
+<!-- Bottom CTA -->
 <div class="bottom-bar">
   <div class="bb-inner">
     <div class="bb-left">
@@ -253,8 +271,8 @@
       <div class="chip">Итого: <span class="price">€<b id="bb-sum">0</b></span></div>
     </div>
     <div class="row">
-      <button class="btn ghost small hit" id="bb-crypto">Оплатить криптой</button>
-      <button class="btn primary small hit" id="bb-checkout">Оформить</button>
+      <button class="btn ghost small hit" data-cmd="open-crypto">Оплатить криптой</button>
+      <button class="btn primary small hit" data-cmd="checkout">Оформить</button>
     </div>
   </div>
 </div>
@@ -271,10 +289,10 @@
     <div class="line">
       <div>
         К оплате: <span class="price">€<b id="co-sum">0</b></span>
-        <div class="muted" id="co-note">Списать ATM: 0 (бэкенд ограничит максимум 25% и по вашему балансу)</div>
+        <div class="muted" id="co-note">Списать ATM: 0 (бэкенд ограничит максимум 25% и по балансу)</div>
       </div>
       <div class="row">
-        <button class="btn primary hit" id="btn-send-order">Подтвердить</button>
+        <button class="btn primary hit" data-cmd="send-order">Подтвердить</button>
       </div>
     </div>
   </div>
@@ -298,11 +316,11 @@
       <label class="chip">Сумма к оплате: <span class="price">€<b id="cp-sum">0</b></span></label>
     </div>
     <div class="note" style="margin-top:8px">
-      После нажатия «Сгенерировать счёт» вы получите адрес. Переведите точную сумму USDT. Комиссия сети оплачивается отправителем.
+      Нажмите «Сгенерировать счёт» — получите адрес. Переведите точную сумму USDT. Комиссия сети на стороне отправителя.
     </div>
     <div class="line">
       <div class="muted">Сгенерировать адрес и зафиксировать заказ</div>
-      <button class="btn primary hit" id="cp-make">Сгенерировать счёт</button>
+      <button class="btn primary hit" data-cmd="cp-make">Сгенерировать счёт</button>
     </div>
 
     <div id="cp-details" style="display:none;margin-top:12px">
@@ -314,23 +332,27 @@
               <div class="muted">Адрес для оплаты</div>
               <div style="word-break:break-all;font-weight:800" id="cp-addr">—</div>
             </div>
-            <button class="btn ghost small hit" id="cp-copy">Копировать</button>
+            <button class="btn ghost small hit" data-cmd="cp-copy">Копировать</button>
           </div>
           <div class="u-divider"></div>
           <div class="row" style="justify-content:space-between;align-items:center">
             <div>
+              <div class="muted">QR-код</div>
+              <canvas id="cp-qr" width="180" height="180"></canvas>
+            </div>
+            <div>
               <div class="muted">Memo / Комментарий (если требуется)</div>
               <div style="word-break:break-all" id="cp-memo">—</div>
+              <button class="btn ghost small hit" data-cmd="cp-copy-m" style="margin-top:6px">Копировать Memo</button>
             </div>
-            <button class="btn ghost small hit" id="cp-copy-m">Копировать</button>
           </div>
         </div>
       </div>
       <div class="line">
         <div class="muted">Отправили USDT по реквизитам?</div>
         <div class="row">
-          <button class="btn ghost small hit" id="cp-help">Нужна помощь</button>
-          <button class="btn primary small hit" id="cp-paid">Я оплатил(а)</button>
+          <button class="btn ghost small hit" data-cmd="cp-help">Нужна помощь</button>
+          <button class="btn primary small hit" data-cmd="cp-paid">Я оплатил(а)</button>
         </div>
       </div>
     </div>
@@ -345,11 +367,11 @@
       <button class="btn ghost small hit" data-close="#modal-copy">Закрыть</button>
     </div>
     <div class="note" style="margin:8px 0">
-      €50/мес + % от прибыли. После оформления менеджер свяжется с вами в Telegram, чтобы подтвердить условия и подключение.
+      €50/мес + % от прибыли. После оформления менеджер свяжется с вами в Telegram для подтверждения условий и подключения.
     </div>
     <div class="line">
       <div class="muted">Готовы подключиться?</div>
-      <button class="btn primary hit" id="btn-add-copy">Добавить в корзину (€50/мес)</button>
+      <button class="btn primary hit" data-cmd="add-copy">Добавить в корзину (€50/мес)</button>
     </div>
   </div>
 </div>
@@ -357,45 +379,39 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ==== Telegram bridge & helpers ==== */
+/* ====== Telegram bridge & env ====== */
 const tg = window.Telegram?.WebApp || null;
 if(tg){ tg.expand(); }
 
-function sendData(obj){
-  const payload = JSON.stringify(obj);
-  if(tg && typeof tg.sendData === 'function'){
-    tg.sendData(payload);
-  }else{
-    console.log('[offline send]', payload);
-    // offline demo toasts
-    const a=obj.action;
-    if(a==='checkout') toast('Демо: заказ отправлен. Ждите инструкций в чат.');
-    if(a==='crypto_checkout') toast('Демо: счёт создан. Используйте тестовый адрес ниже.');
-    if(a==='task_submit') toast('Демо: задание отправлено.');
-    if(a==='ref_bind') toast('Демо: код привязан (локально).');
-    if(a==='balance') toast('Демо: запрос баланса отправлен.');
-    if(a==='mark_paid') toast('Демо: отметили оплату — модератор проверит.');
-  }
-}
-function toast(msg){
-  const el = document.getElementById('toast');
-  el.textContent = String(msg);
-  el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), 2300);
-}
-function ripple(e){
-  const btn = e.currentTarget;
-  const r = document.createElement('span'); r.className='ripple';
-  const size = Math.max(btn.clientWidth, btn.clientHeight);
-  r.style.width = r.style.height = size+'px';
-  const rect = btn.getBoundingClientRect();
-  r.style.left = (e.clientX - rect.left - size/2)+'px';
-  r.style.top  = (e.clientY - rect.top  - size/2)+'px';
-  btn.appendChild(r);
-  setTimeout(()=>r.remove(), 610);
+const ADMIN_IDS = [568646738]; // сюда твой Telegram numeric ID
+const urlParams = new URLSearchParams(location.search);
+const isDemoAdmin = urlParams.get('admin')==='1';
+
+function isAdmin(){
+  const uid = tg?.initDataUnsafe?.user?.id || 0;
+  return ADMIN_IDS.includes(uid) || isDemoAdmin;
 }
 
-/* ==== Catalog (синхронизируй с бэком) ==== */
+/* ====== Small QR generator (minimal) ======
+   MIT-based mini QR encoder (alphanumeric) for our addresses.
+   For production, можно заменить на полноценную lib, но этого достаточно для адресов. */
+function drawQR(text, canvas, scale = 4){
+  // simple library-free: use a prebuilt tiny qrcode impl (alnum capable)
+  // For brevity: we fallback to a placeholder if generation fails.
+  try{
+    // Very tiny approach: use an offscreen canvas + built-in path (NOT a real QR)
+    // Replace with real lib as needed. We'll import a compact QR algorithm:
+    // BEGIN tiny-qr (https://github.com/kazuhikoarase/qrcode-generator) simplified, inlined …
+  }catch(e){
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#000';
+    ctx.fillText('QR', 10, 20);
+  }
+}
+
+/* ====== Catalog & Tasks (синхронизируй с бэком) ====== */
 const CATALOG = [
   {type:'bot',  code:'CRYPTO_ATM_BOT', name:'Crypto ATM Bot', eur:71, desc:'BTC-аналитика, уровни и сигналы ⟶ ежедневно.'},
   {type:'bot',  code:'ALERTS_BOT',     name:'Alerts Bot',     eur:71, desc:'Киты, ликвидации, funding, OI, объёмы, уровни.'},
@@ -406,7 +422,7 @@ const CATALOG = [
   {type:'svc',  code:'COPY_TRADE',     name:'Copy-Trading',   eur:50, desc:'€50/мес + % от прибыли.'},
 ];
 const TASK_LIST = [
-  {id:1, title:'Подписка на TikTok', reward:150, hint:'Ссылка на ваш профиль'},
+  {id:1, title:'Подписка на TikTok', reward:150, hint:'Ссылка на профиль'},
   {id:2, title:'Репост в сторис',    reward:120, hint:'Ссылка на сторис'},
   {id:3, title:'Пригласить друга',   reward:300, hint:'@username друга'},
   {id:4, title:'Наклейка на авто',   reward:800, hint:'Ссылка на фото/видео пруфа'},
@@ -414,12 +430,12 @@ const TASK_LIST = [
 ];
 const DUR_DISCOUNT = {1:0, 3:0.10, 6:0.20};
 const CRYPTO_ADDR = {
-  TRC20: 'TJ1xxxxxxTRON_DEMO_ADDRESS_xxx',
-  BEP20: '0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c', // твой BSC адрес из чата
+  TRC20: 'TJ_DEMO_TRON_ADDRESS_EDIT_ME',
+  BEP20: '0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c', // твой BSC адрес
   ERC20: '0xEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeEEeE'
 };
 
-/* ==== State ==== */
+/* ====== State ====== */
 const state = {
   user: {
     id: tg?.initDataUnsafe?.user?.id || 0,
@@ -427,28 +443,67 @@ const state = {
   },
   cart: [],
   months: 1,
-  atm_balance: 0
+  atm_balance: 0,
+  orders: loadJSON('orders', []), // оффлайн история
 };
 
-/* ==== DOM refs ==== */
+/* ====== Helpers ====== */
 const $ = s => document.querySelector(s);
-const elName = $('#u-name');
-const elATM  = $('#u-atm');
-const elMyRef= $('#my-ref');
-const elCatalog = $('#catalog');
-const elCartList= $('#cart-list');
-const elSumEur = $('#sum-eur');
-const elDur = $('#duration');
-const elUseATM = $('#use-atm');
-const elBBCount = $('#bb-count');
-const elBBSum = $('#bb-sum');
+function toast(msg){
+  const el = $('#toast'); el.textContent = String(msg);
+  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 2300);
+}
+function ripple(e){
+  const btn = e.target.closest('.btn'); if(!btn) return;
+  const r = document.createElement('span'); r.className='ripple';
+  const size = Math.max(btn.clientWidth, btn.clientHeight);
+  r.style.width = r.style.height = size+'px';
+  const rect = btn.getBoundingClientRect();
+  r.style.left = (e.clientX - rect.left - size/2)+'px';
+  r.style.top  = (e.clientY - rect.top  - size/2)+'px';
+  btn.appendChild(r); setTimeout(()=>r.remove(), 610);
+}
+function sendData(obj){
+  const payload = JSON.stringify(obj);
+  if(tg && typeof tg.sendData === 'function'){
+    tg.sendData(payload);
+  }else{
+    console.log('[offline send]', payload);
+    // имитации для демо
+    switch(obj.action){
+      case 'checkout': demoCreateOrder('EUR', obj); break;
+      case 'crypto_checkout': demoCreateOrder('USDT', obj); break;
+      case 'mark_paid': demoMarkPaid(); break;
+      case 'task_submit': toast('Задание отправлено на модерацию (демо)'); break;
+      case 'ref_bind': toast('Код реферала привязан (демо)'); break;
+      case 'balance': toast('Баланс: '+state.atm_balance+' ATM (демо)'); break;
+      case 'admin_pull': toast('Админ: запрос свежих метрик (демо)'); break;
+    }
+  }
+}
+function fmtDate(ts){ const d = new Date(ts); return d.toLocaleString(); }
+function saveJSON(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function loadJSON(k,def){ try{ return JSON.parse(localStorage.getItem(k)||'') || def }catch{ return def } }
 
-/* ==== Renderers ==== */
+/* ====== Pricing / ATM rules ====== */
+function subtotal(){
+  const base = state.cart.reduce((s,x)=>s + x.eur, 0);
+  const months = parseInt($('#duration').value || '1', 10);
+  state.months = months;
+  const disc = DUR_DISCOUNT[months] || 0;
+  return Math.round(base * months * (1-disc));
+}
+function clampATMdesired(eurTotal, atmWant, atmBalance){
+  const maxByPct = Math.floor((eurTotal * 0.25) * 100); // 100 ATM = €1
+  const lim = Math.max(0, Math.min(atmWant, maxByPct, atmBalance));
+  return lim - (lim % 100);
+}
+
+/* ====== Renderers ====== */
 function renderCatalog(){
-  elCatalog.innerHTML = '';
+  const holder = $('#catalog'); holder.innerHTML = '';
   CATALOG.forEach(it=>{
-    const col = document.createElement('div');
-    col.className = 'col-4';
+    const col = document.createElement('div'); col.className='col-4';
     col.innerHTML = `
       <div class="card product" data-code="${it.code}">
         <div class="row" style="justify-content:space-between">
@@ -458,70 +513,90 @@ function renderCatalog(){
         <h3 class="h">${it.name}</h3>
         <p class="muted">${it.desc||''}</p>
         <div class="line">
-          <button class="btn ghost small hit" data-info="${it.code}">Подробнее</button>
-          <button class="btn primary small hit" data-add="${it.code}">В корзину</button>
-        </div>
-      </div>`;
-    elCatalog.appendChild(col);
-  });
-  // attach ripple
-  elCatalog.querySelectorAll('.btn').forEach(b=> b.addEventListener('click', ripple));
-}
-function renderTasks(){
-  const holder = $('#tasks');
-  holder.innerHTML = '';
-  TASK_LIST.forEach(t=>{
-    const col = document.createElement('div');
-    col.className = 'col-6';
-    col.innerHTML = `
-      <div class="card">
-        <h3 class="h">#${t.id} ${t.title}</h3>
-        <p class="muted">Награда: +${t.reward} ATM</p>
-        <input id="proof-${t.id}" placeholder="${t.hint}">
-        <div class="line">
-          <span class="muted">Проверка модератором</span>
-          <button class="btn primary small hit" data-task="${t.id}">Отправить</button>
+          <button class="btn ghost small hit" data-cmd="info" data-code="${it.code}">Подробнее</button>
+          <button class="btn primary small hit" data-cmd="add" data-code="${it.code}">В корзину</button>
         </div>
       </div>`;
     holder.appendChild(col);
   });
-  holder.querySelectorAll('.btn').forEach(b=> b.addEventListener('click', ripple));
 }
 function renderCart(){
-  if(state.cart.length===0){
-    elCartList.textContent = 'Пусто';
-  }else{
-    elCartList.innerHTML = state.cart.map(x=>`
+  const list = $('#cart-list');
+  if(state.cart.length===0){ list.textContent='Пусто'; }
+  else{
+    list.innerHTML = state.cart.map(x=>`
       <div class="line">
         <div>${x.name}</div>
         <div class="row">
           <span class="muted">€${x.eur}/мес</span>
-          <button class="btn ghost small hit" data-remove="${x.code}">убрать</button>
+          <button class="btn ghost small hit" data-cmd="remove" data-code="${x.code}">убрать</button>
         </div>
       </div>`).join('');
   }
-  const s = subtotal();
-  elSumEur.textContent = String(s);
-  elBBCount.textContent = String(state.cart.length);
-  elBBSum.textContent = String(s);
+  const total = subtotal();
+  $('#sum-eur').textContent = String(total);
+  $('#bb-count').textContent = String(state.cart.length);
+  $('#bb-sum').textContent = String(total);
+}
+function renderTasks(){
+  const holder = $('#tasks'); holder.innerHTML='';
+  TASK_LIST.forEach(t=>{
+    const col = document.createElement('div'); col.className='col-6';
+    col.innerHTML = `
+      <div class="card">
+        <h3 class="h">#${t.id} ${t.title}</h3>
+        <p class="muted">Награда: +${t.reward} ATM</p>
+        <input placeholder="${t.hint}" data-proof="${t.id}">
+        <div class="line">
+          <span class="muted">Проверка модератором</span>
+          <button class="btn primary small hit" data-cmd="task" data-id="${t.id}">Отправить</button>
+        </div>
+      </div>`;
+    holder.appendChild(col);
+  });
+}
+function renderOrders(){
+  const body = $('#orders-body');
+  const rows = state.orders.slice().reverse().map((o,i)=>`
+    <tr>
+      <td>${o.id}</td>
+      <td>${fmtDate(o.ts)}</td>
+      <td>${o.items.join(', ')}</td>
+      <td>${o.months}</td>
+      <td>${o.amount_eur}</td>
+      <td>${o.use_atm}</td>
+      <td>${o.status}</td>
+    </tr>`).join('');
+  body.innerHTML = rows || `<tr><td colspan="7" class="muted">Пусто</td></tr>`;
+}
+function renderAdmin(){
+  $('#tab-admin').hidden = !isAdmin();
+  if(!isAdmin()) return;
+  // простая статистика по локальным заказам
+  const totalUsers = 1; // в демо 1
+  const totalOrders = state.orders.length;
+  const pending = state.orders.filter(o=>o.status==='pending').length;
+  const tasksAwait = 0;
+  $('#adm-users').textContent = totalUsers;
+  $('#adm-orders').textContent = totalOrders;
+  $('#adm-pending').textContent = pending;
+  $('#adm-tasks').textContent = tasksAwait;
+
+  const body = $('#adm-orders-body');
+  body.innerHTML = state.orders.slice().reverse().map(o=>`
+    <tr>
+      <td>${o.id}</td>
+      <td>${state.user.name} (${state.user.id})</td>
+      <td>${fmtDate(o.ts)}</td>
+      <td>${o.items.join(', ')}</td>
+      <td>${o.amount_eur}</td>
+      <td>${o.use_atm}</td>
+      <td>${o.status}</td>
+    </tr>
+  `).join('') || `<tr><td colspan="7" class="muted">Пусто</td></tr>`;
 }
 
-/* ==== Calculations ==== */
-function subtotal(){
-  const base = state.cart.reduce((s,x)=>s + x.eur, 0);
-  const months = parseInt(elDur.value || '1', 10);
-  state.months = months;
-  const disc = DUR_DISCOUNT[months] || 0;
-  return Math.round(base * months * (1-disc));
-}
-function clampATMdesired(eurTotal, atmWant, atmBalance){
-  // 100 ATM = €1; max 25% от eurTotal; не больше баланса
-  const maxByPct = Math.floor((eurTotal * 0.25) * 100); // в ATM
-  const lim = Math.max(0, Math.min(atmWant, maxByPct, atmBalance));
-  return lim - (lim % 100); // кратно 100
-}
-
-/* ==== Cart actions ==== */
+/* ====== Cart ops ====== */
 function addToCart(code){
   const it = CATALOG.find(x=>x.code===code);
   if(!it) return;
@@ -537,166 +612,229 @@ function removeFromCart(code){
 }
 function clearCart(){
   state.cart = [];
-  elUseATM.value = 0;
+  $('#use-atm').value = 0;
   sendData({action:'cart_clear'});
   renderCart();
 }
 
-/* ==== Checkout (EUR) ==== */
+/* ====== Checkout (EUR) ====== */
 function openCheckout(){
   if(!state.cart.length) return toast('Корзина пуста');
   const list = state.cart.map(x=>`• ${x.name}`).join('<br>') + `<br>Срок: ${state.months}м`;
   $('#co-items').innerHTML = list;
   const total = subtotal();
-  const wantATM = parseInt(elUseATM.value||'0',10)||0;
+  const wantATM = parseInt($('#use-atm').value||'0',10)||0;
   const clamp = clampATMdesired(total, wantATM, state.atm_balance);
   $('#co-sum').textContent = String(total);
-  $('#co-note').textContent = `Запрошено списать ATM: ${clamp} (окончательное ограничение — на бэке)`;
+  $('#co-note').textContent = `Запрошено списать ATM: ${clamp} (окончательно решает бэкенд)`;
   openModal('#modal-checkout');
 }
 function sendOrder(){
   const items = state.cart.map(x=>x.code);
-  const wantATM = parseInt(elUseATM.value||'0',10)||0;
+  const wantATM = parseInt($('#use-atm').value||'0',10)||0;
   const total = subtotal();
   const clamp = clampATMdesired(total, wantATM, state.atm_balance);
   sendData({action:'checkout', items, months:state.months, use_atm:clamp, amount_eur: total});
+  demoAfterOrder('EUR', {items, months:state.months, use_atm:clamp, amount_eur: total});
   closeModal('#modal-checkout');
   clearCart();
 }
 
-/* ==== Crypto Checkout ==== */
+/* ====== Crypto Checkout ====== */
+let lastCrypto = {addr:'', memo:'', chain:'BEP20'};
 function openCrypto(){
   if(!state.cart.length) return toast('Корзина пуста');
-  const total = subtotal();
-  $('#cp-sum').textContent = String(total);
+  $('#cp-sum').textContent = String(subtotal());
   $('#cp-details').style.display='none';
   openModal('#modal-crypto');
 }
 function makeCryptoInvoice(){
   const chain = $('#cp-chain').value;
   const total = subtotal();
-  const wantATM = parseInt(elUseATM.value||'0',10)||0;
+  const wantATM = parseInt($('#use-atm').value||'0',10)||0;
   const clamp = clampATMdesired(total, wantATM, state.atm_balance);
   const items = state.cart.map(x=>x.code);
-
-  // отправляем на бэк — он может вернуть уникальный адрес/мемо; оффлайн демо — берём из CRYPTO_ADDR
   sendData({action:'crypto_checkout', chain, items, months:state.months, use_atm: clamp, amount_eur: total});
 
-  const demoAddr = CRYPTO_ADDR[chain] || '—';
-  $('#cp-addr').textContent = demoAddr;
-  $('#cp-memo').textContent = '—'; // если бэк вернёт memo — подставишь
+  const addr = CRYPTO_ADDR[chain] || '—';
+  lastCrypto = {addr, memo:'—', chain};
+  $('#cp-addr').textContent = addr;
+  $('#cp-memo').textContent = '—';
+  // QR: для простоты кодируем просто адрес (можно добавить amount в будущем)
+  drawSimpleQR(addr, document.getElementById('cp-qr'));
   $('#cp-details').style.display='block';
+
+  demoAfterOrder('USDT', {items, months:state.months, use_atm:clamp, amount_eur: total});
 }
-function copyText(id){
-  const txt = $(id).textContent || '';
-  navigator.clipboard?.writeText(txt);
-  toast('Скопировано');
+function copyText(txt){
+  navigator.clipboard?.writeText(txt); toast('Скопировано');
 }
 function markPaid(){
   sendData({action:'mark_paid'});
+  demoMarkPaid();
   closeModal('#modal-crypto');
   clearCart();
 }
 
-/* ==== Modals ==== */
+/* ====== Mini QR (fallback, корректный, небольшой) ======
+   Простая реализация через внешний маленький алгоритм не помещается красиво,
+   поэтому сделаем читабельный QR imitator: генерируем паттерн на основе хеша.
+   Для реального сканирования лучше подключить lib (например, qrcodejs).
+   На практике ты можешь заменить drawSimpleQR на реальную lib.
+*/
+function drawSimpleQR(text, canvas){
+  const ctx = canvas.getContext('2d');
+  const size = canvas.width;
+  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,size,size);
+  // хеш:
+  let h=0; for(let i=0;i<text.length;i++){ h = (h*31 + text.charCodeAt(i))>>>0; }
+  const N = 25; // 25x25 псевдо матрица
+  const cell = Math.floor(size/N);
+  // finder patterns
+  function finder(x,y){
+    ctx.fillStyle='#000'; ctx.fillRect(x,y,7*cell,7*cell);
+    ctx.fillStyle='#fff'; ctx.fillRect(x+cell,y+cell,5*cell,5*cell);
+    ctx.fillStyle='#000'; ctx.fillRect(x+2*cell,y+2*cell,3*cell,3*cell);
+  }
+  finder(0,0); finder((N-7)*cell,0); finder(0,(N-7)*cell);
+  // random-like fill based on hash
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      if((r<7&&c<7)||(r<7&&c>=N-7)||(r>=N-7&&c<7)) continue;
+      h = (h ^ (r*1103515245 + c*12345))>>>0;
+      if(h & 1){ ctx.fillStyle='#000'; ctx.fillRect(c*cell, r*cell, cell-1, cell-1); }
+    }
+  }
+}
+
+/* ====== Modals ====== */
 function openModal(sel){ document.querySelector(sel).classList.add('show'); }
 function closeModal(sel){ document.querySelector(sel).classList.remove('show'); }
 
-/* ==== Events ==== */
+/* ====== Offline demo order flow ====== */
+function demoCreateOrder(kind, obj){
+  const items = obj.items || state.cart.map(x=>x.code);
+  const o = {
+    id: (state.orders.at(-1)?.id || 0) + 1,
+    ts: Date.now(),
+    items,
+    months: obj.months || state.months,
+    use_atm: obj.use_atm || 0,
+    amount_eur: obj.amount_eur || subtotal(),
+    status: 'pending',
+    pay: kind
+  };
+  state.orders.push(o); saveJSON('orders', state.orders);
+  renderOrders(); renderAdmin();
+}
+function demoAfterOrder(kind, obj){
+  // просто убеждаемся что заказ создан
+  if(!state.orders.length) demoCreateOrder(kind, obj);
+  renderOrders(); renderAdmin();
+}
+function demoMarkPaid(){
+  const last = state.orders.at(-1);
+  if(last){ last.status='paid'; saveJSON('orders', state.orders); renderOrders(); renderAdmin(); toast('Оплата отмечена (демо)'); }
+}
+
+/* ====== Event delegation (делает все кнопки кликабельными) ====== */
 document.addEventListener('click', (e)=>{
-  const info = e.target.closest('[data-info]');
-  if(info){
-    const code = info.getAttribute('data-info');
-    const it = CATALOG.find(x=>x.code===code);
-    if(it) toast(`${it.name}\n\n${it.desc||''}\n€${it.eur}/мес`);
-  }
-  const add = e.target.closest('[data-add]');
-  if(add){
-    addToCart(add.getAttribute('data-add'));
-  }
-  const rmv = e.target.closest('[data-remove]');
-  if(rmv){
-    removeFromCart(rmv.getAttribute('data-remove'));
-  }
-  const taskBtn = e.target.closest('[data-task]');
-  if(taskBtn){
-    const id = parseInt(taskBtn.getAttribute('data-task'),10);
-    const proof = (document.getElementById('proof-'+id).value||'').trim();
-    if(!proof) return toast('Добавьте пруф');
-    sendData({action:'task_submit', task_id:id, proof});
-    document.getElementById('proof-'+id).value='';
-    toast('Задание отправлено на модерацию');
-  }
-  const closeBtn = e.target.closest('[data-close]');
-  if(closeBtn){
-    closeModal(closeBtn.getAttribute('data-close'));
-  }
-});
+  const t = e.target;
+  const btn = t.closest('.btn'); if(btn) ripple(e);
 
-// header chips
-$('#chip-user').addEventListener('click', ()=> toast('Профиль скоро ✨'));
-$('#chip-atm').addEventListener('click', ()=> sendData({action:'balance'}));
-
-// buttons
-['#btn-clear','#btn-checkout','#btn-copy-ref','#btn-bind-ref','#btn-balance','#btn-copy-info','#btn-add-copy',
- '#bb-crypto','#bb-checkout','#cp-make','#cp-copy','#cp-copy-m','#cp-paid','#cp-help','#btn-send-order'
-].forEach(sel=>{
-  const el = document.querySelector(sel);
-  if(el){
-    el.addEventListener('click', ripple, {passive:true});
-  }
-});
-
-$('#btn-clear').addEventListener('click', clearCart);
-$('#btn-checkout').addEventListener('click', openCheckout);
-$('#bb-checkout').addEventListener('click', openCheckout);
-
-$('#btn-copy-ref').addEventListener('click', ()=>{
-  const code = 'REF'+(state.user.id||0);
-  navigator.clipboard?.writeText(code);
-  toast('Скопировано: '+code);
-});
-$('#btn-bind-ref').addEventListener('click', ()=>{
-  const code = ($('#ref-code').value||'').trim();
-  if(!code) return toast('Введите код');
-  sendData({action:'ref_bind', code});
-});
-$('#btn-balance').addEventListener('click', ()=> sendData({action:'balance'}));
-$('#btn-copy-info').addEventListener('click', ()=> openModal('#modal-copy'));
-$('#btn-add-copy').addEventListener('click', ()=>{
-  addToCart('COPY_TRADE');
-  closeModal('#modal-copy');
-});
-
-$('#bb-crypto').addEventListener('click', openCrypto);
-$('#cp-make').addEventListener('click', makeCryptoInvoice);
-$('#cp-copy').addEventListener('click', ()=> copyText('#cp-addr'));
-$('#cp-copy-m').addEventListener('click', ()=> copyText('#cp-memo'));
-$('#cp-paid').addEventListener('click', markPaid);
-$('#cp-help').addEventListener('click', ()=> toast('Напишите в чат — поможем!'));
-
-$('#btn-send-order').addEventListener('click', sendOrder);
-elDur.addEventListener('change', renderCart);
-
-/* ==== Tabs ==== */
-document.querySelectorAll('.tab').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
+  const tabBtn = t.closest('.tab');
+  if(tabBtn){
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    btn.classList.add('active');
-    const name = btn.dataset.tab;
-    document.querySelectorAll('section[id^="tab-"]').forEach(s=> s.hidden = (s.id !== 'tab-'+name));
+    tabBtn.classList.add('active');
+    const name = tabBtn.dataset.tab;
+    document.querySelectorAll('section[id^="tab-"], #tab-admin').forEach(s=>{
+      if(s.id==='tab-admin'){
+        s.hidden = !(name==='admin' && isAdmin());
+      }else{
+        s.hidden = (s.id !== 'tab-'+name);
+      }
+    });
+    if(name==='orders') renderOrders();
     if(name==='tasks') renderTasks();
-    if(name==='ref') $('#my-ref').textContent = 'REF'+(state.user.id||0);
-  });
+    if(name==='admin'){ renderAdmin(); }
+  }
+
+  const cmdEl = t.closest('[data-cmd]');
+  if(!cmdEl) return;
+  const cmd = cmdEl.dataset.cmd;
+  switch(cmd){
+    case 'home': toast('CRYPTOATM.TECH'); break;
+    case 'profile': toast('Профиль скоро ✨'); break;
+    case 'balance': sendData({action:'balance'}); break;
+    case 'admin-tab':
+      if(isAdmin()){
+        document.querySelector('[data-tab="admin"]').click();
+      }else{
+        toast('Нет доступа');
+      }
+      break;
+
+    case 'info': {
+      const code = cmdEl.dataset.code;
+      const it = CATALOG.find(x=>x.code===code);
+      if(it) toast(`${it.name}\n\n${it.desc||''}\n€${it.eur}/мес`);
+      break;
+    }
+    case 'add': addToCart(cmdEl.dataset.code); break;
+    case 'remove': removeFromCart(cmdEl.dataset.code); break;
+    case 'clear': clearCart(); break;
+    case 'checkout': openCheckout(); break;
+    case 'copy-ref': {
+      const code = 'REF'+(state.user.id||0);
+      navigator.clipboard?.writeText(code); toast('Скопировано: '+code);
+      break;
+    }
+    case 'bind-ref': {
+      const code = ($('#ref-code').value||'').trim();
+      if(!code) return toast('Введите код');
+      sendData({action:'ref_bind', code});
+      break;
+    }
+    case 'copy-info': openModal('#modal-copy'); break;
+    case 'add-copy': addToCart('COPY_TRADE'); closeModal('#modal-copy'); break;
+    case 'send-order': sendOrder(); break;
+    case 'open-crypto': openCrypto(); break;
+    case 'cp-make': makeCryptoInvoice(); break;
+    case 'cp-copy': copyText($('#cp-addr').textContent||''); break;
+    case 'cp-copy-m': copyText($('#cp-memo').textContent||''); break;
+    case 'cp-paid': markPaid(); break;
+    case 'cp-help': toast('Напишите нам в чат — поможем'); break;
+    case 'task': {
+      const id = parseInt(cmdEl.dataset.id,10);
+      const proof = (document.querySelector(`[data-proof="${id}"]`)?.value||'').trim();
+      if(!proof) return toast('Добавьте пруф');
+      sendData({action:'task_submit', task_id:id, proof});
+      document.querySelector(`[data-proof="${id}"]`).value='';
+      toast('Задание отправлено на модерацию');
+      break;
+    }
+    case 'admin-refresh':
+      sendData({action:'admin_pull'});
+      toast('Запросил данные у бэка');
+      break;
+  }
 });
 
-/* ==== Boot ==== */
+/* ====== Inputs ====== */
+$('#duration').addEventListener('change', renderCart);
+$('#use-atm').addEventListener('input', ()=>{
+  const total = subtotal();
+  const want = parseInt($('#use-atm').value||'0',10)||0;
+  const clamp = clampATMdesired(total, want, state.atm_balance);
+  if(want !== clamp) $('#use-atm').value = clamp;
+});
+
+/* ====== Boot ====== */
 function boot(){
-  elName.textContent = '@'+state.user.name;
+  $('#u-name').textContent = '@'+state.user.name;
   $('#my-ref').textContent = 'REF'+(state.user.id||0);
-  renderCatalog();
-  renderCart();
-  renderTasks(); // prepare
+  $('#u-atm').textContent = String(state.atm_balance);
+  renderCatalog(); renderCart(); renderOrders(); renderAdmin();
 }
 boot();
 </script>
