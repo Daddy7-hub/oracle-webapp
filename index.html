@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>CryptoATM.tech — Mini App</title>
 <meta name="theme-color" content="#0a0a0c">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -12,6 +12,7 @@
     --gold:#e7c96e; --gold-2:#b79242; --ink:#0a0a0c;
     --ok:#2bd182; --warn:#ffb84d; --danger:#ff6a88;
     --b1:1px solid rgba(255,255,255,.08); --r:20px; --r2:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    --bb-safe: calc(env(safe-area-inset-bottom,0px) + 10px);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -22,9 +23,10 @@
       radial-gradient(700px 500px at -10% 10%, rgba(183,146,66,.08), transparent),
       var(--bg);
     color:var(--txt);
-    font:14px/1.6 Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    font:16px/1.5 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
   }
-  .wrap{max-width:1180px;margin:0 auto;padding:16px 14px 96px}
+  .wrap{max-width:1180px;margin:0 auto;padding:16px 14px calc(96px + var(--bb-safe))}
   header{
     position:sticky; top:0; z-index:20;
     display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -34,83 +36,85 @@
     box-shadow:var(--shadow);
     backdrop-filter:saturate(120%) blur(4px);
   }
-  .brand{display:flex;gap:12px;align-items:center}
+  .brand{display:flex;gap:12px;align-items:center;min-width:0}
   .logo{
-    width:48px;height:48px;border-radius:12px;
+    width:44px;height:44px;border-radius:12px;flex:0 0 auto;
     background:
       radial-gradient(110% 80% at 30% 20%, #fff8d0 0%, #e7c96e 28%, rgba(231,201,110,.2) 55%, transparent 65%),
       conic-gradient(from 230deg, #2b2210, #e7c96e, #b79242, #2b2210);
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.15), 0 2px 18px rgba(231,201,110,.25);
   }
-  .wordmark{display:flex;flex-direction:column;gap:2px}
+  .wordmark{display:flex;flex-direction:column;gap:2px;min-width:0}
   .wordmark .name{
-    margin:0;font-weight:900;letter-spacing:.3px;line-height:1.1;font-size:20px;
+    margin:0;font-weight:900;letter-spacing:.3px;line-height:1.1;font-size:clamp(18px,3.8vw,22px);
     background:linear-gradient(180deg,#fff7cf,#e7c96e,#b79242);
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .wordmark .tagline{margin:0;color:var(--muted);font-size:12px}
-  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .wordmark .tagline{margin:0;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chips{display:flex;gap:8px;flex-wrap:nowrap;overflow:auto;padding-bottom:2px}
+  .chips::-webkit-scrollbar{display:none}
   .chip{
-    display:inline-flex;gap:8px;align-items:center;min-height:36px;
-    padding:8px 12px;border-radius:999px;background:#0f1014;border:var(--b1)
+    display:inline-flex;gap:8px;align-items:center;min-height:44px;
+    padding:8px 12px;border-radius:999px;background:#0f1014;border:var(--b1);flex:0 0 auto
   }
   .chip.clickable{cursor:pointer;transition:transform .06s ease, box-shadow .2s ease}
-  .chip.clickable:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(231,201,110,.16)}
+  .chip.clickable:active{transform:scale(.98)}
   .btn{
     appearance:none;border:0;border-radius:14px;padding:12px 14px;
     font-weight:900;cursor:pointer;transition:transform .04s ease, box-shadow .2s ease, filter .2s ease;
-    position:relative; overflow:hidden; touch-action:manipulation; user-select:none;
+    position:relative; overflow:hidden; touch-action:manipulation; user-select:none; min-height:44px;
+    font-size:16px; line-height:1;
   }
   .btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold-2));color:var(--ink);box-shadow:0 6px 18px rgba(231,201,110,.26)}
-  .btn.primary:hover{filter:brightness(1.02)}
   .btn.ghost{background:transparent;border:1px dashed rgba(231,201,110,.55);color:var(--txt)}
-  .btn.small{padding:9px 12px;border-radius:12px}
+  .btn.small{padding:10px 12px;border-radius:12px;min-height:44px}
   .btn:active{transform:translateY(1px) scale(.99)}
   .btn:focus-visible{outline:none; box-shadow:0 0 0 3px rgba(231,201,110,.35)}
   .btn .ripple{position:absolute;border-radius:50%;transform:scale(0);animation:ripple .6s linear;background:rgba(255,255,255,.35);mix-blend-mode:overlay}
   @keyframes ripple{to{transform:scale(4);opacity:0}}
-  .tabs{display:flex;gap:8px;margin:14px 0 16px;flex-wrap:wrap}
+
+  .tabs{display:flex;gap:8px;margin:14px 0 16px;overflow:auto;scroll-snap-type:x mandatory}
+  .tabs::-webkit-scrollbar{display:none}
   .tab{
     border:var(--b1);border-radius:12px;background:#0f1014;color:var(--txt);
-    padding:10px 12px;font-weight:900;cursor:pointer;transition:box-shadow .2s ease, transform .06s ease
+    padding:10px 12px;font-weight:900;cursor:pointer;flex:0 0 auto;min-height:44px;
+    scroll-snap-align:start
   }
-  .tab:hover{transform:translateY(-1px); box-shadow:0 8px 18px rgba(231,201,110,.08)}
   .tab.active{background:linear-gradient(135deg,rgba(231,201,110,.25),rgba(255,255,255,.06))}
   .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-  .col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
-  @media(max-width:1140px){.col-8,.col-6,.col-4,.col-3{grid-column:span 12}}
-  .card{background:var(--card);border:var(--b1);border-radius:22px;padding:14px;box-shadow:var(--shadow)}
+  /* mobile-first колонки */
+  .col-12{grid-column:span 12}.col-6{grid-column:span 12}.col-4{grid-column:span 12}.col-3{grid-column:span 12}
+  @media(min-width:421px){.col-6{grid-column:span 6}.col-4{grid-column:span 6}}
+  @media(min-width:900px){.col-4{grid-column:span 4}.col-3{grid-column:span 3}}
+  .card{background:var(--card);border:var(--b1);border-radius:22px;padding:14px;box-shadow:var(--shadow);min-width:0}
   .h{margin:0 0 8px}
   .muted{color:var(--muted)}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .line{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.12);padding-top:10px;margin-top:10px}
+  .line{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.12);padding-top:10px;margin-top:10px;gap:10px}
   input,select,textarea{
     width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-    background:#0f1014;color:var(--txt);outline:none;font-weight:600
+    background:#0f1014;color:var(--txt);outline:none;font-weight:600;min-height:44px;font-size:16px
   }
   textarea{min-height:96px;resize:vertical}
-  .price{font-weight:900;color:#f1d58a}
-  .kpi{display:flex;gap:10px;flex-wrap:wrap}
-  .kpi .chip{background:linear-gradient(180deg,rgba(231,201,110,.10),rgba(255,255,255,.03))}
-  .note{background:rgba(231,201,110,.12);border:1px solid rgba(231,201,110,.35);border-radius:12px;padding:10px;color:#f7eac5}
-  .ok{background:rgba(43,209,130,.12);border:1px solid rgba(43,209,130,.35);border-radius:12px;padding:10px;color:#d8ffe9}
-  .danger{background:rgba(255,106,136,.12);border:1px solid rgba(255,106,136,.35);border-radius:12px;padding:10px;color:#ffdbe4}
+  .price{font-weight:900;color:#f1d58a;white-space:nowrap}
   .pill{display:inline-flex;align-items:center;gap:8px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);border:var(--b1);font-size:12px}
-  .product{display:flex;flex-direction:column;gap:8px}
+  .product{display:flex;flex-direction:column;gap:8px;min-width:0}
+  .product h3{word-wrap:break-word;overflow-wrap:anywhere;margin:0}
   .u-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);margin:6px 0}
-  .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:linear-gradient(180deg, rgba(10,10,12,0), rgba(10,10,12,.9));padding:10px 14px}
+  .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:linear-gradient(180deg, rgba(10,10,12,0), rgba(10,10,12,.96));padding:10px 14px var(--bb-safe)}
   .bb-inner{max-width:1180px;margin:0 auto;background:#0f1014;border:var(--b1);border-radius:16px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .bb-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .bb-left .price{font-size:16px}
+  .bb-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:0}
+  .bb-left .chip{min-height:36px}
   .modal{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:saturate(70%) blur(3px);z-index:50}
   .modal.show{display:flex}
-  .sheet{background:#0d0e12;border:var(--b1);border-radius:20px 20px 0 0;max-width:980px;width:100%;padding:14px}
+  .sheet{background:#0d0e12;border:var(--b1);border-radius:20px 20px 0 0;max-width:980px;width:100%;padding:14px;max-height:calc(100vh - 40px);overflow:auto}
   .sheet h3{margin:0 0 6px}
-  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0e0f13;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;z-index:60;font-weight:800}
-  .toast.show{display:block;animation:fade 2.3s ease}
+  .toast{position:fixed;left:50%;bottom:calc(14px + var(--bb-safe));transform:translateX(-50%);background:#0e0f13;border:1px solid rgba(255,255,255,.12);color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;z-index:60;font-weight:800}
+  .toast.show{display:block;animation:fade 2.1s ease}
   @keyframes fade{0%{opacity:0;transform:translateX(-50%) translateY(6px)}10%{opacity:1;transform:translateX(-50%) translateY(0)}85%{opacity:1}100%{opacity:0}}
   .table{width:100%;border-collapse:collapse}
-  .table th,.table td{border-top:1px dashed rgba(255,255,255,.12);padding:8px 6px;text-align:left}
+  .table th,.table td{border-top:1px dashed rgba(255,255,255,.12);padding:8px 6px;text-align:left;vertical-align:top}
   .hit{min-height:44px;min-width:44px}
   canvas{image-rendering:pixelated}
 </style>
@@ -144,14 +148,14 @@
   <!-- SHOP -->
   <section id="tab-shop" class="grid">
     <div class="col-12 card">
-      <div class="row" style="justify-content:space-between">
-        <div>
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div style="min-width:0">
           <h3 class="h">Оформление подписки</h3>
-          <p class="muted">Добавляйте ботов/пакеты. Срок 1/3/6 мес (−0/10/20%). ATM можно списать до 25% (100 ATM = €1).</p>
+          <p class="muted" style="margin:0">Добавляйте ботов/пакеты. Срок 1/3/6 мес (−0/10/20%). ATM можно списать до 25% (100 ATM = €1).</p>
         </div>
-        <div class="row">
+        <div class="row" style="flex:0 0 auto">
           <label class="chip">Срок:
-            <select id="duration" style="margin-left:8px">
+            <select id="duration" style="margin-left:8px; width:auto">
               <option value="1">1 месяц</option>
               <option value="3">3 месяца (−10%)</option>
               <option value="6">6 месяцев (−20%)</option>
@@ -164,24 +168,24 @@
     <div id="catalog" class="col-12 grid"></div>
 
     <div class="col-12 card">
-      <div class="row" style="justify-content:space-between">
-        <h3 class="h">Корзина</h3>
-        <div class="row">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h3 class="h" style="margin:0">Корзина</h3>
+        <div class="row" style="flex:0 0 auto">
           <button class="btn ghost small hit" data-cmd="clear">Очистить</button>
           <button class="btn primary small hit" data-cmd="checkout">Оформить</button>
         </div>
       </div>
       <div id="cart-list" class="muted">Пусто</div>
       <div class="line">
-        <div class="kpi">
+        <div class="row" style="min-width:0">
           <div class="chip">Сумма: <span class="price">€<b id="sum-eur">0</b></span></div>
           <div class="chip">Списать ATM:
             <input id="use-atm" type="number" min="0" step="100" value="0" style="width:140px;margin-left:8px">
           </div>
           <div class="chip">Лимит: <b>до 25%</b></div>
         </div>
-        <div class="row">
-          <span class="muted">Copy-Trading: €50/мес + % от прибыли.</span>
+        <div class="row" style="flex:0 0 auto">
+          <span class="muted" style="white-space:nowrap">Copy-Trading: €50/мес + %</span>
           <button class="btn ghost small hit" data-cmd="copy-info">Подробнее</button>
         </div>
       </div>
@@ -220,7 +224,7 @@
     <div class="col-12 card">
       <h3 class="h">Задания за ATM-баллы</h3>
       <div id="tasks" class="grid"></div>
-      <div class="note" style="margin-top:10px">ATM-баллами можно покрыть до 25% от суммы заказа (100 ATM = €1).</div>
+      <div class="muted" style="margin-top:10px">ATM-баллами можно покрыть до 25% от суммы заказа (100 ATM = €1).</div>
     </div>
   </section>
 
@@ -241,7 +245,7 @@
   <section id="tab-admin" class="grid" hidden>
     <div class="col-12 card">
       <h3 class="h">Админ-панель</h3>
-      <div class="kpi">
+      <div class="row">
         <div class="chip">Пользователей: <b id="adm-users">—</b></div>
         <div class="chip">Заказов: <b id="adm-orders">—</b></div>
         <div class="chip">Ожидают оплату: <b id="adm-pending">—</b></div>
@@ -270,7 +274,7 @@
       <div class="chip">Позиций: <b id="bb-count">0</b></div>
       <div class="chip">Итого: <span class="price">€<b id="bb-sum">0</b></span></div>
     </div>
-    <div class="row">
+    <div class="row" style="flex:0 0 auto">
       <button class="btn ghost small hit" data-cmd="open-crypto">Оплатить криптой</button>
       <button class="btn primary small hit" data-cmd="checkout">Оформить</button>
     </div>
@@ -289,7 +293,7 @@
     <div class="line">
       <div>
         К оплате: <span class="price">€<b id="co-sum">0</b></span>
-        <div class="muted" id="co-note">Списать ATM: 0 (бэкенд ограничит максимум 25% и по балансу)</div>
+        <div class="muted" id="co-note">Списать ATM: 0 (лимит 25% применит бэкенд)</div>
       </div>
       <div class="row">
         <button class="btn primary hit" data-cmd="send-order">Подтвердить</button>
@@ -307,7 +311,7 @@
     </div>
     <div class="row">
       <label class="chip">Сеть:
-        <select id="cp-chain" style="margin-left:8px">
+        <select id="cp-chain" style="margin-left:8px; width:auto">
           <option value="TRC20">TRC20 (Tron)</option>
           <option value="BEP20">BEP20 (BSC)</option>
           <option value="ERC20">ERC20 (Ethereum)</option>
@@ -315,7 +319,7 @@
       </label>
       <label class="chip">Сумма к оплате: <span class="price">€<b id="cp-sum">0</b></span></label>
     </div>
-    <div class="note" style="margin-top:8px">
+    <div class="muted" style="margin:8px 0">
       Нажмите «Сгенерировать счёт» — получите адрес. Переведите точную сумму USDT. Комиссия сети на стороне отправителя.
     </div>
     <div class="line">
@@ -324,23 +328,23 @@
     </div>
 
     <div id="cp-details" style="display:none;margin-top:12px">
-      <div class="ok" style="margin-bottom:10px">Счёт создан. Оплатите в течение 60 минут и нажмите «Я оплатил(а)».</div>
+      <div class="chip" style="background:rgba(43,209,130,.12);border:1px solid rgba(43,209,130,.35)">Счёт создан. Оплатите в течение 60 минут и нажмите «Я оплатил(а)».</div>
       <div class="grid">
         <div class="col-12 card" style="background:#0f1014">
           <div class="row" style="justify-content:space-between;align-items:center">
-            <div>
+            <div style="min-width:0">
               <div class="muted">Адрес для оплаты</div>
               <div style="word-break:break-all;font-weight:800" id="cp-addr">—</div>
             </div>
             <button class="btn ghost small hit" data-cmd="cp-copy">Копировать</button>
           </div>
           <div class="u-divider"></div>
-          <div class="row" style="justify-content:space-between;align-items:center">
+          <div class="row" style="justify-content:space-between;align-items:center;gap:16px">
             <div>
               <div class="muted">QR-код</div>
-              <canvas id="cp-qr" width="180" height="180"></canvas>
+              <canvas id="cp-qr" width="180" height="180" style="background:#fff;border-radius:8px"></canvas>
             </div>
-            <div>
+            <div style="min-width:0">
               <div class="muted">Memo / Комментарий (если требуется)</div>
               <div style="word-break:break-all" id="cp-memo">—</div>
               <button class="btn ghost small hit" data-cmd="cp-copy-m" style="margin-top:6px">Копировать Memo</button>
@@ -350,7 +354,7 @@
       </div>
       <div class="line">
         <div class="muted">Отправили USDT по реквизитам?</div>
-        <div class="row">
+        <div class="row" style="flex:0 0 auto">
           <button class="btn ghost small hit" data-cmd="cp-help">Нужна помощь</button>
           <button class="btn primary small hit" data-cmd="cp-paid">Я оплатил(а)</button>
         </div>
@@ -366,7 +370,7 @@
       <h3>Copy-Trading</h3>
       <button class="btn ghost small hit" data-close="#modal-copy">Закрыть</button>
     </div>
-    <div class="note" style="margin:8px 0">
+    <div class="muted" style="margin:8px 0">
       €50/мес + % от прибыли. После оформления менеджер свяжется с вами в Telegram для подтверждения условий и подключения.
     </div>
     <div class="line">
@@ -383,37 +387,17 @@
 const tg = window.Telegram?.WebApp || null;
 if(tg){ tg.expand(); }
 
-const ADMIN_IDS = [568646738]; // сюда твой Telegram numeric ID
+const ADMIN_IDS = [568646738];
 const urlParams = new URLSearchParams(location.search);
 const isDemoAdmin = urlParams.get('admin')==='1';
-
 function isAdmin(){
   const uid = tg?.initDataUnsafe?.user?.id || 0;
   return ADMIN_IDS.includes(uid) || isDemoAdmin;
 }
 
-/* ====== Small QR generator (minimal) ======
-   MIT-based mini QR encoder (alphanumeric) for our addresses.
-   For production, можно заменить на полноценную lib, но этого достаточно для адресов. */
-function drawQR(text, canvas, scale = 4){
-  // simple library-free: use a prebuilt tiny qrcode impl (alnum capable)
-  // For brevity: we fallback to a placeholder if generation fails.
-  try{
-    // Very tiny approach: use an offscreen canvas + built-in path (NOT a real QR)
-    // Replace with real lib as needed. We'll import a compact QR algorithm:
-    // BEGIN tiny-qr (https://github.com/kazuhikoarase/qrcode-generator) simplified, inlined …
-  }catch(e){
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = '#000';
-    ctx.fillText('QR', 10, 20);
-  }
-}
-
-/* ====== Catalog & Tasks (синхронизируй с бэком) ====== */
+/* ====== Catalog & Tasks ====== */
 const CATALOG = [
-  {type:'bot',  code:'CRYPTO_ATM_BOT', name:'Crypto ATM Bot', eur:71, desc:'BTC-аналитика, уровни и сигналы ⟶ ежедневно.'},
+  {type:'bot',  code:'CRYPTO_ATM_BOT', name:'Crypto ATM Bot', eur:71, desc:'BTC-аналитика, уровни и сигналы ежедневнo.'},
   {type:'bot',  code:'ALERTS_BOT',     name:'Alerts Bot',     eur:71, desc:'Киты, ликвидации, funding, OI, объёмы, уровни.'},
   {type:'bot',  code:'NEWS_BOT',       name:'News Bot',       eur:71, desc:'Дайджесты, тональность, фильтры, топ-3 и сводки.'},
   {type:'pack', code:'STANDARD',       name:'Standard (3)',   eur:150,desc:'Три бота по спец-цене.'},
@@ -431,7 +415,7 @@ const TASK_LIST = [
 const DUR_DISCOUNT = {1:0, 3:0.10, 6:0.20};
 const CRYPTO_ADDR = {
   TRC20: 'TJ_DEMO_TRON_ADDRESS_EDIT_ME',
-  BEP20: '0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c', // твой BSC адрес
+  BEP20: '0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c',
   ERC20: '0xEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeEEeE'
 };
 
@@ -444,14 +428,14 @@ const state = {
   cart: [],
   months: 1,
   atm_balance: 0,
-  orders: loadJSON('orders', []), // оффлайн история
+  orders: loadJSON('orders', []),
 };
 
 /* ====== Helpers ====== */
 const $ = s => document.querySelector(s);
 function toast(msg){
   const el = $('#toast'); el.textContent = String(msg);
-  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 2300);
+  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 2100);
 }
 function ripple(e){
   const btn = e.target.closest('.btn'); if(!btn) return;
@@ -463,27 +447,25 @@ function ripple(e){
   r.style.top  = (e.clientY - rect.top  - size/2)+'px';
   btn.appendChild(r); setTimeout(()=>r.remove(), 610);
 }
+function fmtDate(ts){ const d = new Date(ts); return d.toLocaleString(); }
+function saveJSON(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function loadJSON(k,def){ try{ return JSON.parse(localStorage.getItem(k)||'') || def }catch{ return def } }
 function sendData(obj){
   const payload = JSON.stringify(obj);
-  if(tg && typeof tg.sendData === 'function'){
-    tg.sendData(payload);
-  }else{
+  if(tg && typeof tg.sendData === 'function') tg.sendData(payload);
+  else {
     console.log('[offline send]', payload);
-    // имитации для демо
     switch(obj.action){
       case 'checkout': demoCreateOrder('EUR', obj); break;
       case 'crypto_checkout': demoCreateOrder('USDT', obj); break;
       case 'mark_paid': demoMarkPaid(); break;
-      case 'task_submit': toast('Задание отправлено на модерацию (демо)'); break;
+      case 'task_submit': toast('Задание отправлено (демо)'); break;
       case 'ref_bind': toast('Код реферала привязан (демо)'); break;
       case 'balance': toast('Баланс: '+state.atm_balance+' ATM (демо)'); break;
-      case 'admin_pull': toast('Админ: запрос свежих метрик (демо)'); break;
+      case 'admin_pull': toast('Админ: запрос метрик (демо)'); break;
     }
   }
 }
-function fmtDate(ts){ const d = new Date(ts); return d.toLocaleString(); }
-function saveJSON(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
-function loadJSON(k,def){ try{ return JSON.parse(localStorage.getItem(k)||'') || def }catch{ return def } }
 
 /* ====== Pricing / ATM rules ====== */
 function subtotal(){
@@ -506,12 +488,12 @@ function renderCatalog(){
     const col = document.createElement('div'); col.className='col-4';
     col.innerHTML = `
       <div class="card product" data-code="${it.code}">
-        <div class="row" style="justify-content:space-between">
+        <div class="row" style="justify-content:space-between;align-items:center">
           <div class="pill">${it.type==='bot'?'БОТ':it.type==='pack'?'ПАКЕТ':'СЕРВИС'}</div>
           <div class="price">€${it.eur}/мес</div>
         </div>
         <h3 class="h">${it.name}</h3>
-        <p class="muted">${it.desc||''}</p>
+        <p class="muted" style="margin:0">${it.desc||''}</p>
         <div class="line">
           <button class="btn ghost small hit" data-cmd="info" data-code="${it.code}">Подробнее</button>
           <button class="btn primary small hit" data-cmd="add" data-code="${it.code}">В корзину</button>
@@ -526,8 +508,8 @@ function renderCart(){
   else{
     list.innerHTML = state.cart.map(x=>`
       <div class="line">
-        <div>${x.name}</div>
-        <div class="row">
+        <div style="min-width:0;overflow:hidden;text-overflow:ellipsis">${x.name}</div>
+        <div class="row" style="flex:0 0 auto">
           <span class="muted">€${x.eur}/мес</span>
           <button class="btn ghost small hit" data-cmd="remove" data-code="${x.code}">убрать</button>
         </div>
@@ -545,7 +527,7 @@ function renderTasks(){
     col.innerHTML = `
       <div class="card">
         <h3 class="h">#${t.id} ${t.title}</h3>
-        <p class="muted">Награда: +${t.reward} ATM</p>
+        <p class="muted" style="margin:0 0 8px">Награда: +${t.reward} ATM</p>
         <input placeholder="${t.hint}" data-proof="${t.id}">
         <div class="line">
           <span class="muted">Проверка модератором</span>
@@ -557,7 +539,7 @@ function renderTasks(){
 }
 function renderOrders(){
   const body = $('#orders-body');
-  const rows = state.orders.slice().reverse().map((o,i)=>`
+  const rows = state.orders.slice().reverse().map((o)=>`
     <tr>
       <td>${o.id}</td>
       <td>${fmtDate(o.ts)}</td>
@@ -572,8 +554,7 @@ function renderOrders(){
 function renderAdmin(){
   $('#tab-admin').hidden = !isAdmin();
   if(!isAdmin()) return;
-  // простая статистика по локальным заказам
-  const totalUsers = 1; // в демо 1
+  const totalUsers = 1;
   const totalOrders = state.orders.length;
   const pending = state.orders.filter(o=>o.status==='pending').length;
   const tasksAwait = 0;
@@ -660,44 +641,30 @@ function makeCryptoInvoice(){
   lastCrypto = {addr, memo:'—', chain};
   $('#cp-addr').textContent = addr;
   $('#cp-memo').textContent = '—';
-  // QR: для простоты кодируем просто адрес (можно добавить amount в будущем)
   drawSimpleQR(addr, document.getElementById('cp-qr'));
   $('#cp-details').style.display='block';
 
   demoAfterOrder('USDT', {items, months:state.months, use_atm:clamp, amount_eur: total});
 }
-function copyText(txt){
-  navigator.clipboard?.writeText(txt); toast('Скопировано');
-}
+function copyText(txt){ navigator.clipboard?.writeText(txt); toast('Скопировано'); }
 function markPaid(){
   sendData({action:'mark_paid'});
   demoMarkPaid();
   closeModal('#modal-crypto');
   clearCart();
 }
-
-/* ====== Mini QR (fallback, корректный, небольшой) ======
-   Простая реализация через внешний маленький алгоритм не помещается красиво,
-   поэтому сделаем читабельный QR imitator: генерируем паттерн на основе хеша.
-   Для реального сканирования лучше подключить lib (например, qrcodejs).
-   На практике ты можешь заменить drawSimpleQR на реальную lib.
-*/
+/* простейший QR-имитатор (замени на lib при желании) */
 function drawSimpleQR(text, canvas){
-  const ctx = canvas.getContext('2d');
-  const size = canvas.width;
+  const ctx = canvas.getContext('2d'); const size = canvas.width;
   ctx.fillStyle = '#fff'; ctx.fillRect(0,0,size,size);
-  // хеш:
   let h=0; for(let i=0;i<text.length;i++){ h = (h*31 + text.charCodeAt(i))>>>0; }
-  const N = 25; // 25x25 псевдо матрица
-  const cell = Math.floor(size/N);
-  // finder patterns
+  const N = 25; const cell = Math.floor(size/N);
   function finder(x,y){
     ctx.fillStyle='#000'; ctx.fillRect(x,y,7*cell,7*cell);
     ctx.fillStyle='#fff'; ctx.fillRect(x+cell,y+cell,5*cell,5*cell);
     ctx.fillStyle='#000'; ctx.fillRect(x+2*cell,y+2*cell,3*cell,3*cell);
   }
   finder(0,0); finder((N-7)*cell,0); finder(0,(N-7)*cell);
-  // random-like fill based on hash
   for(let r=0;r<N;r++){
     for(let c=0;c<N;c++){
       if((r<7&&c<7)||(r<7&&c>=N-7)||(r>=N-7&&c<7)) continue;
@@ -728,7 +695,6 @@ function demoCreateOrder(kind, obj){
   renderOrders(); renderAdmin();
 }
 function demoAfterOrder(kind, obj){
-  // просто убеждаемся что заказ создан
   if(!state.orders.length) demoCreateOrder(kind, obj);
   renderOrders(); renderAdmin();
 }
@@ -737,7 +703,7 @@ function demoMarkPaid(){
   if(last){ last.status='paid'; saveJSON('orders', state.orders); renderOrders(); renderAdmin(); toast('Оплата отмечена (демо)'); }
 }
 
-/* ====== Event delegation (делает все кнопки кликабельными) ====== */
+/* ====== Event delegation ====== */
 document.addEventListener('click', (e)=>{
   const t = e.target;
   const btn = t.closest('.btn'); if(btn) ripple(e);
@@ -767,11 +733,8 @@ document.addEventListener('click', (e)=>{
     case 'profile': toast('Профиль скоро ✨'); break;
     case 'balance': sendData({action:'balance'}); break;
     case 'admin-tab':
-      if(isAdmin()){
-        document.querySelector('[data-tab="admin"]').click();
-      }else{
-        toast('Нет доступа');
-      }
+      if(isAdmin()){ document.querySelector('[data-tab="admin"]').click(); }
+      else{ toast('Нет доступа'); }
       break;
 
     case 'info': {
