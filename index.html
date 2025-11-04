@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CryptoATM Mini App</title>
 
-    <!-- React + ReactDOM (продовые UMD) -->
+    <!-- React + ReactDOM (UMD) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <!-- Babel для JSX в браузере (демо/статические страницы) -->
+    <!-- Babel для JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
   <body style="margin:0;background:#0a0b0e;color:#f1f5fb">
@@ -21,24 +21,25 @@ const { useEffect } = React;
 
 function CryptoATMMiniApp() {
   useEffect(() => {
-    const tg = (window && window.Telegram && window.Telegram.WebApp) || null;
+    const tg = (window?.Telegram && window.Telegram.WebApp) || null;
     try {
-      tg && tg.expand && tg.expand();
-      tg && tg.setHeaderColor && tg.setHeaderColor("#0a0b0e");
-      tg && tg.setBackgroundColor && tg.setBackgroundColor("#0a0b0e");
-    } catch (e) {}
+      tg?.expand?.();
+      tg?.setHeaderColor?.("#0a0b0e");
+      tg?.setBackgroundColor?.("#0a0b0e");
+    } catch {}
 
+    // ====== КОНФИГ ======
     const ADMIN_IDS = [568646738];
     const START_BONUS_ATM = 250;
-    const REF_BONUS_ATM = 200;
+    const REF_BONUS_ATM   = 200;
 
     const CATALOG = [
       { type: "bot", code: "CRYPTO_ATM", name: "Crypto ATM Bot", price: 71, desc: "BTC-аналитика, уровни, сигналы ежедневно." },
-      { type: "bot", code: "ALERTS", name: "Alerts Bot", price: 39, desc: "Реактивные алерты: киты, ликвидации, funding, OI, объёмы, уровни." },
-      { type: "bot", code: "NEWS", name: "News & Events Bot", price: 29, desc: "CoinMarketCal + RSS, перевод, фильтры, тональность, дайджест." },
-      { type: "pack", code: "PREMIUM", name: "Premium (все 3 бота)", price: 99, desc: "Все боты со скидкой." },
-      { type: "pack", code: "ENTERPRISE", name: "Enterprise", price: 199, desc: "Все боты + приоритет + консультации." },
-      { type: "service", code: "COPY", name: "Копитрейдинг", price: 50, desc: "€50/мес + % от прибыли. Управление риском, отчётность." },
+      { type: "bot", code: "ALERTS",     name: "Alerts Bot",     price: 39, desc: "Реактивные алерты: киты, ликвидации, funding, OI, объёмы, уровни." },
+      { type: "bot", code: "NEWS",       name: "News & Events Bot", price: 29, desc: "CoinMarketCal + RSS, перевод, фильтры, тональность, дайджест." },
+      { type: "pack", code: "PREMIUM",   name: "Premium (все 3 бота)", price: 99, desc: "Все боты со скидкой." },
+      { type: "pack", code: "ENTERPRISE",name: "Enterprise", price: 199, desc: "Все боты + приоритет + консультации." },
+      { type: "service", code: "COPY",   name: "Копитрейдинг", price: 50, desc: "€50/мес + % от прибыли. Управление риском, отчётность." },
     ];
     const CATALOG_LONG = {
       CRYPTO_ATM: { bullets: ["BTC-аналитика: уровни, зоны спроса/предложения, сценарии","Сигналы с вероятностями, комментарии к каждому алерту","Ежедневные обзоры + ключевые метрики (OI, funding, объемы)"] },
@@ -46,10 +47,9 @@ function CryptoATMMiniApp() {
       NEWS:       { bullets: ["CoinMarketCal + RSS: фильтры, автоперевод, тональность","Топ-3 за период, дайджест, теги и категории","Экспорт аналитики, умные ключевые слова"] },
       PREMIUM:    { bullets: ["Все 3 бота по сниженной цене","Один платеж — полный доступ"] },
       ENTERPRISE: { bullets: ["Приоритетная поддержка","Консультации и кастомные настройки"] },
-      COPY:       { bullets: ["€50/мес + % от прибыли","Прозрачная отчетность, риск-менеджмент"] },
+      COPY:       { bullets: ["€50/мес + % от прибыли","Прозрачная отчётность, риск-менеджмент"] },
     };
-
-    const PERIOD_DISCOUNT = { 1: 0, 3: 0.1, 6: 0.2 };
+    const PERIOD_DISCOUNT = { 1:0, 3:0.1, 6:0.2 };
 
     const PAY_ADDR_ADMIN = {
       BEP20: "0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c",
@@ -62,100 +62,135 @@ function CryptoATMMiniApp() {
       ERC20: "0x1111222233334444555566667777888899990000",
     };
 
-    const $  = (s) => document.querySelector(s);
-    const $$ = (s) => Array.from(document.querySelectorAll(s));
+    // ====== УТИЛЫ ======
+    const $  = (s)=>document.querySelector(s);
+    const $$ = (s)=>Array.from(document.querySelectorAll(s));
 
-    const DBKEY = "CATM_DB_v3";
+    const DBKEY = "CATM_DB_v4"; // bump
     const loadDB = () => {
-      try {
-        return JSON.parse(localStorage.getItem(DBKEY) || "null") || { users: {}, orders: [], tasks: [], disclaimerAccepted: {} };
-      } catch { return { users: {}, orders: [], tasks: [], disclaimerAccepted: {} }; }
+      try { return JSON.parse(localStorage.getItem(DBKEY) || "null") || { users:{}, orders:[], tasks:[], disclaimerAccepted:{} }; }
+      catch { return { users:{}, orders:[], tasks:[], disclaimerAccepted:{} }; }
     };
     const db = loadDB();
     const saveDB = () => localStorage.setItem(DBKEY, JSON.stringify(db));
 
-    const rawUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-    const CURRENT_USER = rawUser
-      ? { id: rawUser.id, username: rawUser.username || "user", name: (rawUser.first_name || "") + (rawUser.last_name ? " " + rawUser.last_name : "") }
-      : { id: 0, username: "guest", name: "Guest" };
+    // Dev-режим через URL (?uid=...&username=...&admin=1)
+    const qs = new URLSearchParams(location.search);
+    const DEV_UID = qs.get("uid");
+    const DEV_USERNAME = qs.get("username") || "guest";
+    const DEV_ADMIN = qs.get("admin")==="1";
 
+    const rawUser = tg?.initDataUnsafe?.user || (DEV_UID ? { id:Number(DEV_UID), username:DEV_USERNAME } : null);
+    const CURRENT_USER = rawUser
+      ? { id:rawUser.id, username: rawUser.username||"user", name:(rawUser.first_name||"") + (rawUser.last_name? " "+rawUser.last_name : "") }
+      : { id:0, username:"guest", name:"Guest" };
+
+    // создать юзера при первом заходе
     if (!db.users[CURRENT_USER.id]) {
       db.users[CURRENT_USER.id] = {
         id: CURRENT_USER.id, username: CURRENT_USER.username, created_at: new Date().toISOString(),
-        atm: START_BONUS_ATM, ref_code: "REF" + (CURRENT_USER.id || Math.floor(Math.random() * 1e6)),
+        atm: START_BONUS_ATM, ref_code: "REF" + (CURRENT_USER.id || Math.floor(Math.random()*1e6)),
         referred_by: null, orders: [], referrals: [], tasks: [], start_bonus_given: true,
       };
       saveDB();
     }
-    const user = () => db.users[CURRENT_USER.id];
+    // дать админку при dev=1
+    if (DEV_ADMIN && !ADMIN_IDS.includes(CURRENT_USER.id)) ADMIN_IDS.push(CURRENT_USER.id);
 
+    const user = ()=> db.users[CURRENT_USER.id];
+
+    // показать/скрыть кнопку админки
     const tabAdminBtn = $("#tab-admin-btn");
     if (tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
 
+    // ====== STATE ======
     const state = {
-      period: 1, atmDiscount: 0, cart: [],
-      pay: { chain: "BEP20", dest: "admin", addr: PAY_ADDR_ADMIN.BEP20, amount: 0, memo: "" },
+      period: 1,
+      atmDiscount: 0, // ввод с клавы, мгновенно
+      cart: [],
+      pay: { chain:"BEP20", dest:"admin", addr: PAY_ADDR_ADMIN.BEP20, amount:0, memo:"" },
     };
-    const setHash = (tab) => (location.hash = "#/" + tab);
-    const currentTab = () => location.hash.replace("#/", "") || "shop";
-    const applyBottomOffset = () => {
+
+    const setHash = (tab)=> (location.hash = "#/"+tab);
+    const currentTab = ()=> location.hash.replace("#/","") || "shop";
+    const applyBottomOffset = ()=>{
       const bar = $("#bottom-bar");
       if (!bar) return;
-      document.documentElement.style.setProperty("--bottom-h", Math.ceil(bar.getBoundingClientRect().height) + "px");
+      document.documentElement.style.setProperty("--bottom-h", Math.ceil(bar.getBoundingClientRect().height)+"px");
     };
 
-    const renderHeader = () => {
-      const chipName = $("#chip-name");
-      const chipAtm = $("#chip-atm");
-      const chipOrders = $("#chip-orders");
-      const refCode = $("#ref-code");
-      if (chipName) chipName.textContent = "@" + (CURRENT_USER.username || "guest");
-      if (chipAtm)  chipAtm.textContent  = String(user().atm);
-      if (chipOrders) chipOrders.textContent = String(user().orders.length);
-      if (refCode)  refCode.value = user().ref_code;
+    // ====== UI ======
+    const renderHeader = ()=>{
+      $("#chip-name") && ($("#chip-name").textContent = "@"+(CURRENT_USER.username||"guest"));
+      $("#chip-atm")  && ($("#chip-atm").textContent  = String(user().atm));
+      $("#chip-orders") && ($("#chip-orders").textContent = String(user().orders.length));
+      $("#ref-code") && ($("#ref-code").value = user().ref_code);
     };
 
-    const priceFor = (item, months) => {
+    const priceFor = (item, months)=>{
       const disc = PERIOD_DISCOUNT[months] || 0;
-      const perMonth = Math.round(item.price * (1 - disc));
-      return perMonth * months;
+      const perMonth = Math.round(item.price*(1-disc));
+      return perMonth*months;
     };
 
-    const updateCartUI = () => {
-      const eur = state.cart.reduce((s, x) => s + x.amount, 0);
-      const atmMax = Math.floor(eur * 0.25) * 100;
-      const wantATM = Math.min(state.atmDiscount || 0, atmMax, user().atm);
-      const eurMinus = Math.floor(wantATM / 100);
+    // ====== ВВОД ATM С КЛАВИАТУРЫ (мгновенно) ======
+    function clampATMInput(raw){
+      const val = Math.max(0, parseInt(String(raw).replace(/[^\d]/g,"")||"0",10));
+      const eur = state.cart.reduce((s, x)=> s + x.amount, 0);
+      const atmMax = Math.floor(eur*0.25)*100;     // 100 ATM = €1, лимит 25% корзины
+      const wallet = user().atm || 0;
+      return Math.min(val, atmMax, wallet);
+    }
+    function setATMDiscountImmediate(raw){
+      state.atmDiscount = clampATMInput(raw);
+      const atmEl = document.getElementById("atm-discount");
+      if (atmEl && String(atmEl.value)!==String(state.atmDiscount)) atmEl.value = String(state.atmDiscount);
+      updateCartUI();
+    }
+
+    const updateCartUI = ()=>{
+      const eur = state.cart.reduce((s,x)=> s+x.amount, 0);
+      const atmMax = Math.floor(eur*0.25)*100;
+      // state.atmDiscount уже зажат функцией clamp
+      const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
+      const eurMinus = Math.floor(wantATM/100);
       const finalEur = Math.max(0, eur - eurMinus);
-      const cartCount = $("#cart-count");
-      const cartTotalEur = $("#cart-total-eur");
-      const cartTotalAtm = $("#cart-total-atm");
-      const cartTotalFinal = $("#cart-total-final");
-      if (cartCount) cartCount.textContent = String(state.cart.length);
-      if (cartTotalEur) cartTotalEur.textContent = "€" + eur;
-      if (cartTotalAtm) cartTotalAtm.textContent = wantATM + " ATM";
-      if (cartTotalFinal) cartTotalFinal.textContent = "€" + finalEur;
+
+      $("#cart-count")     && ($("#cart-count").textContent = String(state.cart.length));
+      $("#cart-total-eur") && ($("#cart-total-eur").textContent = "€"+eur);
+      $("#cart-total-atm") && ($("#cart-total-atm").textContent = wantATM+" ATM");
+      $("#cart-total-final") && ($("#cart-total-final").textContent = "€"+finalEur);
+
       renderHeader();
       applyBottomOffset();
     };
 
-    const renderCatalog = () => {
+    const renderCatalog = ()=>{
       const grid = $("#catalog");
       if (!grid) return;
       grid.innerHTML = "";
+
       const periodEl = document.getElementById("period");
+      const months = (state.period = parseInt(periodEl?.value || "1",10));
+
+      // актуализируем ATM инпут при каждом ререндере каталога
       const atmEl = document.getElementById("atm-discount");
-      const months = (state.period = parseInt((periodEl && periodEl.value) || "1", 10));
-      state.atmDiscount = Math.max(0, parseInt((atmEl && atmEl.value) || "0", 10));
-      const eur = state.cart.reduce((s, x) => s + x.amount, 0);
-      const atmMax = Math.floor(eur * 0.25) * 100;
-      if (state.atmDiscount > atmMax) {
-        state.atmDiscount = atmMax;
-        if (atmEl) atmEl.value = String(atmMax);
+      if (atmEl){
+        // предотвратить прокрутку-изменение колесом
+        atmEl.addEventListener("wheel", e=> e.preventDefault(), { passive:false });
+        // ввод с клавиатуры — мгновенно
+        atmEl.addEventListener("input", (e)=> setATMDiscountImmediate(e.target.value));
+        // на blur тоже приводим к допустимому
+        atmEl.addEventListener("blur",  (e)=> setATMDiscountImmediate(e.target.value));
+        // Enter не отправляет форму
+        atmEl.addEventListener("keydown", (e)=> { if (e.key==="Enter") { e.preventDefault(); setATMDiscountImmediate(e.target.value); }});
+        // Если значение не инициализировано (например, сменили период), клэмпим
+        setATMDiscountImmediate(atmEl.value || 0);
       }
-      CATALOG.forEach((it) => {
+
+      CATALOG.forEach(it=>{
         const total = priceFor(it, months);
-        const inCart = state.cart.find((x) => x.code === it.code && x.months === months);
+        const inCart = state.cart.find(x=> x.code===it.code && x.months===months);
         const card = document.createElement("div");
         card.className = "col-4 card";
         card.innerHTML = `
@@ -167,342 +202,401 @@ function CryptoATMMiniApp() {
           <p class="muted">${it.desc}</p>
           <div class="line">
             <button class="btn" data-act="details" data-code="${it.code}">Подробнее</button>
-            ${inCart ? `<button class="btn" data-act="remove" data-code="${it.code}">Убрать</button>` : `<button class="btn primary" data-act="add" data-code="${it.code}">В корзину</button>`}
+            ${inCart
+              ? `<button class="btn" data-act="remove" data-code="${it.code}">Убрать</button>`
+              : `<button class="btn primary" data-act="add" data-code="${it.code}">В корзину</button>`
+            }
           </div>`;
         grid.appendChild(card);
       });
       updateCartUI();
     };
 
-    const addToCart = (code) => {
+    const addToCart = (code)=>{
       const months = state.period;
-      const it = CATALOG.find((x) => x.code === code);
+      const it = CATALOG.find(x=>x.code===code);
       if (!it) return;
-      if (state.cart.find((x) => x.code === code && x.months === months)) return;
-      state.cart.push({ code: it.code, name: it.name, months, amount: priceFor(it, months) });
-      updateCartUI();
+      if (state.cart.find(x=>x.code===code && x.months===months)) return;
+      state.cart.push({ code:it.code, name:it.name, months, amount: priceFor(it, months) });
+      // после добавления — пересчитать лимит ATM (мог увеличиться)
+      setATMDiscountImmediate(state.atmDiscount);
       renderCatalog();
     };
 
-    const removeFromCart = (code) => {
+    const removeFromCart = (code)=>{
       const months = state.period;
-      state.cart = state.cart.filter((x) => !(x.code === code && x.months === months));
-      updateCartUI();
+      state.cart = state.cart.filter(x=> !(x.code===code && x.months===months));
+      setATMDiscountImmediate(state.atmDiscount);
       renderCatalog();
     };
 
-    const clearCart = () => {
+    const clearCart = ()=>{
       state.cart = [];
-      updateCartUI();
+      setATMDiscountImmediate(0);
       renderCatalog();
     };
 
-    const renderOrders = () => {
+    const renderOrders = ()=>{
       const tb = document.querySelector("#orders-table tbody");
       if (!tb) return;
       tb.innerHTML = "";
-      const rows = db.orders.filter((o) => o.user === CURRENT_USER.id).slice().reverse();
-      for (const o of rows) {
+      const rows = db.orders.filter(o=>o.user===CURRENT_USER.id).slice().reverse();
+      for (const o of rows){
         const tr = document.createElement("tr");
-        const names = o.items.map((i) => i.name + " ×" + i.months + "м").join(", ");
-        tr.innerHTML = `<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s, i) => s + i.months, 0)} мес</td><td>${o.method}</td><td>€${o.eur_final} ${o.atm_used ? `(+${o.atm_used} ATM)` : ""}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.intent_id || "—"}</td>`;
+        const names = o.items.map(i=> `${i.name} ×${i.months}м`).join(", ");
+        tr.innerHTML = `<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${o.method}</td><td>€${o.eur_final} ${o.atm_used?`(+${o.atm_used} ATM)`:""}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.intent_id||"—"}</td>`;
         tb.appendChild(tr);
       }
       renderHeader();
     };
 
-    const toast = (t) => {
-      if (tg && tg.showPopup) tg.showPopup({ title: "", message: String(t), buttons: [{ type: "close" }] });
-      else console.log("[toast]", t);
+    const toast = (t)=>{
+      if (tg?.showPopup) tg.showPopup({ title:"", message:String(t), buttons:[{type:"close"}] });
+      else alert(String(t));
     };
 
-    const openItemModal = (code) => {
-      const it = CATALOG.find((x) => x.code === code);
+    const openItemModal = (code)=>{
+      const it = CATALOG.find(x=>x.code===code);
       if (!it) return;
-      const long = (CATALOG_LONG[code] && CATALOG_LONG[code].bullets) || [];
-      const title = document.querySelector("#item-title");
-      const desc = document.querySelector("#item-desc");
-      const modal = document.querySelector("#modal-item");
-      if (title) title.textContent = it.name;
-      if (desc)  desc.innerHTML = `
-        <div class="muted" style="margin-bottom:8px">${it.desc}</div>
-        ${long.length ? `<ul class="muted">${long.map((b)=>`<li>${b}</li>`).join("")}</ul>` : ""}
-      `;
-      if (modal) modal.style.display = "flex";
+      const long = (CATALOG_LONG[code]?.bullets)||[];
+      const title = $("#item-title");
+      const desc  = $("#item-desc");
+      const modal = $("#modal-item");
+      title && (title.textContent = it.name);
+      desc  && (desc.innerHTML = `<div class="muted" style="margin-bottom:8px">${it.desc}</div>${long.length?`<ul class="muted">${long.map(b=>`<li>${b}</li>`).join("")}</ul>`:""}`);
+      modal && (modal.style.display = "flex");
     };
-    const closeItem = () => { const m = document.querySelector("#modal-item"); if (m) m.style.display = "none"; };
+    const closeItem = ()=> { const m=$("#modal-item"); if (m) m.style.display="none"; };
 
-    const getActiveAddr = () => {
-      const book = state.pay.dest === "company" ? PAY_ADDR_COMPANY : PAY_ADDR_ADMIN;
+    const getActiveAddr = ()=>{
+      const book = state.pay.dest==="company" ? PAY_ADDR_COMPANY : PAY_ADDR_ADMIN;
       return book[state.pay.chain];
     };
 
-    const drawQR = (text) => {
+    const drawQR = (text)=>{
       const c = document.getElementById("qr");
       if (!c) return;
-      const ctx = c.getContext && c.getContext("2d");
+      const ctx = c.getContext?.("2d");
       if (!ctx) return;
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, c.width, c.height);
-      ctx.fillStyle = "#000";
-      let seed = 0;
-      for (let i = 0; i < text.length; i++) seed = ((seed * 33 + text.charCodeAt(i)) >>> 0);
-      const n = 21, s = Math.floor((c.width - 20) / n), off = 10;
-      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-        seed = (seed * 1103515245 + 12345) >>> 0; const v = seed & 1;
-        if (v) ctx.fillRect(off + x * s, off + y * s, s - 1, s - 1);
+      ctx.fillStyle="#fff"; ctx.fillRect(0,0,c.width,c.height);
+      ctx.fillStyle="#000";
+      let seed=0; for (let i=0;i<text.length;i++) seed = ((seed*33 + text.charCodeAt(i))>>>0);
+      const n=21, s=Math.floor((c.width-20)/n), off=10;
+      for (let y=0;y<n;y++) for (let x=0;x<n;x++){
+        seed = (seed*1103515245 + 12345)>>>0; const v = seed & 1;
+        if (v) ctx.fillRect(off + x*s, off + y*s, s-1, s-1);
       }
     };
 
-    const openCryptoModal = (eur, chain = "BEP20", memo = "") => {
+    const openCryptoModal = (eur, chain="BEP20", memo="")=>{
       state.pay.chain = chain;
-      state.pay.addr = getActiveAddr();
+      state.pay.addr  = getActiveAddr();
       const chainSel = document.getElementById("pay-chain-select");
-      const destSel = document.getElementById("pay-dest-select");
-      const addrEl = document.querySelector("#pay-addr");
-      const amountEl = document.querySelector("#pay-amount");
-      const memoEl = document.querySelector("#pay-memo");
-      const modal = document.querySelector("#modal-crypto");
-      if (chainSel) chainSel.value = chain;
-      if (destSel)  destSel.value  = state.pay.dest;
-      if (addrEl)   addrEl.textContent = state.pay.addr;
-      if (amountEl) amountEl.textContent = `€${eur}`;
-      if (memoEl)   memoEl.textContent   = memo || "CRYPTOATM";
-      if (modal) modal.style.display = "flex";
+      const destSel  = document.getElementById("pay-dest-select");
+      const addrEl   = document.getElementById("pay-addr");
+      const amountEl = document.getElementById("pay-amount");
+      const memoEl   = document.getElementById("pay-memo");
+      const modal    = document.getElementById("modal-crypto");
+      chainSel && (chainSel.value=chain);
+      destSel  && (destSel.value=state.pay.dest);
+      addrEl   && (addrEl.textContent = state.pay.addr);
+      amountEl && (amountEl.textContent = `€${eur}`);
+      memoEl   && (memoEl.textContent   = memo || "CRYPTOATM");
+      modal && (modal.style.display="flex");
       drawQR(state.pay.addr);
       applyBottomOffset();
     };
-    const closeCrypto = () => { const m = document.getElementById("modal-crypto"); if (m) m.style.display = "none"; };
+    const closeCrypto = ()=> { const m=document.getElementById("modal-crypto"); if (m) m.style.display="none"; };
 
-    const createPaymentIntent = async (order) => {
-      const payload = {
-        user_id: CURRENT_USER.id, username: CURRENT_USER.username,
-        items: order.items, eur: order.eur_final, atm_used: order.atm_used,
-        network: state.pay.chain, address: state.pay.addr, dest: state.pay.dest,
-        memo: order.memo, initData: (tg && (tg.initData || tg.initDataUnsafe)) || null,
-      };
-      try {
-        // const res = await fetch('https://YOUR_API/payment-intent', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
-        // const data = await res.json();
-        // return data.intent_id || null;
-        await new Promise((r) => setTimeout(r, 400));
-        return "intent_" + Math.random().toString(36).slice(2, 9);
-      } catch (e) { console.error(e); return null; }
+    const createPaymentIntent = async (order)=>{
+      // имитация id платежа (пока без бэка)
+      await new Promise(r=>setTimeout(r,300));
+      return "intent_" + Math.random().toString(36).slice(2,9);
     };
 
-    const createOrder = () => {
-      if (state.cart.length === 0) return toast("Корзина пуста");
-      const eur = state.cart.reduce((s, x) => s + x.amount, 0);
-      const atmMax = Math.floor(eur * 0.25) * 100;
-      const wantATM = Math.min(state.atmDiscount || 0, atmMax, user().atm);
-      const eurMinus = Math.floor(wantATM / 100);
+    const copyToClipboard = async (text)=>{
+      try { await navigator.clipboard.writeText(text); toast("Скопировано в буфер"); }
+      catch { console.log(text); toast("Не удалось скопировать — см. консоль"); }
+    };
+
+    const createOrder = ()=>{
+      if (state.cart.length===0) return toast("Корзина пуста");
+      const eur = state.cart.reduce((s,x)=> s+x.amount, 0);
+      const atmMax = Math.floor(eur*0.25)*100;
+      const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
+      const eurMinus = Math.floor(wantATM/100);
       const finalEur = Math.max(0, eur - eurMinus);
-      if (wantATM > 0) user().atm = Math.max(0, user().atm - wantATM);
-      const memo = "ORDER-" + (db.orders.length + 1);
+      if (wantATM>0) user().atm = Math.max(0, user().atm - wantATM);
+
+      const memo = "ORDER-" + (db.orders.length+1);
       const order = {
-        id: db.orders.length + 1, user: CURRENT_USER.id,
-        items: state.cart.map((x) => ({ code: x.code, name: x.name, months: x.months, amount: x.amount })),
-        method: "crypto", dest: state.pay.dest, eur, atm_used: wantATM, eur_final: finalEur,
-        status: "waiting", created_at: new Date().toISOString(), memo, intent_id: null,
+        id: db.orders.length+1, user: CURRENT_USER.id,
+        items: state.cart.map(x=> ({ code:x.code, name:x.name, months:x.months, amount:x.amount })),
+        method:"crypto", dest: state.pay.dest, eur, atm_used: wantATM, eur_final: finalEur,
+        status:"waiting", created_at:new Date().toISOString(), memo, intent_id:null,
       };
       db.orders.push(order);
       user().orders.push(order.id);
       saveDB();
+
       state.cart = [];
-      state.atmDiscount = 0;
-      const atmInput = document.getElementById("atm-discount");
-      if (atmInput) atmInput.value = "0";
-      updateCartUI();
+      setATMDiscountImmediate(0);
+      renderCatalog();
       renderOrders();
+
       state.pay.amount = finalEur;
-      state.pay.memo = memo;
+      state.pay.memo   = memo;
       openCryptoModal(finalEur, state.pay.chain, memo);
-      createPaymentIntent(order).then((id) => {
+
+      createPaymentIntent(order).then((id)=>{
         order.intent_id = id;
         saveDB();
         renderOrders();
-        const memoEl = document.querySelector("#pay-memo");
+        const memoEl = document.getElementById("pay-memo");
         if (id && memoEl) memoEl.textContent = id;
+
+        // «Отправить админу» — копируем JSON (потом заменишь на API)
+        const payload = {
+          kind:"payment_intent",
+          order_id: order.id,
+          user: { id: CURRENT_USER.id, username: CURRENT_USER.username },
+          network: state.pay.chain, address: state.pay.addr, dest: state.pay.dest,
+          eur_final: finalEur, atm_used: wantATM, memo:id
+        };
+        copyToClipboard(JSON.stringify(payload, null, 2));
       });
     };
 
-    const renderRefs = () => {
-      const refCode = document.querySelector("#ref-code");
-      if (refCode) refCode.value = user().ref_code;
+    const renderRefs = ()=>{
+      const refCode = document.getElementById("ref-code");
+      refCode && (refCode.value = user().ref_code);
       const tb = document.querySelector("#ref-table tbody");
-      if (tb) {
+      if (tb){
         tb.innerHTML = "";
-        for (const r of (user().referrals || []).slice().reverse()) {
+        for (const r of (user().referrals||[]).slice().reverse()){
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td>@${(db.users[r.uid] && db.users[r.uid].username) || r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid ? "Да" : "—"}</td><td>${r.reward || 0} ATM</td>`;
+          tr.innerHTML = `<td>@${(db.users[r.uid]?.username)||r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid?"Да":"—"}</td><td>${r.reward||0} ATM</td>`;
           tb.appendChild(tr);
         }
       }
       const hasRef = !!user().referred_by;
-      const bindInput = document.querySelector("#ref-bind-input");
-      const bindBtn = document.querySelector("#ref-bind-btn");
-      if (bindInput) bindInput.disabled = hasRef;
-      if (bindBtn) bindBtn.disabled = hasRef;
+      const bindInput = document.getElementById("ref-bind-input");
+      const bindBtn   = document.getElementById("ref-bind-btn");
+      bindInput && (bindInput.disabled = hasRef);
+      bindBtn   && (bindBtn.disabled   = hasRef);
     };
 
     const TASK_DEF = [
-      { id: 1, title: "Подписка на TikTok", reward: 100, type: "link", hint: "Ссылка на профиль/скрин" },
-      { id: 2, title: "Репост в сторис", reward: 120, type: "link", hint: "Ссылка на сторис" },
-      { id: 3, title: "Отзыв о проекте", reward: 150, type: "text", hint: "Текст/ссылка на отзыв" },
-      { id: 4, title: "Наклейка на авто", reward: 500, type: "image", hint: "Ссылка на фото" },
+      { id:1, title:"Подписка на TikTok", reward:100, type:"link",  hint:"Ссылка на профиль/скрин" },
+      { id:2, title:"Репост в сторис",   reward:120, type:"link",  hint:"Ссылка на сторис" },
+      { id:3, title:"Отзыв о проекте",   reward:150, type:"text",  hint:"Текст/ссылка на отзыв" },
+      { id:4, title:"Наклейка на авто",  reward:500, type:"image", hint:"Ссылка на фото" },
     ];
 
-    const renderTasks = () => {
-      const holder = document.querySelector("#tasks");
+    const renderTasks = ()=>{
+      const holder = document.getElementById("tasks");
       if (!holder) return;
       holder.innerHTML = "";
-      TASK_DEF.forEach((t) => {
+      TASK_DEF.forEach(t=>{
         const col = document.createElement("div");
         col.className = "col-6 card";
-        col.innerHTML = `<h3>#${t.id} ${t.title}</h3><p class="muted">Награда: <b>+${t.reward} ATM</b></p><input id="proof-${t.id}" placeholder="${t.hint}"><div class="line"><span class="muted">Проверка модератором</span><button class="btn primary" data-act="submit-task" data-id="${t.id}">Отправить</button></div>`;
+        col.innerHTML = `<h3>#${t.id} ${t.title}</h3>
+          <p class="muted">Награда: <b>+${t.reward} ATM</b></p>
+          <input id="proof-${t.id}" placeholder="${t.hint}" inputmode="text">
+          <div class="line"><span class="muted">Проверка модератором</span>
+          <button class="btn primary" data-act="submit-task" data-id="${t.id}">Отправить</button></div>`;
         holder.appendChild(col);
       });
     };
 
-    const renderBalance = () => { const el = document.querySelector("#atm-balance"); if (el) el.textContent = String(user().atm); };
+    const renderBalance = ()=> { const el=document.getElementById("atm-balance"); el && (el.textContent = String(user().atm)); };
 
-    const renderAdmin = () => {
+    // ====== АДМИНКА (локальная) ======
+    const renderAdmin = ()=>{
       const users = Object.values(db.users);
       const o = db.orders;
-      const totalEur = o.reduce((s, x) => s + x.eur_final, 0);
-      const totalAtm = users.reduce((s, u) => s + u.atm, 0);
-      const stats = document.querySelector("#admin-stats");
-      if (stats) stats.innerHTML = `<div class="row"><div class="chip">Пользователи: <b>${users.length}</b></div><div class="chip">Заказы: <b>${o.length}</b></div><div class="chip">Выручка: <b>€${totalEur}</b></div><div class="chip">ATM на балансах: <b>${totalAtm}</b></div></div>`;
+      const totalEur = o.reduce((s,x)=> s+x.eur_final, 0);
+      const totalAtm = users.reduce((s,u)=> s+(u.atm||0), 0);
+
+      const stats = document.getElementById("admin-stats");
+      stats && (stats.innerHTML = `<div class="row">
+        <div class="chip">Пользователи: <b>${users.length}</b></div>
+        <div class="chip">Заказы: <b>${o.length}</b></div>
+        <div class="chip">Выручка: <b>€${totalEur}</b></div>
+        <div class="chip">ATM на балансах: <b>${totalAtm}</b></div>
+        <div class="chip">Ты админ: <b>${ADMIN_IDS.includes(CURRENT_USER.id)?"да":"нет"}</b></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input id="adm-uid" placeholder="user_id" style="max-width:120px">
+        <input id="adm-delta" placeholder="±ATM (напр. 500)" style="max-width:160px">
+        <button class="btn" id="adm-addatm">Изменить ATM</button>
+        <button class="btn" id="adm-copydb">Скопировать весь JSON</button>
+      </div>`);
+
       const utb = document.querySelector("#admin-users tbody");
-      if (utb) {
+      if (utb){
         utb.innerHTML = "";
-        users.slice().sort((a, b) => b.id - a.id).forEach((u) => {
-          const refFrom = u.referred_by ? "@" + ((db.users[u.referred_by] && db.users[u.referred_by].username) || u.referred_by) : "—";
+        users.slice().sort((a,b)=> b.id-a.id).forEach(u=>{
+          const refFrom = u.referred_by ? "@"+(db.users[u.referred_by]?.username || u.referred_by) : "—";
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${u.id}</td><td>@${u.username}</td><td>${u.atm}</td><td>${u.orders.length}</td><td>${u.ref_code}</td><td>${refFrom}</td><td>${new Date(u.created_at).toLocaleDateString()}</td>`;
+          tr.innerHTML = `<td>${u.id}</td><td>@${u.username||""}</td><td>${u.atm||0}</td><td>${u.orders.length}</td><td>${u.ref_code}</td><td>${refFrom}</td><td>${new Date(u.created_at).toLocaleDateString()}</td>`;
           utb.appendChild(tr);
         });
       }
+
       const otb = document.querySelector("#admin-orders tbody");
-      if (otb) {
+      if (otb){
         otb.innerHTML = "";
-        db.orders.slice().reverse().forEach((or) => {
-          const userName = "@" + ((db.users[or.user] && db.users[or.user].username) || or.user);
-          const items = or.items.map((i) => i.code + "×" + i.months).join(", ");
+        db.orders.slice().reverse().forEach(or=>{
+          const userName = "@"+(db.users[or.user]?.username || or.user);
+          const items = or.items.map(i=> i.code+"×"+i.months).join(", ");
           const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s, i) => s + i.months, 0)} мес</td><td>${or.method} (${or.dest || '-'})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td><button class="btn" data-act="mark-paid" data-id="${or.id}">Оплачен</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">Отмена</button></td>`;
+          tr.innerHTML = `<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${or.method} (${or.dest||"-"})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td>
+          <td>
+            <button class="btn" data-act="mark-paid" data-id="${or.id}">Оплачен</button>
+            <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">Отмена</button>
+          </td>`;
           otb.appendChild(tr);
         });
       }
 
       const ttb = document.querySelector("#admin-tasks tbody");
-      if (ttb) {
-        ttb.innerHTML = "";
-        users.forEach((u) => {
-          (u.tasks || []).forEach((t, idx) => {
-            if (t.status === "pending") {
-              const def = TASK_DEF.find((d) => d.id === t.id) || { reward: 0, title: "#" + t.id };
+      if (ttb){
+        ttb.innerHTML="";
+        users.forEach(u=>{
+          (u.tasks||[]).forEach((t, idx)=>{
+            if (t.status==="pending"){
+              const def = TASK_DEF.find(d=>d.id===t.id) || { reward:0, title:"#"+t.id };
               const tr = document.createElement("tr");
-              tr.innerHTML = `<td>${u.id}</td><td>@${u.username}</td><td>#${t.id} ${def.title || ''}</td><td>${t.proof || ''}</td><td>+${def.reward} ATM</td><td>${t.status}</td><td><button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">Одобрить</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">Отклонить</button></td>`;
+              tr.innerHTML = `<td>${u.id}</td><td>@${u.username||""}</td><td>#${t.id} ${def.title||""}</td><td>${t.proof||""}</td><td>+${def.reward} ATM</td><td>${t.status}</td>
+              <td>
+                <button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">Одобрить</button>
+                <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">Отклонить</button>
+              </td>`;
               ttb.appendChild(tr);
             }
           });
         });
       }
+
+      // админ-действия: начисление, копия JSON
+      const addBtn = document.getElementById("adm-addatm");
+      addBtn && addBtn.addEventListener("click", ()=>{
+        if (!ADMIN_IDS.includes(CURRENT_USER.id)) return toast("Нет прав");
+        const uid = Number(document.getElementById("adm-uid")?.value||0);
+        const delta = Number(document.getElementById("adm-delta")?.value||0);
+        if (!uid || !Number.isFinite(delta)) return toast("Заполни user_id и сумму");
+        if (!db.users[uid]) return toast("Пользователь не найден");
+        db.users[uid].atm = (db.users[uid].atm||0) + delta;
+        saveDB(); renderAdmin(); renderBalance(); renderHeader();
+        toast(`Баланс обновлён: uid ${uid} ${delta>0?"+":""}${delta} ATM`);
+      });
+
+      const copyBtn = document.getElementById("adm-copydb");
+      copyBtn && copyBtn.addEventListener("click", ()=>{
+        // «отправить админу» — копируем в буфер
+        const dump = JSON.stringify(db, null, 2);
+        copyToClipboard(dump);
+      });
     };
 
-    const switchTab = (name) => {
-      $$(".tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
-      $$(".page").forEach((p) => p.classList.toggle("active", p.id === "page-" + name));
-      if (name === "shop") renderCatalog();
-      if (name === "orders") renderOrders();
-      if (name === "ref") renderRefs();
-      if (name === "tasks") renderTasks();
-      if (name === "balance") renderBalance();
-      if (name === "admin") renderAdmin();
+    const switchTab = (name)=>{
+      $$(".tab").forEach(b=> b.classList.toggle("active", b.dataset.tab===name));
+      $$(".page").forEach(p=> p.classList.toggle("active", p.id === "page-"+name));
+      if (name==="shop")    renderCatalog();
+      if (name==="orders")  renderOrders();
+      if (name==="ref")     renderRefs();
+      if (name==="tasks")   renderTasks();
+      if (name==="balance") renderBalance();
+      if (name==="admin")   renderAdmin();
       applyBottomOffset();
     };
 
-    const onHashChange = () => switchTab(currentTab());
+    const onHashChange = ()=> switchTab(currentTab());
     window.addEventListener("hashchange", onHashChange);
 
-    const clickHandler = (e) => {
-      const target = e.target;
-      const btn = target && target.closest && target.closest("button, .btn");
+    // ====== HANDLERS ======
+    const clickHandler = (e)=>{
+      const btn = e.target?.closest?.("button, .btn");
       if (!btn) return;
-      if (btn.classList.contains("tab")) {
+
+      if (btn.classList.contains("tab")){
         const t = btn.dataset.tab;
-        if (t) { setHash(t); switchTab(t); }
+        if (t){ setHash(t); switchTab(t); }
         return;
       }
       const act = btn.dataset.act;
-      if (act === "add")      { addToCart(btn.dataset.code); return; }
-      if (act === "remove")   { removeFromCart(btn.dataset.code); return; }
-      if (act === "details")  { openItemModal(btn.dataset.code); return; }
-      if (act === "submit-task") {
+
+      if (act==="add")     { addToCart(btn.dataset.code); return; }
+      if (act==="remove")  { removeFromCart(btn.dataset.code); return; }
+      if (act==="details") { openItemModal(btn.dataset.code); return; }
+
+      if (act==="submit-task"){
         const id = +btn.dataset.id;
         const proofEl = document.getElementById(`proof-${id}`);
-        const proof = (proofEl && proofEl.value && proofEl.value.trim()) || "";
+        const proof = proofEl?.value?.trim() || "";
         if (!proof) return toast("Добавьте пруф");
         user().tasks = user().tasks || [];
-        user().tasks.push({ id, proof, at: new Date().toISOString(), status: "pending" });
+        user().tasks.push({ id, proof, at:new Date().toISOString(), status:"pending" });
         saveDB();
         toast("Отправлено на проверку");
         if (proofEl) proofEl.value = "";
         return;
       }
-      if (btn.id === "cart-clear")   { clearCart(); return; }
-      if (btn.id === "checkout-btn") { createOrder(); return; }
-      if (btn.id === "ref-copy")     { navigator.clipboard.writeText(user().ref_code).then(() => toast("Скопировано")); return; }
-      if (btn.id === "ref-bind-btn") {
+
+      if (btn.id==="cart-clear"){ clearCart(); return; }
+      if (btn.id==="checkout-btn"){ createOrder(); return; }
+      if (btn.id==="ref-copy"){ navigator.clipboard.writeText(user().ref_code).then(()=>toast("Скопировано")); return; }
+
+      if (btn.id==="ref-bind-btn"){
         const inp = document.getElementById("ref-bind-input");
-        const code = (inp && inp.value && inp.value.trim().toUpperCase()) || "";
+        const code = inp?.value?.trim().toUpperCase() || "";
         if (!code) return toast("Введите код");
-        const owner = Object.values(db.users).find((u) => u.ref_code === code);
+        const owner = Object.values(db.users).find(u=>u.ref_code===code);
         if (!owner) return toast("Код не найден");
-        if (owner.id === CURRENT_USER.id) return toast("Нельзя привязать свой код");
+        if (owner.id===CURRENT_USER.id) return toast("Нельзя привязать свой код");
         if (user().referred_by) return toast("Код уже привязан");
         user().referred_by = owner.id;
-        owner.referrals.push({ uid: CURRENT_USER.id, at: new Date().toISOString(), paid: false, reward: 0 });
-        saveDB();
-        renderRefs();
-        toast("Код привязан");
-        return;
+        owner.referrals.push({ uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0 });
+        saveDB(); renderRefs(); toast("Код привязан"); return;
       }
-      if (btn.id === "admin-refresh") { renderAdmin(); return; }
-      if (btn.id === "admin-export") {
-        const blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
+
+      if (btn.id==="admin-refresh"){ renderAdmin(); return; }
+      if (btn.id==="admin-export"){
+        const blob = new Blob([JSON.stringify(db,null,2)], { type:"application/json" });
+        const url  = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url; a.download = "cryptoatm_export.json"; a.click();
         URL.revokeObjectURL(url);
         return;
       }
-      if (btn.id === "copy-addr")   { navigator.clipboard.writeText((document.getElementById("pay-addr")?.textContent || "")); toast("Адрес скопирован"); return; }
-      if (btn.id === "copy-amount") { navigator.clipboard.writeText(((document.getElementById("pay-amount")?.textContent) || "").replace("€", "")); toast("Сумма скопирована"); return; }
-      if (btn.id === "copy-memo")   { navigator.clipboard.writeText((document.getElementById("pay-memo")?.textContent || "")); toast("Назначение скопировано"); return; }
-      if (btn.id === "paid-btn")    { toast("Спасибо! Мы отметим заказ после проверки."); closeCrypto(); return; }
-      if (btn.id === "close-crypto"){ closeCrypto(); return; }
-      if (btn.id === "close-item")  { closeItem(); return; }
-      if (btn.id === "auth-close")  { const m = document.getElementById("modal-auth"); if (m) m.style.display = "none"; return; }
-      if (btn.id === "accept")      { db.disclaimerAccepted[CURRENT_USER.id] = true; saveDB(); const m = document.getElementById("modal-disclaimer"); if (m) m.style.display = "none"; return; }
-      if (btn.id === "decline")     { if (tg && tg.close) tg.close(); else window.location.href = "about:blank"; return; }
 
-      if (act === "mark-paid" && ADMIN_IDS.includes(CURRENT_USER.id)) {
-        const id = +(btn.dataset.id || 0);
-        const o = db.orders.find((x) => x.id === id);
-        if (o) {
-          o.status = "paid";
+      if (btn.id==="copy-addr"){ navigator.clipboard.writeText(document.getElementById("pay-addr")?.textContent||""); toast("Адрес скопирован"); return; }
+      if (btn.id==="copy-amount"){ navigator.clipboard.writeText((document.getElementById("pay-amount")?.textContent||"").replace("€","")); toast("Сумма скопирована"); return; }
+      if (btn.id==="copy-memo"){ navigator.clipboard.writeText(document.getElementById("pay-memo")?.textContent||""); toast("Назначение скопировано"); return; }
+      if (btn.id==="paid-btn"){ toast("Спасибо! Мы отметим заказ после проверки."); closeCrypto(); return; }
+      if (btn.id==="close-crypto"){ closeCrypto(); return; }
+      if (btn.id==="close-item"){ closeItem(); return; }
+      if (btn.id==="auth-close"){ const m=document.getElementById("modal-auth"); if (m) m.style.display="none"; return; }
+      if (btn.id==="accept"){ db.disclaimerAccepted[CURRENT_USER.id] = true; saveDB(); const m=document.getElementById("modal-disclaimer"); if (m) m.style.display="none"; return; }
+      if (btn.id==="decline"){ tg?.close ? tg.close() : (window.location.href="about:blank"); return; }
+
+      // ADMIN actions
+      if (act==="mark-paid" && ADMIN_IDS.includes(CURRENT_USER.id)){
+        const id = +(btn.dataset.id||0);
+        const o = db.orders.find(x=>x.id===id);
+        if (o){
+          o.status="paid";
           const buyer = db.users[o.user];
-          if (buyer && buyer.referred_by) {
+          if (buyer?.referred_by){
             const refUser = db.users[buyer.referred_by];
-            if (refUser) {
-              const rec = (refUser.referrals || []).find((r) => r.uid === buyer.id);
-              if (rec && !rec.paid) {
+            if (refUser){
+              const rec = (refUser.referrals||[]).find(r=>r.uid===buyer.id);
+              if (rec && !rec.paid){
                 rec.paid = true;
-                if (!rec.reward || rec.reward === 0) {
+                if (!rec.reward || rec.reward===0){
                   rec.reward = REF_BONUS_ATM;
-                  refUser.atm = (refUser.atm || 0) + REF_BONUS_ATM;
+                  refUser.atm = (refUser.atm||0) + REF_BONUS_ATM;
                 }
               }
             }
@@ -511,89 +605,95 @@ function CryptoATMMiniApp() {
         }
         return;
       }
-      if (act === "mark-cancel" && ADMIN_IDS.includes(CURRENT_USER.id)) {
-        const id = +(btn.dataset.id || 0);
-        const o = db.orders.find((x) => x.id === id);
-        if (o) { o.status = "canceled"; saveDB(); renderOrders(); renderAdmin(); toast("Статус изменён: canceled"); }
+      if (act==="mark-cancel" && ADMIN_IDS.includes(CURRENT_USER.id)){
+        const id = +(btn.dataset.id||0);
+        const o = db.orders.find(x=>x.id===id);
+        if (o){ o.status="canceled"; saveDB(); renderOrders(); renderAdmin(); toast("Статус изменён: canceled"); }
         return;
       }
-      if (act === "task-approve" && ADMIN_IDS.includes(CURRENT_USER.id)) {
-        const uid = +(btn.dataset.uid || 0);
-        const idx = +(btn.dataset.idx || -1);
+      if (act==="task-approve" && ADMIN_IDS.includes(CURRENT_USER.id)){
+        const uid = +(btn.dataset.uid||0);
+        const idx = +(btn.dataset.idx||-1);
         const u = db.users[uid];
-        if (u && u.tasks && u.tasks[idx]) {
+        if (u?.tasks?.[idx]){
           const t = u.tasks[idx];
-          const def = TASK_DEF.find((d) => d.id === t.id) || { reward: 0 };
-          t.status = "approved";
-          u.atm = (u.atm || 0) + (def.reward || 0);
+          const def = TASK_DEF.find(d=>d.id===t.id) || { reward:0 };
+          t.status="approved";
+          u.atm = (u.atm||0) + (def.reward||0);
           saveDB(); renderAdmin(); renderBalance(); toast(`Задание #${t.id} одобрено (+${def.reward} ATM)`);
         }
         return;
       }
-      if (act === "task-reject" && ADMIN_IDS.includes(CURRENT_USER.id)) {
-        const uid = +(btn.dataset.uid || 0);
-        const idx = +(btn.dataset.idx || -1);
+      if (act==="task-reject" && ADMIN_IDS.includes(CURRENT_USER.id)){
+        const uid = +(btn.dataset.uid||0);
+        const idx = +(btn.dataset.idx||-1);
         const u = db.users[uid];
-        if (u && u.tasks && u.tasks[idx]) {
+        if (u?.tasks?.[idx]){
           const t = u.tasks[idx];
-          t.status = "rejected";
+          t.status="rejected";
           saveDB(); renderAdmin(); toast(`Задание #${t.id} отклонено`);
         }
         return;
       }
     };
 
-    const changeHandler = (e) => {
+    const changeHandler = (e)=>{
       const el = e.target;
       if (!el) return;
-      if (el.id === "period" || el.id === "atm-discount") { renderCatalog(); }
-      if (el.id === "pay-chain-select") {
+
+      if (el.id==="period"){
+        state.period = parseInt(el.value,10)||1;
+        renderCatalog();
+      }
+
+      // — ВНИМАНИЕ — ввод ATM теперь обрабатывается на 'input' в renderCatalog()
+
+      if (el.id==="pay-chain-select"){
         state.pay.chain = el.value;
-        state.pay.addr = getActiveAddr();
+        state.pay.addr  = getActiveAddr();
         const addrEl = document.getElementById("pay-addr");
-        if (addrEl) addrEl.textContent = state.pay.addr;
+        addrEl && (addrEl.textContent = state.pay.addr);
         drawQR(state.pay.addr);
       }
-      if (el.id === "pay-dest-select") {
+      if (el.id==="pay-dest-select"){
         state.pay.dest = el.value;
         state.pay.addr = getActiveAddr();
         const addrEl = document.getElementById("pay-addr");
-        if (addrEl) addrEl.textContent = state.pay.addr;
+        addrEl && (addrEl.textContent = state.pay.addr);
         drawQR(state.pay.addr);
       }
     };
 
-    const touchStart = (e) => { const b = e.target && e.target.closest && e.target.closest(".btn"); if (b) b.classList.add("touching"); };
-    const touchEnd = () => $$(".btn.touching").forEach((b) => b.classList.remove("touching"));
+    const touchStart = (e)=> { const b = e.target?.closest?.(".btn"); if (b) b.classList.add("touching"); };
+    const touchEnd   = ()=> $$(".btn.touching").forEach(b=> b.classList.remove("touching"));
 
-    const ensureDisclaimer = () => {
+    const ensureDisclaimer = ()=>{
       const ok = db.disclaimerAccepted[CURRENT_USER.id];
       const modal = document.getElementById("modal-disclaimer");
       if (!modal) return;
       modal.style.display = ok ? "none" : "flex";
     };
 
-    const boot = () => {
-      if (CURRENT_USER.id === 0) { const m = document.getElementById("modal-auth"); if (m) m.style.display = "flex"; }
+    const boot = ()=>{
+      if (CURRENT_USER.id===0){ const m=document.getElementById("modal-auth"); if (m) m.style.display="flex"; }
       switchTab(currentTab());
       renderHeader();
       applyBottomOffset();
       ensureDisclaimer();
-      setInterval(() => { const chip = document.getElementById("chip-atm"); if (chip) chip.textContent = String(user().atm); }, 1000);
+      // автообновление ATM в хедере
+      setInterval(()=> { const chip=document.getElementById("chip-atm"); chip && (chip.textContent = String(user().atm)); }, 1000);
     };
 
     document.addEventListener("click", clickHandler);
     document.addEventListener("change", changeHandler);
-    document.addEventListener("touchstart", touchStart, { passive: true });
+    document.addEventListener("touchstart", touchStart, { passive:true });
     document.addEventListener("touchend", touchEnd);
 
-    console.assert(typeof priceFor === "function", "priceFor should be defined");
-    console.assert(document.getElementById("catalog") !== null, "#catalog should exist");
-    console.assert(document.getElementById("copy-amount") !== null, "#copy-amount button should exist");
-
+    // sanity
+    console.assert(typeof priceFor==="function", "priceFor should be defined");
     boot();
 
-    return () => {
+    return ()=> {
       document.removeEventListener("click", clickHandler);
       document.removeEventListener("change", changeHandler);
       document.removeEventListener("touchstart", touchStart);
@@ -611,7 +711,7 @@ header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8p
 .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}.tab{appearance:none;border:var(--b1);background:var(--card);color:var(--txt);border-radius:12px;padding:8px 12px;font-weight:800;cursor:pointer}.tab.active{background:linear-gradient(135deg, rgba(245,215,122,.18), rgba(212,175,55,.14));box-shadow: 0 0 0 1px rgba(212,175,55,.5) inset}.page{display:none}.page.active{display:block}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}@media(max-width:1020px){.col-8,.col-6,.col-4{grid-column:span 12}}.card{background:var(--card);border:var(--b1);border-radius:var(--r-xl);padding:14px;box-shadow:var(--shadow)}.card h3{margin:0 0 8px}.muted{color:var(--muted)}.badge{display:inline-block;background:rgba(255,255,255,.06);border:var(--b1);border-radius:8px;padding:4px 8px;color:var(--muted);font-size:12px}
 .btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;transition:transform .04s ease, box-shadow .2s ease;background:#1a2030;color:var(--txt);border:1px solid rgba(255,255,255,.1)}.btn.primary{background:linear-gradient(135deg, #715d1d, #f3d46b 40%, #c9a529);color:#0b0b0c;text-shadow:0 1px 0 rgba(255,255,255,.35);border:1px solid rgba(245,215,122,.65);box-shadow: 0 4px 18px rgba(212,175,55,.28), 0 1px 0 rgba(255,255,255,.25) inset}.btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.3)}.btn:active{transform:translateY(1px)}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}input,select,textarea{width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#11161f;color:var(--txt);outline:none}select{padding-right:32px}.label{color:var(--muted);font-weight:700}.line{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.1);padding-top:10px;margin-top:10px}.price{font-weight:900}.kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-.bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96));padding:10px 10px calc(10px + var(--safe-bot))}.bb-inner{max-width:1160px;margin:0 авто;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0e1117;border:var(--b1);border-radius:16px;padding:10px 12px;pointer-events:auto}
+.bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96));padding:10px 10px calc(10px + var(--safe-bot))}.bb-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0e1117;border:var(--b1);border-radius:16px;padding:10px 12px;pointer-events:auto}
 .modal-back{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:20px 14px}.modal{max-width:680px;width:100%;background:#0e1117;border:var(--b1);border-radius:18px;box-shadow:var(--shadow);padding:16px}.modal h2{margin:0 0 10px}.modal .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 .table{width:100%;border-collapse:separate;border-spacing:0;border:var(--b1);border-radius:12px;overflow:hidden}.table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08)}.table th{background:#101421;color:var(--muted);text-align:left}.table tr:last-child td{border-bottom:0}
 .visually-hidden{position:absolute;left:-9999px}.btn.touching{filter:brightness(1.03)}
@@ -716,7 +816,7 @@ header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8p
             <div className="grid">
               <div className="col-12 card">
                 <h3>Админ-панель</h3>
-                <p className="muted">Сводка по пользователям, заказам, рефералам и задачам.</p>
+                <p className="muted">Сводка по пользователям, заказам, рефералам и задачам. Все данные локальны (LocalStorage) — для продакшна подключи бэкенд.</p>
                 <div className="row"><button className="btn" id="admin-refresh" type="button">Обновить</button><button className="btn ghost" id="admin-export" type="button">Экспорт JSON</button></div>
                 <div className="grid" style={{ marginTop: 12 }}>
                   <div className="col-12 card" id="admin-stats"></div>
@@ -761,7 +861,7 @@ header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8p
       <div className="modal-back" id="modal-auth" role="dialog" aria-modal="true" aria-labelledby="auth-title">
         <div className="modal">
           <h2 id="auth-title">Требуется авторизация</h2>
-          <p className="muted">Откройте приложение внутри Telegram, чтобы продолжить. Если вы разработчик — включите Mini App и передайте initData.</p>
+          <p className="muted">Откройте приложение внутри Telegram, чтобы продолжить. Для браузерного теста можно использовать параметры URL: <code>?uid=568646738&username=Rich&admin=1</code></p>
           <div className="foot"><button className="btn" id="auth-close" type="button">Закрыть</button></div>
         </div>
       </div>
@@ -797,7 +897,10 @@ header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8p
               <div className="kv"><span className="label">Адрес</span><code id="pay-addr" style={{ wordBreak: "break-all" }}></code></div>
               <div className="kv"><span className="label">Сумма</span><b id="pay-amount">—</b> <button className="btn" id="copy-amount" type="button" style={{ marginLeft: 8 }}>Копировать</button></div>
               <div className="kv"><span className="label">Назначение</span><b id="pay-memo">—</b> <button className="btn" id="copy-memo" type="button" style={{ marginLeft: 8 }}>Копировать</button></div>
-              <div className="row" style={{ marginTop: 8 }}><button className="btn" id="copy-addr" type="button">Скопировать адрес</button><button className="btn primary" id="paid-btn" type="button">Я оплатил(а)</button></div>
+              <div className="row" style={{ marginTop: 8 }}>
+                <button className="btn" id="copy-addr" type="button">Скопировать адрес</button>
+                <button className="btn primary" id="paid-btn" type="button">Я оплатил(а)</button>
+              </div>
             </div>
           </div>
           <div className="foot"><button className="btn" id="close-crypto" type="button">Закрыть</button></div>
@@ -819,9 +922,8 @@ header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8p
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<CryptoATMMiniApp />);
 
-// Покажи ошибку, если что-то пойдёт не так (для дебага)
+// Плашка ошибок для быстрого дебага
 window.addEventListener('error', e => {
-  console.error(e.error || e.message);
   const msg = (e.error && e.error.stack) || e.message;
   document.body.insertAdjacentHTML('afterbegin', `<pre style="position:fixed;z-index:9999;top:0;left:0;background:#000c;color:#fff;padding:8px;font:12px/1.3 monospace;max-width:100vw;white-space:pre-wrap">${msg}</pre>`);
 });
