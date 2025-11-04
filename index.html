@@ -5,17 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CryptoATM Mini App</title>
 
-    <!-- React + ReactDOM (можешь заменить на production *.min.js позже) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- React + ReactDOM (продовые UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <!-- Babel для JSX в браузере -->
+    <!-- Babel для JSX в браузере (демо/статические страницы) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
   <body style="margin:0;background:#0a0b0e;color:#f1f5fb">
     <div id="root"></div>
 
-    <!-- ТВОЁ ПРИЛОЖЕНИЕ -->
     <script type="text/babel">
 'use client';
 const { useEffect } = React;
@@ -31,9 +30,8 @@ function CryptoATMMiniApp() {
 
     const ADMIN_IDS = [568646738];
     const START_BONUS_ATM = 250;
-    const REF_BONUS_ATM = 200; // бонус рефереру при успешной оплате друга
+    const REF_BONUS_ATM = 200;
 
-    // Каталог + расширенные описания для модалки "Подробнее"
     const CATALOG = [
       { type: "bot", code: "CRYPTO_ATM", name: "Crypto ATM Bot", price: 71, desc: "BTC-аналитика, уровни, сигналы ежедневно." },
       { type: "bot", code: "ALERTS", name: "Alerts Bot", price: 39, desc: "Реактивные алерты: киты, ликвидации, funding, OI, объёмы, уровни." },
@@ -43,56 +41,35 @@ function CryptoATMMiniApp() {
       { type: "service", code: "COPY", name: "Копитрейдинг", price: 50, desc: "€50/мес + % от прибыли. Управление риском, отчётность." },
     ];
     const CATALOG_LONG = {
-      CRYPTO_ATM: {
-        bullets: [
-          "BTC-аналитика: уровни, зоны спроса/предложения, сценарии",
-          "Сигналы с вероятностями, комментарии к каждому алерту",
-          "Ежедневные обзоры + ключевые метрики (OI, funding, объемы)",
-        ],
-      },
-      ALERTS: {
-        bullets: [
-          "Крупные сделки китов (спот/фьюч), ликвидации",
-          "Funding/OI, всплески объема, локальные уровни",
-          "Рекомендация направления + объяснение триггера",
-        ],
-      },
-      NEWS: {
-        bullets: [
-          "CoinMarketCal + RSS: фильтры, автоперевод, тональность",
-          "Топ-3 за период, дайджест, теги и категории",
-          "Экспорт аналитики, умные ключевые слова",
-        ],
-      },
-      PREMIUM: { bullets: ["Все 3 бота по сниженной цене", "Один платеж — полный доступ"] },
-      ENTERPRISE: { bullets: ["Приоритетная поддержка", "Консультации и кастомные настройки"] },
-      COPY: { bullets: ["€50/мес + % от прибыли", "Прозрачная отчетность, риск-менеджмент"] },
+      CRYPTO_ATM: { bullets: ["BTC-аналитика: уровни, зоны спроса/предложения, сценарии","Сигналы с вероятностями, комментарии к каждому алерту","Ежедневные обзоры + ключевые метрики (OI, funding, объемы)"] },
+      ALERTS:     { bullets: ["Крупные сделки китов (спот/фьюч), ликвидации","Funding/OI, всплески объема, локальные уровни","Рекомендация направления + объяснение триггера"] },
+      NEWS:       { bullets: ["CoinMarketCal + RSS: фильтры, автоперевод, тональность","Топ-3 за период, дайджест, теги и категории","Экспорт аналитики, умные ключевые слова"] },
+      PREMIUM:    { bullets: ["Все 3 бота по сниженной цене","Один платеж — полный доступ"] },
+      ENTERPRISE: { bullets: ["Приоритетная поддержка","Консультации и кастомные настройки"] },
+      COPY:       { bullets: ["€50/мес + % от прибыли","Прозрачная отчетность, риск-менеджмент"] },
     };
 
     const PERIOD_DISCOUNT = { 1: 0, 3: 0.1, 6: 0.2 };
 
-    // Два адресных набора: биржа админа и счёт компании (позже заменим реквизиты)
     const PAY_ADDR_ADMIN = {
       BEP20: "0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c",
       TRC20: "TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs",
       ERC20: "0x1111222233334444555566667777888899990000",
     };
     const PAY_ADDR_COMPANY = {
-      BEP20: "0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c", // TODO: заменить на реквизиты компании
-      TRC20: "TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs", // TODO
-      ERC20: "0x1111222233334444555566667777888899990000", // TODO
+      BEP20: "0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c",
+      TRC20: "TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs",
+      ERC20: "0x1111222233334444555566667777888899990000",
     };
 
-    const $ = (s) => document.querySelector(s);
+    const $  = (s) => document.querySelector(s);
     const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-    const DBKEY = "CATM_DB_v3"; // bump схема: добавили задачи в админке
+    const DBKEY = "CATM_DB_v3";
     const loadDB = () => {
       try {
         return JSON.parse(localStorage.getItem(DBKEY) || "null") || { users: {}, orders: [], tasks: [], disclaimerAccepted: {} };
-      } catch (e) {
-        return { users: {}, orders: [], tasks: [], disclaimerAccepted: {} };
-      }
+      } catch { return { users: {}, orders: [], tasks: [], disclaimerAccepted: {} }; }
     };
     const db = loadDB();
     const saveDB = () => localStorage.setItem(DBKEY, JSON.stringify(db));
@@ -104,47 +81,38 @@ function CryptoATMMiniApp() {
 
     if (!db.users[CURRENT_USER.id]) {
       db.users[CURRENT_USER.id] = {
-        id: CURRENT_USER.id,
-        username: CURRENT_USER.username,
-        created_at: new Date().toISOString(),
-        atm: START_BONUS_ATM,
-        ref_code: "REF" + (CURRENT_USER.id || Math.floor(Math.random() * 1e6)),
-        referred_by: null,
-        orders: [],
-        referrals: [],
-        tasks: [],
-        start_bonus_given: true,
+        id: CURRENT_USER.id, username: CURRENT_USER.username, created_at: new Date().toISOString(),
+        atm: START_BONUS_ATM, ref_code: "REF" + (CURRENT_USER.id || Math.floor(Math.random() * 1e6)),
+        referred_by: null, orders: [], referrals: [], tasks: [], start_bonus_given: true,
       };
       saveDB();
     }
     const user = () => db.users[CURRENT_USER.id];
 
-    const tabAdminBtn = document.querySelector("#tab-admin-btn");
+    const tabAdminBtn = $("#tab-admin-btn");
     if (tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
 
     const state = {
-      period: 1,
-      atmDiscount: 0,
-      cart: [],
+      period: 1, atmDiscount: 0, cart: [],
       pay: { chain: "BEP20", dest: "admin", addr: PAY_ADDR_ADMIN.BEP20, amount: 0, memo: "" },
     };
     const setHash = (tab) => (location.hash = "#/" + tab);
     const currentTab = () => location.hash.replace("#/", "") || "shop";
     const applyBottomOffset = () => {
-      const bar = document.querySelector("#bottom-bar");
+      const bar = $("#bottom-bar");
       if (!bar) return;
       document.documentElement.style.setProperty("--bottom-h", Math.ceil(bar.getBoundingClientRect().height) + "px");
     };
 
     const renderHeader = () => {
-      const chipName = document.querySelector("#chip-name");
-      const chipAtm = document.querySelector("#chip-atm");
-      const chipOrders = document.querySelector("#chip-orders");
-      const refCode = document.querySelector("#ref-code");
+      const chipName = $("#chip-name");
+      const chipAtm = $("#chip-atm");
+      const chipOrders = $("#chip-orders");
+      const refCode = $("#ref-code");
       if (chipName) chipName.textContent = "@" + (CURRENT_USER.username || "guest");
-      if (chipAtm) chipAtm.textContent = String(user().atm);
+      if (chipAtm)  chipAtm.textContent  = String(user().atm);
       if (chipOrders) chipOrders.textContent = String(user().orders.length);
-      if (refCode) refCode.value = user().ref_code;
+      if (refCode)  refCode.value = user().ref_code;
     };
 
     const priceFor = (item, months) => {
@@ -159,10 +127,10 @@ function CryptoATMMiniApp() {
       const wantATM = Math.min(state.atmDiscount || 0, atmMax, user().atm);
       const eurMinus = Math.floor(wantATM / 100);
       const finalEur = Math.max(0, eur - eurMinus);
-      const cartCount = document.querySelector("#cart-count");
-      const cartTotalEur = document.querySelector("#cart-total-eur");
-      const cartTotalAtm = document.querySelector("#cart-total-atm");
-      const cartTotalFinal = document.querySelector("#cart-total-final");
+      const cartCount = $("#cart-count");
+      const cartTotalEur = $("#cart-total-eur");
+      const cartTotalAtm = $("#cart-total-atm");
+      const cartTotalFinal = $("#cart-total-final");
       if (cartCount) cartCount.textContent = String(state.cart.length);
       if (cartTotalEur) cartTotalEur.textContent = "€" + eur;
       if (cartTotalAtm) cartTotalAtm.textContent = wantATM + " ATM";
@@ -172,7 +140,7 @@ function CryptoATMMiniApp() {
     };
 
     const renderCatalog = () => {
-      const grid = document.querySelector("#catalog");
+      const grid = $("#catalog");
       if (!grid) return;
       grid.innerHTML = "";
       const periodEl = document.getElementById("period");
@@ -243,7 +211,10 @@ function CryptoATMMiniApp() {
       renderHeader();
     };
 
-    const toast = (t) => { if (tg && tg.showPopup) tg.showPopup({ title: "", message: String(t), buttons: [{ type: "close" }] }); else console.log("[toast]", t); };
+    const toast = (t) => {
+      if (tg && tg.showPopup) tg.showPopup({ title: "", message: String(t), buttons: [{ type: "close" }] });
+      else console.log("[toast]", t);
+    };
 
     const openItemModal = (code) => {
       const it = CATALOG.find((x) => x.code === code);
@@ -253,7 +224,7 @@ function CryptoATMMiniApp() {
       const desc = document.querySelector("#item-desc");
       const modal = document.querySelector("#modal-item");
       if (title) title.textContent = it.name;
-      if (desc) desc.innerHTML = `
+      if (desc)  desc.innerHTML = `
         <div class="muted" style="margin-bottom:8px">${it.desc}</div>
         ${long.length ? `<ul class="muted">${long.map((b)=>`<li>${b}</li>`).join("")}</ul>` : ""}
       `;
@@ -277,7 +248,10 @@ function CryptoATMMiniApp() {
       let seed = 0;
       for (let i = 0; i < text.length; i++) seed = ((seed * 33 + text.charCodeAt(i)) >>> 0);
       const n = 21, s = Math.floor((c.width - 20) / n), off = 10;
-      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { seed = (seed * 1103515245 + 12345) >>> 0; const v = seed & 1; if (v) ctx.fillRect(off + x * s, off + y * s, s - 1, s - 1); }
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+        seed = (seed * 1103515245 + 12345) >>> 0; const v = seed & 1;
+        if (v) ctx.fillRect(off + x * s, off + y * s, s - 1, s - 1);
+      }
     };
 
     const openCryptoModal = (eur, chain = "BEP20", memo = "") => {
@@ -290,39 +264,30 @@ function CryptoATMMiniApp() {
       const memoEl = document.querySelector("#pay-memo");
       const modal = document.querySelector("#modal-crypto");
       if (chainSel) chainSel.value = chain;
-      if (destSel) destSel.value = state.pay.dest;
-      if (addrEl) addrEl.textContent = state.pay.addr;
+      if (destSel)  destSel.value  = state.pay.dest;
+      if (addrEl)   addrEl.textContent = state.pay.addr;
       if (amountEl) amountEl.textContent = `€${eur}`;
-      if (memoEl) memoEl.textContent = memo || "CRYPTOATM";
+      if (memoEl)   memoEl.textContent   = memo || "CRYPTOATM";
       if (modal) modal.style.display = "flex";
       drawQR(state.pay.addr);
       applyBottomOffset();
     };
-    const closeCrypto = () => { const m = document.querySelector("#modal-crypto"); if (m) m.style.display = "none"; };
+    const closeCrypto = () => { const m = document.getElementById("modal-crypto"); if (m) m.style.display = "none"; };
 
     const createPaymentIntent = async (order) => {
       const payload = {
-        user_id: CURRENT_USER.id,
-        username: CURRENT_USER.username,
-        items: order.items,
-        eur: order.eur_final,
-        atm_used: order.atm_used,
-        network: state.pay.chain,
-        address: state.pay.addr,
-        dest: state.pay.dest,
-        memo: order.memo,
-        initData: (tg && (tg.initData || tg.initDataUnsafe)) || null,
+        user_id: CURRENT_USER.id, username: CURRENT_USER.username,
+        items: order.items, eur: order.eur_final, atm_used: order.atm_used,
+        network: state.pay.chain, address: state.pay.addr, dest: state.pay.dest,
+        memo: order.memo, initData: (tg && (tg.initData || tg.initDataUnsafe)) || null,
       };
       try {
-        // const res = await fetch('/api/payment-intent', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+        // const res = await fetch('https://YOUR_API/payment-intent', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
         // const data = await res.json();
         // return data.intent_id || null;
         await new Promise((r) => setTimeout(r, 400));
         return "intent_" + Math.random().toString(36).slice(2, 9);
-      } catch (e) {
-        console.error(e);
-        return null;
-      }
+      } catch (e) { console.error(e); return null; }
     };
 
     const createOrder = () => {
@@ -335,18 +300,10 @@ function CryptoATMMiniApp() {
       if (wantATM > 0) user().atm = Math.max(0, user().atm - wantATM);
       const memo = "ORDER-" + (db.orders.length + 1);
       const order = {
-        id: db.orders.length + 1,
-        user: CURRENT_USER.id,
+        id: db.orders.length + 1, user: CURRENT_USER.id,
         items: state.cart.map((x) => ({ code: x.code, name: x.name, months: x.months, amount: x.amount })),
-        method: "crypto",
-        dest: state.pay.dest,
-        eur,
-        atm_used: wantATM,
-        eur_final: finalEur,
-        status: "waiting",
-        created_at: new Date().toISOString(),
-        memo,
-        intent_id: null,
+        method: "crypto", dest: state.pay.dest, eur, atm_used: wantATM, eur_final: finalEur,
+        status: "waiting", created_at: new Date().toISOString(), memo, intent_id: null,
       };
       db.orders.push(order);
       user().orders.push(order.id);
@@ -441,7 +398,6 @@ function CryptoATMMiniApp() {
       const ttb = document.querySelector("#admin-tasks tbody");
       if (ttb) {
         ttb.innerHTML = "";
-        // собрать все pending задачи
         users.forEach((u) => {
           (u.tasks || []).forEach((t, idx) => {
             if (t.status === "pending") {
@@ -480,25 +436,24 @@ function CryptoATMMiniApp() {
         return;
       }
       const act = btn.dataset.act;
-      if (act === "add") { addToCart(btn.dataset.code); return; }
-      if (act === "remove") { removeFromCart(btn.dataset.code); return; }
-      if (act === "details") { openItemModal(btn.dataset.code); return; }
+      if (act === "add")      { addToCart(btn.dataset.code); return; }
+      if (act === "remove")   { removeFromCart(btn.dataset.code); return; }
+      if (act === "details")  { openItemModal(btn.dataset.code); return; }
       if (act === "submit-task") {
         const id = +btn.dataset.id;
         const proofEl = document.getElementById(`proof-${id}`);
         const proof = (proofEl && proofEl.value && proofEl.value.trim()) || "";
         if (!proof) return toast("Добавьте пруф");
-        user().tasks = user().tasks || {};
-        (user().tasks || (user().tasks=[]));
+        user().tasks = user().tasks || [];
         user().tasks.push({ id, proof, at: new Date().toISOString(), status: "pending" });
         saveDB();
         toast("Отправлено на проверку");
         if (proofEl) proofEl.value = "";
         return;
       }
-      if (btn.id === "cart-clear") { clearCart(); return; }
+      if (btn.id === "cart-clear")   { clearCart(); return; }
       if (btn.id === "checkout-btn") { createOrder(); return; }
-      if (btn.id === "ref-copy") { navigator.clipboard.writeText(user().ref_code).then(() => toast("Скопировано")); return; }
+      if (btn.id === "ref-copy")     { navigator.clipboard.writeText(user().ref_code).then(() => toast("Скопировано")); return; }
       if (btn.id === "ref-bind-btn") {
         const inp = document.getElementById("ref-bind-input");
         const code = (inp && inp.value && inp.value.trim().toUpperCase()) || "";
@@ -523,23 +478,21 @@ function CryptoATMMiniApp() {
         URL.revokeObjectURL(url);
         return;
       }
-      if (btn.id === "copy-addr") { navigator.clipboard.writeText((document.getElementById("pay-addr")?.textContent || "")); toast("Адрес скопирован"); return; }
+      if (btn.id === "copy-addr")   { navigator.clipboard.writeText((document.getElementById("pay-addr")?.textContent || "")); toast("Адрес скопирован"); return; }
       if (btn.id === "copy-amount") { navigator.clipboard.writeText(((document.getElementById("pay-amount")?.textContent) || "").replace("€", "")); toast("Сумма скопирована"); return; }
-      if (btn.id === "copy-memo") { navigator.clipboard.writeText((document.getElementById("pay-memo")?.textContent || "")); toast("Назначение скопировано"); return; }
-      if (btn.id === "paid-btn") { toast("Спасибо! Мы отметим заказ после проверки."); closeCrypto(); return; }
-      if (btn.id === "close-crypto") { closeCrypto(); return; }
-      if (btn.id === "close-item") { closeItem(); return; }
-      if (btn.id === "auth-close") { const m = document.getElementById("modal-auth"); if (m) m.style.display = "none"; return; }
-      if (btn.id === "accept") { db.disclaimerAccepted[CURRENT_USER.id] = true; saveDB(); const m = document.getElementById("modal-disclaimer"); if (m) m.style.display = "none"; return; }
-      if (btn.id === "decline") { if (tg && tg.close) tg.close(); else window.location.href = "about:blank"; return; }
+      if (btn.id === "copy-memo")   { navigator.clipboard.writeText((document.getElementById("pay-memo")?.textContent || "")); toast("Назначение скопировано"); return; }
+      if (btn.id === "paid-btn")    { toast("Спасибо! Мы отметим заказ после проверки."); closeCrypto(); return; }
+      if (btn.id === "close-crypto"){ closeCrypto(); return; }
+      if (btn.id === "close-item")  { closeItem(); return; }
+      if (btn.id === "auth-close")  { const m = document.getElementById("modal-auth"); if (m) m.style.display = "none"; return; }
+      if (btn.id === "accept")      { db.disclaimerAccepted[CURRENT_USER.id] = true; saveDB(); const m = document.getElementById("modal-disclaimer"); if (m) m.style.display = "none"; return; }
+      if (btn.id === "decline")     { if (tg && tg.close) tg.close(); else window.location.href = "about:blank"; return; }
 
-      // ADMIN actions
       if (act === "mark-paid" && ADMIN_IDS.includes(CURRENT_USER.id)) {
         const id = +(btn.dataset.id || 0);
         const o = db.orders.find((x) => x.id === id);
         if (o) {
           o.status = "paid";
-          // Реферальная награда (один раз)
           const buyer = db.users[o.user];
           if (buyer && buyer.referred_by) {
             const refUser = db.users[buyer.referred_by];
@@ -634,7 +587,6 @@ function CryptoATMMiniApp() {
     document.addEventListener("touchstart", touchStart, { passive: true });
     document.addEventListener("touchend", touchEnd);
 
-    // runtime sanity checks (простые проверки, не юнит-тесты)
     console.assert(typeof priceFor === "function", "priceFor should be defined");
     console.assert(document.getElementById("catalog") !== null, "#catalog should exist");
     console.assert(document.getElementById("copy-amount") !== null, "#copy-amount button should exist");
@@ -659,44 +611,220 @@ header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8p
 .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}.tab{appearance:none;border:var(--b1);background:var(--card);color:var(--txt);border-radius:12px;padding:8px 12px;font-weight:800;cursor:pointer}.tab.active{background:linear-gradient(135deg, rgba(245,215,122,.18), rgba(212,175,55,.14));box-shadow: 0 0 0 1px rgba(212,175,55,.5) inset}.page{display:none}.page.active{display:block}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}@media(max-width:1020px){.col-8,.col-6,.col-4{grid-column:span 12}}.card{background:var(--card);border:var(--b1);border-radius:var(--r-xl);padding:14px;box-shadow:var(--shadow)}.card h3{margin:0 0 8px}.muted{color:var(--muted)}.badge{display:inline-block;background:rgba(255,255,255,.06);border:var(--b1);border-radius:8px;padding:4px 8px;color:var(--muted);font-size:12px}
 .btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;transition:transform .04s ease, box-shadow .2s ease;background:#1a2030;color:var(--txt);border:1px solid rgba(255,255,255,.1)}.btn.primary{background:linear-gradient(135deg, #715d1d, #f3d46b 40%, #c9a529);color:#0b0b0c;text-shadow:0 1px 0 rgba(255,255,255,.35);border:1px solid rgba(245,215,122,.65);box-shadow: 0 4px 18px rgba(212,175,55,.28), 0 1px 0 rgba(255,255,255,.25) inset}.btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.3)}.btn:active{transform:translateY(1px)}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}input,select,textarea{width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#11161f;color:var(--txt);outline:none}select{padding-right:32px}.label{color:var(--muted);font-weight:700}.line{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.1);padding-top:10px;margin-top:10px}.price{font-weight:900}.kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-.bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96));padding:10px 10px calc(10px + var(--safe-bot))}.bb-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0e1117;border:var(--b1);border-radius:16px;padding:10px 12px;pointer-events:auto}
+.bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96));padding:10px 10px calc(10px + var(--safe-bot))}.bb-inner{max-width:1160px;margin:0 авто;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0e1117;border:var(--b1);border-radius:16px;padding:10px 12px;pointer-events:auto}
 .modal-back{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:20px 14px}.modal{max-width:680px;width:100%;background:#0e1117;border:var(--b1);border-radius:18px;box-shadow:var(--shadow);padding:16px}.modal h2{margin:0 0 10px}.modal .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 .table{width:100%;border-collapse:separate;border-spacing:0;border:var(--b1);border-radius:12px;overflow:hidden}.table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08)}.table th{background:#101421;color:var(--muted);text-align:left}.table tr:last-child td{border-bottom:0}
 .visually-hidden{position:absolute;left:-9999px}.btn.touching{filter:brightness(1.03)}
       `}</style>
 
       <div className="wrap">
-        <!-- ВЕСЬ ТВОЙ JSX ИЗ СООБЩЕНИЯ (header/nav/pages/модалки) — УЖЕ ВСТАВЛЕН -->
-        <!-- см. исходник: я перенёс полностью разметку из твоего компонента -->
-        <!-- ... (всё как в твоём коде) ... -->
+        <header>
+          <div className="hbar">
+            <div className="brand">
+              <div className="logo" aria-hidden="true" />
+              <div>
+                <h1 id="brand-title">CRYPTOATM.TECH</h1>
+                <small>Подписки • Пакеты • Копитрейдинг • Рефералы</small>
+              </div>
+            </div>
+            <div className="userchips">
+              <div className="chip">👤 <b id="chip-name">@guest</b></div>
+              <div className="chip">ATM: <b id="chip-atm">0</b></div>
+              <div className="chip">Заказы: <b id="chip-orders">0</b></div>
+            </div>
+          </div>
+          <nav className="tabs" id="tabs" aria-label="Навигация">
+            <button className="tab active" data-tab="shop" type="button">🛒 Магазин</button>
+            <button className="tab" data-tab="orders" type="button">📄 Заказы</button>
+            <button className="tab" data-tab="ref" type="button">👥 Рефералы</button>
+            <button className="tab" data-tab="tasks" type="button">🧩 Задания</button>
+            <button className="tab" data-tab="balance" type="button">💰 Баланс</button>
+            <button className="tab" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 Админ</button>
+            <button className="tab" data-tab="faq" type="button">❓ FAQ</button>
+          </nav>
+        </header>
+
+        <main id="pages">
+          <section id="page-shop" className="page active">
+            <div className="grid">
+              <div className="col-12 card">
+                <h3>Оформление подписки</h3>
+                <p className="muted">Выберите срок 1/3/6 мес (скидка ~0/10/20%). ATM можно списать до 25% (100 ATM = €1).</p>
+                <div className="row">
+                  <div className="kv" style={{ minWidth: 240 }}>
+                    <label className="label" htmlFor="period">Срок</label>
+                    <select id="period"><option value="1">1 месяц</option><option value="3">3 месяца</option><option value="6">6 месяцев</option></select>
+                  </div>
+                  <div className="kv" style={{ minWidth: 260 }}>
+                    <label className="label" htmlFor="atm-discount">Списать ATM (макс 25%)</label>
+                    <input id="atm-discount" type="number" min={0} step={50} defaultValue={0} placeholder="0" inputMode="numeric" />
+                  </div>
+                </div>
+              </div>
+              <div id="catalog" className="col-12 grid"></div>
+            </div>
+          </section>
+
+          <section id="page-orders" className="page">
+            <div className="grid">
+              <div className="col-12 card">
+                <h3>История заказов</h3>
+                <table className="table" id="orders-table"><thead><tr><th>№</th><th>Товар</th><th>Срок</th><th>Метод</th><th>Сумма</th><th>Статус</th><th>Дата</th><th>Intent</th></tr></thead><tbody></tbody></table>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-ref" className="page">
+            <div className="grid">
+              <div className="col-12 card">
+                <h3>Реферальная программа</h3>
+                <p className="muted">Делитесь кодом. За оплаченные подписки друзей — бонус ATM. Ваш код:</p>
+                <div className="row"><input id="ref-code" readOnly /><button className="btn primary" id="ref-copy" type="button">Скопировать</button></div>
+                <div className="line">
+                  <div className="muted">Привязать чужой код</div>
+                  <div className="row"><input id="ref-bind-input" placeholder="REF123456" /><button className="btn" id="ref-bind-btn" type="button">Привязать</button></div>
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <table className="table" id="ref-table"><thead><tr><th>Партнёр</th><th>Дата</th><th>Оплата</th><th>Вознаграждение</th></tr></thead><tbody></tbody></table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-tasks" className="page">
+            <div className="grid">
+              <div className="col-12 card">
+                <h3>Задания за ATM</h3>
+                <div id="tasks" className="grid"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-balance" className="page">
+            <div className="grid">
+              <div className="col-12 card">
+                <h3>Баланс ATM</h3>
+                <p className="muted">Коины выдаются за выполнение заданий и через реферальные бонусы. Стартовый бонус начисляется при первой авторизации.</p>
+                <div className="row">
+                  <div className="chip">Текущий баланс: <b id="atm-balance">0</b></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-admin" className="page">
+            <div className="grid">
+              <div className="col-12 card">
+                <h3>Админ-панель</h3>
+                <p className="muted">Сводка по пользователям, заказам, рефералам и задачам.</p>
+                <div className="row"><button className="btn" id="admin-refresh" type="button">Обновить</button><button className="btn ghost" id="admin-export" type="button">Экспорт JSON</button></div>
+                <div className="grid" style={{ marginTop: 12 }}>
+                  <div className="col-12 card" id="admin-stats"></div>
+                  <div className="col-12 card"><h3>Пользователи</h3><table className="table" id="admin-users"><thead><tr><th>ID</th><th>Username</th><th>ATM</th><th>Заказы</th><th>Реф-код</th><th>От кого</th><th>Дата</th></tr></thead><tbody></tbody></table></div>
+                  <div className="col-12 card"><h3>Заказы</h3><table className="table" id="admin-orders"><thead><tr><th>#</th><th>User</th><th>Товар</th><th>Срок</th><th>Метод</th><th>€</th><th>ATM</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
+                  <div className="col-12 card"><h3>Задания (ожидают проверки)</h3><table className="table" id="admin-tasks"><thead><tr><th>UserID</th><th>Username</th><th>Задание</th><th>Пруф</th><th>Награда</th><th>Статус</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="page-faq" className="page">
+            <div className="grid">
+              <div className="col-12 card">
+                <h3>FAQ</h3>
+                <ul className="muted">
+                  <li>Подписки: отдельно по ботам или пакеты Premium/Enterprise; копитрейдинг — €50/мес + % от прибыли.</li>
+                  <li>Оплата: криптой (QR/адрес); скидка ATM до 25% (100 ATM = €1).</li>
+                  <li>Рефералы: ваш код формата REF&lt;id&gt;. За оплату приглашённых — бонусы.</li>
+                  <li>Задания: пруфы проверяются модерацией; награда в ATM.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </main>
       </div>
 
       <div className="bottom-bar" id="bottom-bar">
-        <!-- ... -->
+        <div className="bb-inner">
+          <div className="row">
+            <div className="chip">Позиций: <b id="cart-count">0</b></div>
+            <div className="chip">Итого: <b id="cart-total-eur">€0</b> / <b id="cart-total-atm">0 ATM</b></div>
+            <div className="chip">С учётом ATM: <b id="cart-total-final">€0</b></div>
+          </div>
+          <div className="row">
+            <button className="btn" id="cart-clear" type="button">Очистить</button>
+            <button className="btn primary" id="checkout-btn" type="button">Оплатить</button>
+          </div>
+        </div>
       </div>
 
       <div className="modal-back" id="modal-auth" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-        <!-- ... -->
+        <div className="modal">
+          <h2 id="auth-title">Требуется авторизация</h2>
+          <p className="muted">Откройте приложение внутри Telegram, чтобы продолжить. Если вы разработчик — включите Mini App и передайте initData.</p>
+          <div className="foot"><button className="btn" id="auth-close" type="button">Закрыть</button></div>
+        </div>
       </div>
 
       <div className="modal-back" id="modal-disclaimer" role="dialog" aria-modal="true" aria-labelledby="disc-title">
-        <!-- ... -->
+        <div className="modal">
+          <h2 id="disc-title">Дисклеймер</h2>
+          <p className="muted">Это не финансовые рекомендации. Рынок волатилен; любые сигналы могут ошибаться. Проводите собственный анализ.</p>
+          <div className="foot"><button className="btn" id="decline" type="button">Не согласен</button><button className="btn primary" id="accept" type="button">Я понимаю и несу ответственность</button></div>
+        </div>
       </div>
 
       <div className="modal-back" id="modal-crypto" role="dialog" aria-modal="true" aria-labelledby="pay-title">
-        <!-- ... -->
+        <div className="modal">
+          <h2 id="pay-title">Оплата криптовалютой</h2>
+          <p className="muted">Выберите получателя и сеть. Отсканируйте QR или скопируйте адрес. После оплаты нажмите «Я оплатил(а)» — заказ перейдёт в обработку.</p>
+          <div className="row">
+            <canvas id="qr" width="180" height="180" style={{ background: "#fff", borderRadius: 8 }}></canvas>
+            <div style={{ flex: 1 }}>
+              <div className="kv"><span className="label">Получатель</span>
+                <select id="pay-dest-select">
+                  <option value="admin">Биржа администратора</option>
+                  <option value="company">Счёт компании</option>
+                </select>
+              </div>
+              <div className="kv"><span className="label">Сеть</span>
+                <select id="pay-chain-select">
+                  <option value="BEP20">BNB Smart Chain (USDC)</option>
+                  <option value="TRC20">TRON TRC20 (USDT)</option>
+                  <option value="ERC20" disabled>Ethereum ERC20 (скоро)</option>
+                </select>
+              </div>
+              <div className="kv"><span className="label">Адрес</span><code id="pay-addr" style={{ wordBreak: "break-all" }}></code></div>
+              <div className="kv"><span className="label">Сумма</span><b id="pay-amount">—</b> <button className="btn" id="copy-amount" type="button" style={{ marginLeft: 8 }}>Копировать</button></div>
+              <div className="kv"><span className="label">Назначение</span><b id="pay-memo">—</b> <button className="btn" id="copy-memo" type="button" style={{ marginLeft: 8 }}>Копировать</button></div>
+              <div className="row" style={{ marginTop: 8 }}><button className="btn" id="copy-addr" type="button">Скопировать адрес</button><button className="btn primary" id="paid-btn" type="button">Я оплатил(а)</button></div>
+            </div>
+          </div>
+          <div className="foot"><button className="btn" id="close-crypto" type="button">Закрыть</button></div>
+        </div>
       </div>
 
       <div className="modal-back" id="modal-item" role="dialog" aria-modal="true" aria-labelledby="item-title">
-        <!-- ... -->
+        <div className="modal">
+          <h2 id="item-title">Товар</h2>
+          <div id="item-desc" className="muted"></div>
+          <div className="foot"><button className="btn" id="close-item" type="button">Закрыть</button></div>
+        </div>
       </div>
     </>
   );
 }
 
-// Монтируем приложение
+// Монтируем
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<CryptoATMMiniApp />);
+
+// Покажи ошибку, если что-то пойдёт не так (для дебага)
+window.addEventListener('error', e => {
+  console.error(e.error || e.message);
+  const msg = (e.error && e.error.stack) || e.message;
+  document.body.insertAdjacentHTML('afterbegin', `<pre style="position:fixed;z-index:9999;top:0;left:0;background:#000c;color:#fff;padding:8px;font:12px/1.3 monospace;max-width:100vw;white-space:pre-wrap">${msg}</pre>`);
+});
     </script>
   </body>
 </html>
