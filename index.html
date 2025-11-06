@@ -1,1019 +1,660 @@
-'use client';
-import React, { useEffect } from "react";
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>CryptoATM.tech — Mini App</title>
+  <meta name="color-scheme" content="dark" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-export default function CryptoATMMiniApp() {
-  useEffect(() => {
-    // === TELEGRAM INIT ===
-    const tg = (window && window.Telegram && window.Telegram.WebApp) || null;
-    try {
-      tg && tg.expand && tg.expand();
-      tg && tg.setHeaderColor && tg.setHeaderColor("#0a0b0e");
-      tg && tg.setBackgroundColor && tg.setBackgroundColor("#0a0b0e");
-    } catch (e) {}
+  <!-- React + ReactDOM (UMD) + Babel (для JSX без сборки) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    // === CONFIG ===
-    const ADMIN_IDS = [568646738];
-    const START_BONUS_ATM = 250;
-    const REF_BONUS_PERCENT = 0.10; // 10% от евро-суммы
-    const ATM_RATE = 100; // 100 ATM = €1
+  <style>
+    :root{--bg:#0a0b0e;--panel:#111319;--card:#141821;--muted:#a5adbb;--txt:#f1f5fb;--gold:#d4af37;--gold-2:#f5d77a;--gold-glow:rgba(212,175,55,.28);--accent:#00e5ff;--green:#22e39e;--danger:#ff6a88;--b1:1px solid rgba(255,255,255,.08);--r:14px;--r-xl:18px;--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--bottom-h:96px;--shadow:0 6px 28px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.04) inset}
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.08), transparent 60%), var(--bg);color:var(--txt);font:14px/1.45 system-ui,-apple-system,Inter,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
+    .wrap{max-width:1160px;margin:0 auto;padding: calc(10px + var(--safe-top)) 14px calc(var(--bottom-h) + 14px)}
 
-    // === КАТАЛОГ ===
-    const CATALOG = [
-      { type: "bot", code: "CRYPTO_ATM", name: "Crypto ATM Bot", price: 71, desc: "BTC analytics, daily signals & levels." },
-      { type: "bot", code: "ALERTS", name: "Alerts Bot", price: 39, desc: "Whales, liquidations, funding, OI & volume alerts." },
-      { type: "bot", code: "NEWS", name: "News Bot", price: 29, desc: "CoinMarketCal + RSS + translation + tone analysis." },
-      { type: "pack", code: "PREMIUM", name: "Premium", price: 99, desc: "All 3 bots with discount." },
-      { type: "pack", code: "ENTERPRISE", name: "Enterprise", price: 199, desc: "Full access + consulting." },
-      { type: "service", code: "COPY", name: "Copy-trading", price: 50, desc: "€50/month + profit share. Risk-managed." },
-    ];
+    header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8px + var(--safe-top)) 14px 8px; background:linear-gradient(180deg, rgba(10,11,14,.95), rgba(10,11,14,.6)); backdrop-filter:saturate(120%) blur(6px); border-bottom: var(--b1)}
+    .hbar{ display:flex; align-items:center; justify-content:space-between; gap:12px }
+    .brand{ display:flex; align-items:center; gap:12px; min-width:0 }
+    .logo{ width:44px; height:44px; border-radius:12px; background: radial-gradient(140% 140% at 30% 20%, var(--gold-2), var(--gold) 60%, #6e570f); box-shadow: inset 0 2px 10px rgba(255,255,255,.25), 0 4px 18px var(--gold-glow) }
+    .brand h1{margin:0;font-size:18px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand small{display:block;color:var(--muted);margin-top:2px;font-size:12px}
+    .userchips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:var(--b1);border-radius:999px;padding:8px 12px;color:var(--txt)}
 
-    // === РАСШИРЕННЫЕ ОПИСАНИЯ ===
-    const CATALOG_LONG = {
-      CRYPTO_ATM: {
-        bullets: [
-          "BTC analytics: levels, demand/supply zones",
-          "Signals with probabilities and comments",
-          "Daily review with key metrics (OI, funding, volumes)",
-        ],
-      },
-      ALERTS: {
-        bullets: [
-          "Whale trades (spot/futures), liquidations",
-          "Funding/OI, volume spikes, and local levels",
-          "Direction suggestion + trigger explanation",
-        ],
-      },
-      NEWS: {
-        bullets: [
-          "CoinMarketCal + RSS: filters, auto-translate, tone",
-          "Top-3 digest, categories & keyword intelligence",
-          "Analytics export with sentiment impact",
-        ],
-      },
-      PREMIUM: { bullets: ["All 3 bots, one payment", "30% discount included"] },
-      ENTERPRISE: { bullets: ["Priority support", "Consulting & full access"] },
-      COPY: { bullets: ["€50/month + profit share", "Transparent reports & risk control"] },
-    };
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+    .tab{appearance:none;border:var(--b1);background:var(--card);color:var(--txt);border-radius:12px;padding:8px 12px;font-weight:800;cursor:pointer}
+    .tab.active{background:linear-gradient(135deg, rgba(245,215,122,.18), rgba(212,175,55,.14));box-shadow: 0 0 0 1px rgba(212,175,55,.5) inset}
+    .page{display:none}.page.active{display:block}
 
-    const PERIOD_DISCOUNT = { 1: 0, 3: 0.1, 6: 0.2 };
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}
+    @media(max-width:1020px){.col-8,.col-6,.col-4{grid-column:span 12}}
+    .card{background:var(--card);border:var(--b1);border-radius:var(--r-xl);padding:14px;box-shadow:var(--shadow)}
+    .card h3{margin:0 0 8px}
+    .muted{color:var(--muted)}
+    .badge{display:inline-block;background:rgba(255,255,255,.06);border:var(--b1);border-radius:8px;padding:4px 8px;color:var(--muted);font-size:12px}
 
-    // === РЕКВИЗИТЫ ===
-    const PAY_ADDR_ADMIN = {
-      BEP20: "0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c",
-      TRC20: "TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs",
-      ERC20: "0x1111222233334444555566667777888899990000",
-    };
-    const PAY_ADDR_COMPANY = {
-      BEP20: "0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c",
-      TRC20: "TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs",
-      ERC20: "0x1111222233334444555566667777888899990000",
-    };
+    .btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;transition:transform .04s ease, box-shadow .2s ease;background:#1a2030;color:var(--txt);border:1px solid rgba(255,255,255,.1)}
+    .btn.primary{background:linear-gradient(135deg, #715d1d, #f3d46b 40%, #c9a529);color:#0b0b0c;text-shadow:0 1px 0 rgba(255,255,255,.35);border:1px solid rgba(245,215,122,.65);box-shadow: 0 4px 18px rgba(212,175,55,.28), 0 1px 0 rgba(255,255,255,.25) inset}
+    .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.3)}
+    .btn:active{transform:translateY(1px)}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    input,select,textarea{width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#11161f;color:var(--txt);outline:none}
+    select{padding-right:32px}
+    .label{color:var(--muted);font-weight:700}
+    .line{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.1);padding-top:10px;margin-top:10px}
+    .price{font-weight:900}
+    .kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
 
-    // === УТИЛИТЫ ===
-    const $ = (s) => document.querySelector(s);
-    const $$ = (s) => Array.from(document.querySelectorAll(s));
+    .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96));padding:10px 10px calc(10px + var(--safe-bot))}
+    .bb-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0e1117;border:var(--b1);border-radius:16px;padding:10px 12px;pointer-events:auto}
 
-    // === LOCAL STORAGE DB ===
-    const DBKEY = "CATM_DB_v4";
-    const loadDB = () => {
-      try {
-        return JSON.parse(localStorage.getItem(DBKEY) || "null") || {
-          users: {},
-          orders: [],
-          tasks: [],
-          disclaimerAccepted: {},
+    .modal-back{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:20px 14px}
+    .modal{max-width:680px;width:100%;background:#0e1117;border:var(--b1);border-radius:18px;box-shadow:var(--shadow);padding:16px}
+    .modal h2{margin:0 0 10px}
+    .modal .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+    .table{width:100%;border-collapse:separate;border-spacing:0;border:var(--b1);border-radius:12px;overflow:hidden}
+    .table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .table th{background:#101421;color:var(--muted);text-align:left}
+    .table tr:last-child td{border-bottom:0}
+
+    .visually-hidden{position:absolute;left:-9999px}
+    .btn.touching{filter:brightness(1.03)}
+
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes pop{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}
+    .modal-back[style*="display: flex"]{animation:fadeIn .12s ease-out}
+    .modal{animation:pop .18s ease-out}
+    .btn:hover{filter:brightness(1.08)}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useEffect } = React;
+
+    function App(){
+      useEffect(()=>{
+        const tg = window.Telegram && window.Telegram.WebApp;
+        try {
+          tg && tg.expand && tg.expand();
+          tg && tg.setHeaderColor && tg.setHeaderColor('#0a0b0e');
+          tg && tg.setBackgroundColor && tg.setBackgroundColor('#0a0b0e');
+        } catch(e){}
+
+        const ADMIN_IDS = [568646738];
+        const START_BONUS_ATM = 250;
+        const REF_BONUS_PERCENT = 0.10; // 10% от €-суммы
+        const ATM_RATE = 100; // 100 ATM = €1
+
+        const CATALOG = [
+          {type:'bot',code:'CRYPTO_ATM',name:'Crypto ATM Bot',price:71,desc:'BTC analytics, daily signals & levels.'},
+          {type:'bot',code:'ALERTS',name:'Alerts Bot',price:39,desc:'Whales, liquidations, funding, OI & volume alerts.'},
+          {type:'bot',code:'NEWS',name:'News Bot',price:29,desc:'CoinMarketCal + RSS + translation + tone analysis.'},
+          {type:'pack',code:'PREMIUM',name:'Premium',price:99,desc:'All 3 bots with discount.'},
+          {type:'pack',code:'ENTERPRISE',name:'Enterprise',price:199,desc:'Full access + consulting.'},
+          {type:'service',code:'COPY',name:'Copy-trading',price:50,desc:'€50/month + profit share. Risk-managed.'},
+        ];
+        const CATALOG_LONG = {
+          CRYPTO_ATM:{bullets:['BTC analytics: levels & zones','Signals with probabilities + comments','Daily OI, funding, volumes']},
+          ALERTS:{bullets:['Whale trades (spot/futures), liquidations','Funding/OI, volume spikes, local levels','Direction + trigger explanation']},
+          NEWS:{bullets:['CoinMarketCal + RSS + tone','Top-3 digest, translate','Analytics export + keywords']},
+          PREMIUM:{bullets:['All 3 bots, one payment','Discount included']},
+          ENTERPRISE:{bullets:['Priority support','Consulting & full access']},
+          COPY:{bullets:['€50/month + profit share','Transparent reports & risk control']},
         };
-      } catch {
-        return { users: {}, orders: [], tasks: [], disclaimerAccepted: {} };
-      }
-    };
-    const db = loadDB();
-    const saveDB = () => localStorage.setItem(DBKEY, JSON.stringify(db));
+        const PERIOD_DISCOUNT = {1:0,3:0.1,6:0.2};
 
-    // === USER ===
-    const rawUser = tg?.initDataUnsafe?.user;
-    const CURRENT_USER = rawUser
-      ? {
-          id: rawUser.id,
-          username: rawUser.username || "user",
-          name: (rawUser.first_name || "") + (rawUser.last_name ? " " + rawUser.last_name : ""),
+        const PAY_ADDR_ADMIN = {
+          BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c',
+          TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs',
+          ERC20:'0x1111222233334444555566667777888899990000'
+        };
+        const PAY_ADDR_COMPANY = {
+          BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c',
+          TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs',
+          ERC20:'0x1111222233334444555566667777888899990000'
+        };
+
+        const $ = s=>document.querySelector(s);
+        const $$ = s=>Array.from(document.querySelectorAll(s));
+
+        const DBKEY='CATM_DB_HTMLv1';
+        function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)||'null') || {users:{},orders:[],tasks:[],disclaimerAccepted:{}} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:{}} } }
+        const db = loadDB();
+        const saveDB = ()=> localStorage.setItem(DBKEY, JSON.stringify(db));
+
+        const rawUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+        const CURRENT_USER = rawUser ? {
+          id: rawUser.id, username: rawUser.username||'user',
+          name: (rawUser.first_name||'') + (rawUser.last_name?(' '+rawUser.last_name):'')
+        } : { id:0, username:'guest', name:'Guest' };
+
+        if (!db.users[CURRENT_USER.id]){
+          db.users[CURRENT_USER.id] = {
+            id: CURRENT_USER.id, username: CURRENT_USER.username, created_at: new Date().toISOString(),
+            atm: START_BONUS_ATM, ref_code: 'REF'+(CURRENT_USER.id||Math.floor(Math.random()*1e6)),
+            referred_by: null, orders: [], referrals: [], tasks: [], start_bonus_given: true
+          };
+          saveDB();
         }
-      : { id: 0, username: "guest", name: "Guest" };
+        function user(){ return db.users[CURRENT_USER.id]; }
 
-    if (!db.users[CURRENT_USER.id]) {
-      db.users[CURRENT_USER.id] = {
-        id: CURRENT_USER.id,
-        username: CURRENT_USER.username,
-        created_at: new Date().toISOString(),
-        atm: START_BONUS_ATM,
-        ref_code: "REF" + (CURRENT_USER.id || Math.floor(Math.random() * 1e6)),
-        referred_by: null,
-        orders: [],
-        referrals: [],
-        tasks: [],
-        start_bonus_given: true,
-      };
-      saveDB();
+        const state = { period:1, atmDiscount:0, cart:[], pay:{chain:'BEP20', dest:'admin', addr: PAY_ADDR_ADMIN.BEP20, amount:0, memo:''} };
+
+        function setHash(tab){ location.hash = '#/'+tab; }
+        function currentTab(){ return (location.hash.replace('#/','') || 'shop'); }
+        function applyBottomOffset(){ const bar=$('#bottom-bar'); if(!bar) return; document.documentElement.style.setProperty('--bottom-h', Math.ceil(bar.getBoundingClientRect().height)+'px'); }
+
+        function renderHeader(){
+          $('#chip-name').textContent = '@'+(CURRENT_USER.username||'guest');
+          $('#chip-atm').textContent = String(user().atm);
+          $('#chip-orders').textContent = String(user().orders.length);
+          const refCode = $('#ref-code'); if(refCode) refCode.value = user().ref_code;
+        }
+
+        function priceFor(item, months){ const disc=PERIOD_DISCOUNT[months]||0; const perMonth=Math.round(item.price*(1-disc)); return perMonth*months; }
+
+        function updateCartUI(){
+          const eur = state.cart.reduce((s,x)=>s+x.amount,0);
+          const atmMax = Math.floor(eur*0.25)*ATM_RATE;
+          const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
+          const eurMinus = Math.floor(wantATM/ATM_RATE);
+          const finalEur = Math.max(0, eur-eurMinus);
+          $('#cart-count').textContent = String(state.cart.length);
+          $('#cart-total-eur').textContent = '€'+eur;
+          $('#cart-total-atm').textContent = wantATM+' ATM';
+          $('#cart-total-final').textContent = '€'+finalEur;
+          renderHeader(); applyBottomOffset();
+        }
+
+        function renderCatalog(){
+          const grid = $('#catalog'); if(!grid) return;
+          grid.innerHTML='';
+          const months = state.period = parseInt(($('#period') && $('#period').value) || '1',10);
+          state.atmDiscount = Math.max(0, parseInt(($('#atm-discount') && $('#atm-discount').value) || '0',10));
+          const eur = state.cart.reduce((s,x)=>s+x.amount,0); const atmMax=Math.floor(eur*0.25)*ATM_RATE;
+          if(state.atmDiscount>atmMax){ state.atmDiscount=atmMax; if($('#atm-discount')) $('#atm-discount').value = String(atmMax); }
+          CATALOG.forEach(it=>{
+            const total = priceFor(it, months); const inCart = state.cart.find(x=>x.code===it.code && x.months===months);
+            const card = document.createElement('div'); card.className='col-4 card';
+            card.innerHTML = `
+              <div class="row" style="justify-content:space-between;align-items:start">
+                <span class="badge">${it.type.toUpperCase()}</span>
+                <span class="price" style="color:var(--gold)">€${total} / ${months}м</span>
+              </div>
+              <h3 style="margin-top:6px">${it.name}</h3>
+              <p class="muted">${it.desc}</p>
+              <div class="line">
+                <button class="btn" data-act="details" data-code="${it.code}">Подробнее</button>
+                ${ inCart ? `<button class="btn" data-act="remove" data-code="${it.code}">Убрать</button>` : `<button class="btn primary" data-act="add" data-code="${it.code}">В корзину</button>` }
+              </div>`;
+            grid.appendChild(card);
+          });
+          updateCartUI();
+        }
+
+        function addToCart(code){
+          const months=state.period; const it=CATALOG.find(x=>x.code===code); if(!it) return;
+          if(state.cart.find(x=>x.code===code && x.months===months)) return;
+          state.cart.push({code:it.code,name:it.name,months,amount:priceFor(it,months)});
+          updateCartUI(); renderCatalog();
+        }
+        function removeFromCart(code){
+          const months=state.period;
+          state.cart = state.cart.filter(x=>!(x.code===code && x.months===months));
+          updateCartUI(); renderCatalog();
+        }
+        function clearCart(){ state.cart=[]; updateCartUI(); renderCatalog(); }
+
+        function renderOrders(){
+          const tb = $('#orders-table tbody'); if(!tb) return; tb.innerHTML='';
+          const rows = db.orders.filter(o=>o.user===CURRENT_USER.id).slice().reverse();
+          rows.forEach(o=>{
+            const tr = document.createElement('tr');
+            const names = o.items.map(i=>i.name+' ×'+i.months+'м').join(', ');
+            tr.innerHTML = `<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${o.method} (${o.dest||'-'})</td><td>€${o.eur_final} ${o.atm_used?`(+${o.atm_used} ATM)`:''}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.intent_id||'—'}</td>`;
+            tb.appendChild(tr);
+          });
+          renderHeader();
+        }
+
+        function toast(t){ if(tg&&tg.showPopup){ tg.showPopup({title:'',message:String(t),buttons:[{type:'close'}]}); } else { console.log('[toast]', t); } }
+
+        function openItemModal(code){
+          const it = CATALOG.find(x=>x.code===code); if(!it) return;
+          const long = (CATALOG_LONG[code] && CATALOG_LONG[code].bullets) || [];
+          $('#item-title').textContent = it.name;
+          $('#item-desc').innerHTML = `
+            <div class="muted" style="margin-bottom:8px">${it.desc}</div>
+            ${long.length ? `<ul class="muted">${long.map(b=>`<li>${b}</li>`).join('')}</ul>` : ''}
+          `;
+          $('#modal-item').style.display='flex';
+        }
+        function closeItem(){ $('#modal-item').style.display='none'; }
+
+        function getActiveAddr(){ const book = state.pay.dest==='company'? PAY_ADDR_COMPANY : PAY_ADDR_ADMIN; return book[state.pay.chain]; }
+
+        function drawQR(text){
+          const c = $('#qr'); if(!c) return; const ctx = c.getContext && c.getContext('2d'); if(!ctx) return;
+          ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle='#000';
+          let seed=0; for(let i=0;i<text.length;i++) seed=((seed*33+text.charCodeAt(i))>>>0);
+          const n=21,s=Math.floor((c.width-20)/n),off=10;
+          for(let y=0;y<n;y++) for(let x=0;x<n;x++){ seed=(seed*1103515245+12345)>>>0; const v=seed&1; if(v) ctx.fillRect(off+x*s, off+y*s, s-1, s-1); }
+        }
+
+        function openCryptoModal(eur, chain='BEP20', memo=''){
+          state.pay.chain = chain; state.pay.addr = getActiveAddr();
+          const chainSel = $('#pay-chain-select'), destSel = $('#pay-dest-select');
+          if(chainSel) chainSel.value = chain; if(destSel) destSel.value = state.pay.dest;
+          $('#pay-addr').textContent = state.pay.addr;
+          $('#pay-amount').textContent = `€${eur}`;
+          $('#pay-memo').textContent = memo || 'CRYPTOATM';
+          $('#modal-crypto').style.display='flex';
+          drawQR(state.pay.addr); applyBottomOffset();
+        }
+        function closeCrypto(){ $('#modal-crypto').style.display='none'; }
+
+        async function createPaymentIntent(order){
+          try{
+            await new Promise(r=>setTimeout(r,350));
+            return 'intent_'+Math.random().toString(36).slice(2,9);
+          }catch(e){ console.error(e); return null; }
+        }
+
+        function createOrder(){
+          if(state.cart.length===0) return toast('Корзина пуста');
+          const eur = state.cart.reduce((s,x)=>s+x.amount,0);
+          const atmMax = Math.floor(eur*0.25)*ATM_RATE;
+          const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
+          const eurMinus = Math.floor(wantATM/ATM_RATE);
+          const finalEur = Math.max(0, eur-eurMinus);
+          if(wantATM>0) user().atm = Math.max(0, user().atm - wantATM);
+
+          const memo='ORDER-'+(db.orders.length+1);
+          const order = { id: db.orders.length+1, user: CURRENT_USER.id, items: state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})), method:'crypto', dest: state.pay.dest, eur, atm_used: wantATM, eur_final: finalEur, status:'waiting', created_at:new Date().toISOString(), memo, intent_id: null };
+          db.orders.push(order); user().orders.push(order.id); saveDB();
+
+          state.cart=[]; state.atmDiscount=0; if($('#atm-discount')) $('#atm-discount').value='0';
+          updateCartUI(); renderOrders();
+
+          state.pay.amount=finalEur; state.pay.memo=memo;
+          openCryptoModal(finalEur, state.pay.chain, memo);
+
+          createPaymentIntent(order).then(id=>{
+            order.intent_id=id; saveDB(); renderOrders(); if(id) $('#pay-memo').textContent=id;
+          });
+        }
+
+        function renderRefs(){
+          const rc = $('#ref-code'); if(rc) rc.value = user().ref_code;
+          const tb = $('#ref-table tbody'); if(tb){ tb.innerHTML=''; for(const r of (user().referrals||[]).slice().reverse()){ const tr=document.createElement('tr'); tr.innerHTML = `<td>@${(db.users[r.uid] && db.users[r.uid].username) || r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid?'Да':'—'}</td><td>${r.reward||0} ATM</td>`; tb.appendChild(tr); } }
+          const hasRef = !!user().referred_by; if($('#ref-bind-input')) $('#ref-bind-input').disabled=hasRef; if($('#ref-bind-btn')) $('#ref-bind-btn').disabled=hasRef;
+        }
+
+        const TASK_DEF=[{id:1,title:'Подписка на TikTok',reward:100,hint:'URL на профиль/скрин'},{id:2,title:'Репост в сторис',reward:120,hint:'URL сторис'},{id:3,title:'Отзыв о проекте',reward:150,hint:'URL на отзыв'},{id:4,title:'Наклейка на авто',reward:500,hint:'URL на фото'}];
+        function renderTasks(){
+          const holder = $('#tasks'); if(!holder) return; holder.innerHTML='';
+          TASK_DEF.forEach(t=>{
+            const col=document.createElement('div'); col.className='col-6 card';
+            col.innerHTML = `<h3>#${t.id} ${t.title}</h3><p class="muted">Награда: <b>+${t.reward} ATM</b></p><input id="proof-${t.id}" type="url" placeholder="${t.hint}"><div class="line"><span class="muted">Проверка модератором</span><button class="btn primary" data-act="submit-task" data-id="${t.id}">Отправить</button></div>`;
+            holder.appendChild(col);
+          });
+        }
+
+        function renderBalance(){ const el=$('#atm-balance'); if(el) el.textContent = String(user().atm); }
+
+        function renderAdmin(){
+          const users = Object.values(db.users); const o=db.orders; const totalEur=o.reduce((s,x)=>s+x.eur_final,0); const totalAtm=users.reduce((s,u)=>s+u.atm,0);
+          const stats = $('#admin-stats'); if(stats) stats.innerHTML = `<div class="row"><div class="chip">Пользователи: <b>${users.length}</b></div><div class="chip">Заказы: <b>${o.length}</b></div><div class="chip">Выручка: <b>€${totalEur}</b></div><div class="chip">ATM на балансах: <b>${totalAtm}</b></div></div>`;
+          const utb = $('#admin-users tbody'); if(utb){ utb.innerHTML=''; users.slice().sort((a,b)=>b.id-a.id).forEach(u=>{ const refFrom=u.referred_by ? '@'+((db.users[u.referred_by] && db.users[u.referred_by].username)||u.referred_by) : '—'; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>${u.atm}</td><td>${u.orders.length}</td><td>${u.ref_code}</td><td>${refFrom}</td><td>${new Date(u.created_at).toLocaleDateString()}</td>`; utb.appendChild(tr); }); }
+          const otb = $('#admin-orders tbody'); if(otb){ otb.innerHTML=''; db.orders.slice().reverse().forEach(or=>{ const userName='@'+((db.users[or.user] && db.users[or.user].username)||or.user); const items = or.items.map(i=>i.code+'×'+i.months).join(', '); const tr=document.createElement('tr'); tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${or.method} (${or.dest||'-'})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td><button class="btn" data-act="mark-paid" data-id="${or.id}">Оплачен</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">Отмена</button></td>`; otb.appendChild(tr); }); }
+          const ttb = $('#admin-tasks tbody'); if(ttb){ ttb.innerHTML=''; users.forEach(u=>{ (u.tasks||[]).forEach((t,idx)=>{ if(t.status==='pending'){ const def=TASK_DEF.find(d=>d.id===t.id)||{reward:0,title:'#'+t.id}; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>#${t.id} ${def.title||''}</td><td>${t.proof||''}</td><td>+${def.reward} ATM</td><td>${t.status}</td><td><button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">Одобрить</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">Отклонить</button></td>`; ttb.appendChild(tr); } }) }); }
+        }
+
+        function switchTab(name){
+          $$('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+          $$('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+name));
+          if(name==='shop') renderCatalog();
+          if(name==='orders') renderOrders();
+          if(name==='ref') renderRefs();
+          if(name==='tasks') renderTasks();
+          if(name==='balance') renderBalance();
+          if(name==='admin') renderAdmin();
+          applyBottomOffset();
+        }
+
+        function getPinKey(uid){ return `PIN_OK_${uid}` }
+        function isPinSet(){ return !!user().pin; }
+        function isUnlocked(){ return !isPinSet() || sessionStorage.getItem(getPinKey(CURRENT_USER.id))==='1'; }
+        function showPinModal(mode){
+          const m=$('#modal-pin'), title=$('#pin-title'), sub=$('#pin-sub'), action=$('#pin-action'), reset=$('#pin-reset'), input=$('#pin-input');
+          if(!m||!title||!sub||!action||!reset||!input) return;
+          if(mode==='set'){
+            title.textContent='Создать ПИН-код'; sub.textContent='Введите 4 цифры. Запомните их: ПИН хранится локально.';
+            action.textContent='Сохранить'; reset.style.display='none'; input.value=''; m.style.display='flex'; input.focus();
+            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Введите 4 цифры'); user().pin=v; saveDB(); toast('ПИН сохранён'); m.style.display='none'; };
+          } else {
+            title.textContent='ПИН-код'; sub.textContent='Введите 4 цифры, чтобы разблокировать.';
+            action.textContent='Разблокировать'; reset.style.display = isPinSet()? 'inline-flex':'none'; input.value=''; m.style.display='flex'; input.focus();
+            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Введите 4 цифры'); if(v===user().pin){ sessionStorage.setItem(getPinKey(CURRENT_USER.id),'1'); toast('Разблокировано'); m.style.display='none'; } else toast('Неверный ПИН'); };
+          }
+        }
+        function ensureUnlocked(){ if(!isUnlocked()){ showPinModal('unlock'); return false; } return true; }
+
+        function ensureDisclaimer(){ const ok=db.disclaimerAccepted[CURRENT_USER.id]; $('#modal-disclaimer').style.display = ok ? 'none' : 'flex'; }
+
+        function onHashChange(){ switchTab(currentTab()); }
+        window.addEventListener('hashchange', onHashChange);
+
+        function clickHandler(e){
+          const btn = e.target && e.target.closest && e.target.closest('button, .btn'); if(!btn) return;
+          if(btn.classList.contains('tab')){ const t=btn.dataset.tab; if(t){ setHash(t); switchTab(t); } return; }
+          const act=btn.dataset.act;
+
+          if(act==='add'){ addToCart(btn.dataset.code); return; }
+          if(act==='remove'){ removeFromCart(btn.dataset.code); return; }
+          if(act==='details'){ openItemModal(btn.dataset.code); return; }
+
+          if(act==='submit-task'){
+            const id=+btn.dataset.id; const proofEl=$('#proof-'+id); const proof=(proofEl && proofEl.value && proofEl.value.trim()) || '';
+            if(!/^https?:\/\//i.test(proof)) return toast('Добавьте ссылку-пруф');
+            user().tasks=user().tasks||[]; user().tasks.push({id,proof,at:new Date().toISOString(),status:'pending'}); saveDB(); toast('Отправлено на проверку'); if(proofEl) proofEl.value=''; return;
+          }
+
+          if(btn.id==='cart-clear'){ clearCart(); return; }
+          if(btn.id==='checkout-btn'){ if(!ensureUnlocked()) return; createOrder(); return; }
+          if(btn.id==='ref-copy'){ navigator.clipboard.writeText(user().ref_code).then(()=>toast('Скопировано')); return; }
+          if(btn.id==='ref-bind-btn'){ const inp=$('#ref-bind-input'); const code=(inp && inp.value && inp.value.trim().toUpperCase()) || ''; if(!code) return toast('Введите код'); const owner=Object.values(db.users).find(u=>u.ref_code===code); if(!owner) return toast('Код не найден'); if(owner.id===CURRENT_USER.id) return toast('Нельзя привязать свой код'); if(user().referred_by) return toast('Код уже привязан'); user().referred_by=owner.id; owner.referrals.push({uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0}); saveDB(); renderRefs(); toast('Код привязан'); return; }
+          if(btn.id==='admin-refresh'){ renderAdmin(); return; }
+          if(btn.id==='admin-export'){ const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='cryptoatm_export.json'; a.click(); URL.revokeObjectURL(url); return; }
+          if(btn.id==='copy-addr'){ navigator.clipboard.writeText(($('#pay-addr')?.textContent)||''); toast('Address copied'); return; }
+          if(btn.id==='copy-amount'){ navigator.clipboard.writeText((($('#pay-amount')?.textContent)||'').replace('€','')); toast('Amount copied'); return; }
+          if(btn.id==='copy-memo'){ navigator.clipboard.writeText(($('#pay-memo')?.textContent)||''); toast('Memo copied'); return; }
+          if(btn.id==='paid-btn'){ toast('Thanks! We will verify the payment.'); closeCrypto(); return; }
+          if(btn.id==='close-crypto'){ closeCrypto(); return; }
+          if(btn.id==='close-item'){ closeItem(); return; }
+          if(btn.id==='auth-close'){ $('#modal-auth').style.display='none'; return; }
+          if(btn.id==='accept'){ db.disclaimerAccepted[CURRENT_USER.id]=true; saveDB(); $('#modal-disclaimer').style.display='none'; return; }
+
+          if(btn.id==='pin-manage'){ if(isPinSet()){ showPinModal('unlock'); } else { showPinModal('set'); } return; }
+          if(btn.id==='pin-close'){ $('#modal-pin').style.display='none'; return; }
+          if(btn.id==='pin-reset'){ if(!isPinSet()) return; user().pin=undefined; saveDB(); sessionStorage.removeItem(getPinKey(CURRENT_USER.id)); toast('ПИН удалён'); $('#modal-pin').style.display='none'; return; }
+
+          if(act==='mark-paid'){
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('Нет прав');
+            const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id); if(o){ o.status='paid';
+              const buyer=db.users[o.user]; if(buyer && buyer.referred_by){ const refUser=db.users[buyer.referred_by]; if(refUser){ const rec=(refUser.referrals||[]).find(r=>r.uid===buyer.id); if(rec && !rec.paid){ rec.paid=true; const atmReward=Math.max(0, Math.round((o.eur_final||0) * REF_BONUS_PERCENT * ATM_RATE)); rec.reward=atmReward; refUser.atm=(refUser.atm||0)+atmReward; } } }
+              saveDB(); renderOrders(); renderAdmin(); toast('Статус изменён: paid'); }
+            return;
+          }
+          if(act==='mark-cancel'){
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('Нет прав');
+            const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id); if(o){ o.status='canceled'; saveDB(); renderOrders(); renderAdmin(); toast('Статус изменён: canceled'); }
+            return;
+          }
+          if(act==='task-approve'){
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('Нет прав');
+            const uid=+(btn.dataset.uid||0); const idx=+(btn.dataset.idx||-1); const u=db.users[uid];
+            if(u && u.tasks && u.tasks[idx]){ const t=u.tasks[idx]; const def=TASK_DEF.find(d=>d.id===t.id)||{reward:0}; t.status='approved'; u.atm=(u.atm||0)+(def.reward||0); saveDB(); renderAdmin(); renderBalance(); toast('Задание #'+t.id+' одобрено (+'+def.reward+' ATM)'); }
+            return;
+          }
+          if(act==='task-reject'){
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('Нет прав');
+            const uid=+(btn.dataset.uid||0); const idx=+(btn.dataset.idx||-1); const u=db.users[uid];
+            if(u && u.tasks && u.tasks[idx]){ const t=u.tasks[idx]; t.status='rejected'; saveDB(); renderAdmin(); toast('Задание #'+t.id+' отклонено'); }
+            return;
+          }
+        }
+
+        function changeHandler(e){
+          const el=e.target; if(!el) return;
+          if(el.id==='period' || el.id==='atm-discount'){ renderCatalog(); }
+          if(el.id==='pay-chain-select'){ state.pay.chain = el.value; state.pay.addr=getActiveAddr(); $('#pay-addr').textContent=state.pay.addr; drawQR(state.pay.addr); }
+          if(el.id==='pay-dest-select'){ state.pay.dest = el.value; state.pay.addr=getActiveAddr(); $('#pay-addr').textContent=state.pay.addr; drawQR(state.pay.addr); }
+        }
+
+        function touchStart(e){ const b=e.target && e.target.closest && e.target.closest('.btn'); if(b) b.classList.add('touching'); }
+        function touchEnd(){ $$('.btn.touching').forEach(b=>b.classList.remove('touching')); }
+
+        function boot(){
+          const tabAdminBtn = document.querySelector('#tab-admin-btn'); if(tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
+          if(CURRENT_USER.id===0){ $('#modal-auth').style.display='flex'; }
+          switchTab(currentTab()); renderHeader(); applyBottomOffset(); ensureDisclaimer();
+          if(isPinSet()){ sessionStorage.removeItem(getPinKey(CURRENT_USER.id)); showPinModal('unlock'); }
+          setInterval(()=>{ const chip=$('#chip-atm'); if(chip) chip.textContent=String(user().atm); }, 1000);
+        }
+
+        document.addEventListener('click', clickHandler);
+        document.addEventListener('change', changeHandler);
+        document.addEventListener('touchstart', touchStart, {passive:true});
+        document.addEventListener('touchend', touchEnd);
+        window.addEventListener('hashchange', onHashChange);
+
+        // sanity checks
+        console.assert(typeof priceFor==='function','priceFor should be defined');
+        console.assert(document.getElementById('catalog')!==null,'#catalog should exist');
+
+        boot();
+        return ()=>{};
+      },[]);
+
+      return (
+        <>
+          <div className="wrap">
+            <header>
+              <div className="hbar">
+                <div className="brand">
+                  <div className="logo" aria-hidden="true"></div>
+                  <div>
+                    <h1 id="brand-title">CRYPTOATM.TECH</h1>
+                    <small>Подписки • Пакеты • Копитрейдинг • Рефералы</small>
+                  </div>
+                </div>
+                <div className="userchips">
+                  <div className="chip">👤 <b id="chip-name">@guest</b></div>
+                  <div className="chip">ATM: <b id="chip-atm">0</b></div>
+                  <div className="chip">Заказы: <b id="chip-orders">0</b></div>
+                </div>
+              </div>
+              <nav className="tabs" id="tabs" aria-label="Навигация">
+                <button className="tab active" data-tab="shop" type="button">🛒 Магазин</button>
+                <button className="tab" data-tab="orders" type="button">📄 Заказы</button>
+                <button className="tab" data-tab="ref" type="button">👥 Рефералы</button>
+                <button className="tab" data-tab="tasks" type="button">🧩 Задания</button>
+                <button className="tab" data-tab="balance" type="button">💰 Баланс</button>
+                <button className="tab" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 Админ</button>
+                <button className="tab" data-tab="faq" type="button">❓ FAQ</button>
+              </nav>
+            </header>
+
+            <main id="pages">
+              <section id="page-shop" className="page active">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>Оформление подписки</h3>
+                    <p className="muted">Выберите срок 1/3/6 мес (скидка ~0/10/20%). ATM можно списать до 25% (100 ATM = €1).</p>
+                    <div className="row">
+                      <div className="kv" style={{minWidth:240}}>
+                        <label className="label" htmlFor="period">Срок</label>
+                        <select id="period"><option value="1">1 месяц</option><option value="3">3 месяца</option><option value="6">6 месяцев</option></select>
+                      </div>
+                      <div className="kv" style={{minWidth:260}}>
+                        <label className="label" htmlFor="atm-discount">Списать ATM (макс 25%)</label>
+                        <input id="atm-discount" type="number" min="0" step="50" defaultValue="0" placeholder="0" inputMode="numeric" />
+                      </div>
+                    </div>
+                  </div>
+                  <div id="catalog" className="col-12 grid"></div>
+                </div>
+              </section>
+
+              <section id="page-orders" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>История заказов</h3>
+                    <table className="table" id="orders-table"><thead><tr><th>№</th><th>Товар</th><th>Срок</th><th>Метод</th><th>Сумма</th><th>Статус</th><th>Дата</th><th>Intent</th></tr></thead><tbody></tbody></table>
+                  </div>
+                </div>
+              </section>
+
+              <section id="page-ref" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>Реферальная программа</h3>
+                    <p className="muted">Делитесь кодом и получайте <b>10%</b> от оплаты подписки (в ATM). Ваш код:</p>
+                    <div className="row"><input id="ref-code" readOnly /><button className="btn primary" id="ref-copy" type="button">Скопировать</button></div>
+                    <div className="line">
+                      <div className="muted">Привязать чужой код</div>
+                      <div className="row"><input id="ref-bind-input" placeholder="REF123456" /><button className="btn" id="ref-bind-btn" type="button">Привязать</button></div>
+                    </div>
+                    <div style={{marginTop:10}}>
+                      <table className="table" id="ref-table"><thead><tr><th>Партнёр</th><th>Дата</th><th>Оплата</th><th>Вознаграждение</th></tr></thead><tbody></tbody></table>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section id="page-tasks" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>Задания за ATM</h3>
+                    <div id="tasks" className="grid"></div>
+                  </div>
+                </div>
+              </section>
+
+              <section id="page-balance" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>Баланс ATM</h3>
+                    <p className="muted">Коины выдаются за задания и рефералов. Можно списать до 25% от суммы покупки (100 ATM = €1).</p>
+                    <div className="row"><div className="chip">Текущий баланс: <b id="atm-balance">0</b></div></div>
+                    <div className="line"><span className="muted">PIN-защита</span><button className="btn" id="pin-manage" type="button">Управление PIN</button></div>
+                  </div>
+                </div>
+              </section>
+
+              <section id="page-admin" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>Админ-панель</h3>
+                    <p className="muted">Статистика, заказы, задания.</p>
+                    <div className="row"><button className="btn" id="admin-refresh" type="button">Обновить</button><button className="btn ghost" id="admin-export" type="button">Экспорт JSON</button></div>
+                    <div className="grid" style={{marginTop:12}}>
+                      <div className="col-12 card" id="admin-stats"></div>
+                      <div className="col-12 card"><h3>Пользователи</h3><table className="table" id="admin-users"><thead><tr><th>ID</th><th>Username</th><th>ATM</th><th>Заказы</th><th>Реф-код</th><th>От кого</th><th>Дата</th></tr></thead><tbody></tbody></table></div>
+                      <div className="col-12 card"><h3>Заказы</h3><table className="table" id="admin-orders"><thead><tr><th>#</th><th>User</th><th>Товар</th><th>Срок</th><th>Метод</th><th>€</th><th>ATM</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
+                      <div className="col-12 card"><h3>Задания (модерация)</h3><table className="table" id="admin-tasks"><thead><tr><th>UID</th><th>User</th><th>Задание</th><th>Пруф</th><th>Награда</th><th>Статус</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section id="page-faq" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>FAQ</h3>
+                    <ul className="muted">
+                      <li>Fixed prices in EUR. You can pay in crypto to admin exchange or company wallet.</li>
+                      <li>ATM can cover up to 25% of order (100 ATM = €1).</li>
+                      <li>Referral reward: 10% of paid subscription (credited in ATM to referrer).</li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+            </main>
+          </div>
+
+          <div className="bottom-bar" id="bottom-bar">
+            <div className="bb-inner">
+              <div className="row">
+                <div className="chip">Позиций: <b id="cart-count">0</b></div>
+                <div className="chip">Итого: <b id="cart-total-eur">€0</b> / <b id="cart-total-atm">0 ATM</b></div>
+                <div className="chip">С учётом ATM: <b id="cart-total-final">€0</b></div>
+              </div>
+              <div className="row">
+                <button className="btn" id="cart-clear" type="button">Очистить</button>
+                <button className="btn primary" id="checkout-btn" type="button">Оплатить</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="modal-back" id="modal-auth" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+            <div className="modal">
+              <h2 id="auth-title">Authorization required</h2>
+              <p className="muted">Open this Mini App inside Telegram to continue (with initData).</p>
+              <div className="foot"><button className="btn" id="auth-close" type="button">Close</button></div>
+            </div>
+          </div>
+
+          <div className="modal-back" id="modal-disclaimer" role="dialog" aria-modal="true" aria-labelledby="disc-title">
+            <div className="modal">
+              <h2 id="disc-title">Disclaimer</h2>
+              <p className="muted">
+                We strongly recommend conducting your own research before purchasing any services.
+                CryptoATM does not provide financial advice and is not responsible for any losses.
+                By continuing, you confirm you understand the risks and accept full responsibility.
+              </p>
+              <div className="foot"><button className="btn primary" id="accept" type="button">I agree</button></div>
+            </div>
+          </div>
+
+          <div className="modal-back" id="modal-crypto" role="dialog" aria-modal="true" aria-labelledby="pay-title">
+            <div className="modal">
+              <h2 id="pay-title">Оплата криптовалютой</h2>
+              <p className="muted">Scan QR or copy address. After payment press “Я оплатил(а)”.</p>
+              <div className="row">
+                <canvas id="qr" width="180" height="180" style={{background:'#fff',borderRadius:'8px'}}></canvas>
+                <div style={{flex:1}}>
+                  <div className="kv"><span className="label">Получатель</span>
+                    <select id="pay-dest-select"><option value="admin">Биржа администратора</option><option value="company">Счёт компании</option></select>
+                  </div>
+                  <div className="kv"><span className="label">Сеть</span>
+                    <select id="pay-chain-select"><option value="BEP20">BEP20</option><option value="TRC20">TRC20</option><option value="ERC20">ERC20</option></select>
+                  </div>
+                  <div className="kv"><span className="label">Адрес</span><code id="pay-addr" style={{wordBreak:'break-all'}}></code> <button className="btn" id="copy-addr" type="button" style={{marginLeft:'8px'}}>Copy</button></div>
+                  <div className="kv"><span className="label">Сумма</span><b id="pay-amount">—</b> <button className="btn" id="copy-amount" type="button" style={{marginLeft:'8px'}}>Copy</button></div>
+                  <div className="kv"><span className="label">Назначение</span><b id="pay-memo">CRYPTOATM</b> <button className="btn" id="copy-memo" type="button" style={{marginLeft:'8px'}}>Copy</button></div>
+                  <div className="row" style={{marginTop:'8px'}}><button className="btn" id="close-crypto" type="button">Закрыть</button><button className="btn primary" id="paid-btn" type="button">Я оплатил(а)</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="modal-back" id="modal-item" role="dialog" aria-modal="true" aria-labelledby="item-title">
+            <div className="modal">
+              <h2 id="item-title">Товар</h2>
+              <div id="item-desc" className="muted"></div>
+              <div className="foot"><button className="btn" id="close-item" type="button">Закрыть</button></div>
+            </div>
+          </div>
+
+          <div className="modal-back" id="modal-pin" role="dialog" aria-modal="true" aria-labelledby="pin-title">
+            <div className="modal">
+              <h2 id="pin-title">PIN</h2>
+              <p id="pin-sub" className="muted"></p>
+              <input id="pin-input" inputMode="numeric" maxLength="4" placeholder="••••" />
+              <div className="foot">
+                <button className="btn ghost" id="pin-reset" type="button">Сброс PIN</button>
+                <button className="btn" id="pin-close" type="button">Закрыть</button>
+                <button className="btn primary" id="pin-action" type="button">OK</button>
+              </div>
+            </div>
+          </div>
+        </>
+      );
     }
 
-    const user = () => db.users[CURRENT_USER.id];
-
-    // === СОСТОЯНИЕ ===
-    const state = {
-      period: 1,
-      atmDiscount: 0,
-      cart: [],
-      pay: { chain: "BEP20", dest: "admin", addr: PAY_ADDR_ADMIN.BEP20, amount: 0, memo: "" },
-    };
-
-    // === ТАБЫ ===
-    const setHash = (tab) => (location.hash = "#/" + tab);
-    const currentTab = () => location.hash.replace("#/", "") || "shop";
-
-    const applyBottomOffset = () => {
-      const bar = document.querySelector("#bottom-bar");
-      if (!bar) return;
-      document.documentElement.style.setProperty("--bottom-h", Math.ceil(bar.getBoundingClientRect().height) + "px");
-    };
-
-    // === ХЕДЕР ===
-    const renderHeader = () => {
-      const chipName = $("#chip-name");
-      const chipAtm = $("#chip-atm");
-      const chipOrders = $("#chip-orders");
-      if (chipName) chipName.textContent = "@" + (CURRENT_USER.username || "guest");
-      if (chipAtm) chipAtm.textContent = String(user().atm);
-      if (chipOrders) chipOrders.textContent = String(user().orders.length);
-    };
-
-    // === ЦЕНЫ ===
-    const priceFor = (item, months) => {
-      const disc = PERIOD_DISCOUNT[months] || 0;
-      const perMonth = Math.round(item.price * (1 - disc));
-      return perMonth * months;
-    };
-
-    // === ОБНОВЛЕНИЕ КОРЗИНЫ ===
-    const updateCartUI = () => {
-      const eur = state.cart.reduce((s, x) => s + x.amount, 0);
-      const atmMax = Math.floor(eur * 0.25) * ATM_RATE;
-      const wantATM = Math.min(state.atmDiscount || 0, atmMax, user().atm);
-      const eurMinus = Math.floor(wantATM / ATM_RATE);
-      const finalEur = Math.max(0, eur - eurMinus);
-      $("#cart-count").textContent = String(state.cart.length);
-      $("#cart-total-eur").textContent = "€" + eur;
-      $("#cart-total-atm").textContent = wantATM + " ATM";
-      $("#cart-total-final").textContent = "€" + finalEur;
-      renderHeader();
-      applyBottomOffset();
-    };
-    // === КАТАЛОГ ===
-    const renderCatalog = () => {
-      const grid = document.querySelector("#catalog");
-      if (!grid) return;
-      grid.innerHTML = "";
-      const periodEl = document.getElementById("period");
-      const atmEl = document.getElementById("atm-discount");
-      const months = (state.period = parseInt((periodEl && periodEl.value) || "1", 10));
-      state.atmDiscount = Math.max(0, parseInt((atmEl && atmEl.value) || "0", 10));
-
-      const eur = state.cart.reduce((s, x) => s + x.amount, 0);
-      const atmMax = Math.floor(eur * 0.25) * ATM_RATE;
-      if (state.atmDiscount > atmMax) {
-        state.atmDiscount = atmMax;
-        if (atmEl) (atmEl as HTMLInputElement).value = String(atmMax);
-      }
-
-      CATALOG.forEach((it) => {
-        const total = priceFor(it, months);
-        const inCart = state.cart.find((x) => x.code === it.code && x.months === months);
-        const card = document.createElement("div");
-        card.className = "col-4 card";
-        card.innerHTML = `
-          <div class="row" style="justify-content:space-between;align-items:start">
-            <span class="badge">${it.type.toUpperCase()}</span>
-            <span class="price" style="color:var(--gold)">€${total} / ${months}м</span>
-          </div>
-          <h3 style="margin-top:6px">${it.name}</h3>
-          <p class="muted">${it.desc}</p>
-          <div class="line">
-            <button class="btn" data-act="details" data-code="${it.code}">Подробнее</button>
-            ${inCart ? `<button class="btn" data-act="remove" data-code="${it.code}">Убрать</button>` : `<button class="btn primary" data-act="add" data-code="${it.code}">В корзину</button>`}
-          </div>`;
-        grid.appendChild(card);
-      });
-      updateCartUI();
-    };
-
-    const addToCart = (code) => {
-      const months = state.period;
-      const it = CATALOG.find((x) => x.code === code);
-      if (!it) return;
-      if (state.cart.find((x) => x.code === code && x.months === months)) return;
-      state.cart.push({ code: it.code, name: it.name, months, amount: priceFor(it, months) });
-      updateCartUI();
-      renderCatalog();
-    };
-    const removeFromCart = (code) => {
-      const months = state.period;
-      state.cart = state.cart.filter((x) => !(x.code === code && x.months === months));
-      updateCartUI();
-      renderCatalog();
-    };
-    const clearCart = () => {
-      state.cart = [];
-      updateCartUI();
-      renderCatalog();
-    };
-
-    // === ЗАКАЗЫ ===
-    const renderOrders = () => {
-      const tb = document.querySelector("#orders-table tbody");
-      if (!tb) return;
-      tb.innerHTML = "";
-      const rows = db.orders.filter((o) => o.user === CURRENT_USER.id).slice().reverse();
-      for (const o of rows) {
-        const tr = document.createElement("tr");
-        const names = o.items.map((i) => i.name + " ×" + i.months + "м").join(", ");
-        tr.innerHTML = `<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s, i) => s + i.months, 0)} мес</td><td>${o.method} (${o.dest || "-"})</td><td>€${o.eur_final} ${o.atm_used ? `(+${o.atm_used} ATM)` : ""}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.intent_id || "—"}</td>`;
-        tb.appendChild(tr);
-      }
-      renderHeader();
-    };
-
-    // === TOAST ===
-    const toast = (t) => {
-      if (tg?.showPopup) tg.showPopup({ title: "", message: String(t), buttons: [{ type: "close" }] });
-      else console.log("[toast]", t);
-    };
-
-    // === МОДАЛ "Подробнее" ===
-    const openItemModal = (code) => {
-      const it = CATALOG.find((x) => x.code === code);
-      if (!it) return;
-      const long = (CATALOG_LONG[code] && CATALOG_LONG[code].bullets) || [];
-      const title = document.querySelector("#item-title");
-      const desc = document.querySelector("#item-desc");
-      const modal = document.querySelector("#modal-item");
-      if (title) title.textContent = it.name;
-      if (desc) (desc as HTMLElement).innerHTML = `
-        <div class="muted" style="margin-bottom:8px">${it.desc}</div>
-        ${long.length ? `<ul class="muted">${long.map((b)=>`<li>${b}</li>`).join("")}</ul>` : ""}
-      `;
-      if (modal) (modal as HTMLElement).style.display = "flex";
-    };
-    const closeItem = () => { const m = document.querySelector("#modal-item"); if (m) (m as HTMLElement).style.display = "none"; };
-
-    // === PAY ADDR ===
-    const getActiveAddr = () => {
-      const book = state.pay.dest === "company" ? PAY_ADDR_COMPANY : PAY_ADDR_ADMIN;
-      return book[state.pay.chain];
-    };
-
-    // === Псевдо-QR (замена на реальную lib позже) ===
-    const drawQR = (text) => {
-      const c = document.getElementById("qr") as HTMLCanvasElement | null;
-      if (!c) return;
-      const ctx = c.getContext && c.getContext("2d");
-      if (!ctx) return;
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, c.width, c.height);
-      ctx.fillStyle = "#000";
-      let seed = 0;
-      for (let i = 0; i < text.length; i++) seed = ((seed * 33 + text.charCodeAt(i)) >>> 0);
-      const n = 21, s = Math.floor((c.width - 20) / n), off = 10;
-      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { seed = (seed * 1103515245 + 12345) >>> 0; const v = seed & 1; if (v) ctx.fillRect(off + x * s, off + y * s, s - 1, s - 1); }
-    };
-
-    // === МОДАЛ ОПЛАТЫ ===
-    const openCryptoModal = (eur, chain = "BEP20", memo = "") => {
-      state.pay.chain = chain;
-      state.pay.addr = getActiveAddr();
-      const chainSel = document.getElementById("pay-chain-select") as HTMLSelectElement | null;
-      const destSel = document.getElementById("pay-dest-select") as HTMLSelectElement | null;
-      const addrEl = document.querySelector("#pay-addr");
-      const amountEl = document.querySelector("#pay-amount");
-      const memoEl = document.querySelector("#pay-memo");
-      const modal = document.querySelector("#modal-crypto");
-      if (chainSel) chainSel.value = chain;
-      if (destSel) destSel.value = state.pay.dest;
-      if (addrEl) addrEl.textContent = state.pay.addr;
-      if (amountEl) amountEl.textContent = `€${eur}`;
-      if (memoEl) memoEl.textContent = memo || "CRYPTOATM";
-      if (modal) (modal as HTMLElement).style.display = "flex";
-      drawQR(state.pay.addr);
-      applyBottomOffset();
-    };
-    const closeCrypto = () => { const m = document.querySelector("#modal-crypto"); if (m) (m as HTMLElement).style.display = "none"; };
-
-    // === PAYMENT INTENT (заглушка) ===
-    const createPaymentIntent = async (order) => {
-      const payload = {
-        user_id: CURRENT_USER.id,
-        username: CURRENT_USER.username,
-        items: order.items,
-        eur: order.eur_final,
-        atm_used: order.atm_used,
-        network: state.pay.chain,
-        address: state.pay.addr,
-        dest: state.pay.dest,
-        memo: order.memo,
-        initData: tg && (tg.initData || tg.initDataUnsafe),
-      };
-      try {
-        // const res = await fetch('/api/payment-intent', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
-        // const data = await res.json();
-        // return data.intent_id || null;
-        await new Promise((r) => setTimeout(r, 350));
-        return "intent_" + Math.random().toString(36).slice(2, 9);
-      } catch (e) {
-        console.error(e);
-        return null;
-      }
-    };
-
-    // === СОЗДАНИЕ ЗАКАЗА ===
-    const createOrder = () => {
-      if (state.cart.length === 0) return toast("Корзина пуста");
-      const eur = state.cart.reduce((s, x) => s + x.amount, 0);
-      const atmMax = Math.floor(eur * 0.25) * ATM_RATE;
-      const wantATM = Math.min(state.atmDiscount || 0, atmMax, user().atm);
-      const eurMinus = Math.floor(wantATM / ATM_RATE);
-      const finalEur = Math.max(0, eur - eurMinus);
-      if (wantATM > 0) user().atm = Math.max(0, user().atm - wantATM);
-
-      const memo = "ORDER-" + (db.orders.length + 1);
-      const order = {
-        id: db.orders.length + 1,
-        user: CURRENT_USER.id,
-        items: state.cart.map((x) => ({ code: x.code, name: x.name, months: x.months, amount: x.amount })),
-        method: "crypto",
-        dest: state.pay.dest,
-        eur,
-        atm_used: wantATM,
-        eur_final: finalEur,
-        status: "waiting",
-        created_at: new Date().toISOString(),
-        memo,
-        intent_id: null,
-      };
-      db.orders.push(order);
-      user().orders.push(order.id);
-      saveDB();
-
-      state.cart = [];
-      state.atmDiscount = 0;
-      const atmInput = document.getElementById("atm-discount") as HTMLInputElement | null;
-      if (atmInput) atmInput.value = "0";
-      updateCartUI();
-      renderOrders();
-
-      state.pay.amount = finalEur;
-      state.pay.memo = memo;
-      openCryptoModal(finalEur, state.pay.chain, memo);
-
-      createPaymentIntent(order).then((id) => {
-        order.intent_id = id;
-        saveDB();
-        renderOrders();
-        const memoEl = document.querySelector("#pay-memo");
-        if (id && memoEl) memoEl.textContent = id;
-      });
-    };
-
-    // === РЕФЕРАЛЫ ===
-    const renderRefs = () => {
-      const refCode = document.querySelector("#ref-code") as HTMLInputElement | null;
-      if (refCode) refCode.value = user().ref_code;
-      const tb = document.querySelector("#ref-table tbody");
-      if (tb) {
-        tb.innerHTML = "";
-        for (const r of (user().referrals || []).slice().reverse()) {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>@${(db.users[r.uid] && db.users[r.uid].username) || r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid ? "Да" : "—"}</td><td>${r.reward || 0} ATM</td>`;
-          tb.appendChild(tr);
-        }
-      }
-      const hasRef = !!user().referred_by;
-      const bindInput = document.querySelector("#ref-bind-input") as HTMLInputElement | null;
-      const bindBtn = document.querySelector("#ref-bind-btn") as HTMLButtonElement | null;
-      if (bindInput) bindInput.disabled = hasRef;
-      if (bindBtn) bindBtn.disabled = hasRef;
-    };
-
-    // === ЗАДАНИЯ ===
-    const TASK_DEF = [
-      { id: 1, title: "Подписка на TikTok", reward: 100, type: "link", hint: "URL на профиль/скрин" },
-      { id: 2, title: "Репост в сторис", reward: 120, type: "link", hint: "URL сторис" },
-      { id: 3, title: "Отзыв о проекте", reward: 150, type: "text", hint: "URL на отзыв" },
-      { id: 4, title: "Наклейка на авто", reward: 500, type: "image", hint: "URL на фото" },
-    ];
-    const renderTasks = () => {
-      const holder = document.querySelector("#tasks");
-      if (!holder) return;
-      holder.innerHTML = "";
-      TASK_DEF.forEach((t) => {
-        const col = document.createElement("div");
-        col.className = "col-6 card";
-        col.innerHTML = `<h3>#${t.id} ${t.title}</h3><p class="muted">Награда: <b>+${t.reward} ATM</b></p><input id="proof-${t.id}" type="url" placeholder="${t.hint}"><div class="line"><span class="muted">Проверка модератором</span><button class="btn primary" data-act="submit-task" data-id="${t.id}">Отправить</button></div>`;
-        holder.appendChild(col);
-      });
-    };
-
-    // === БАЛАНС ===
-    const renderBalance = () => { const el = document.querySelector("#atm-balance"); if (el) el.textContent = String(user().atm); };
-
-    // === АДМИНКА ===
-    const renderAdmin = () => {
-      const users = Object.values(db.users);
-      const o = db.orders;
-      const totalEur = o.reduce((s, x) => s + x.eur_final, 0);
-      const totalAtm = users.reduce((s, u) => s + u.atm, 0);
-
-      const stats = document.querySelector("#admin-stats");
-      if (stats) (stats as HTMLElement).innerHTML = `<div class="row"><div class="chip">Пользователи: <b>${users.length}</b></div><div class="chip">Заказы: <b>${o.length}</b></div><div class="chip">Выручка: <b>€${totalEur}</b></div><div class="chip">ATM на балансах: <b>${totalAtm}</b></div></div>`;
-
-      const utb = document.querySelector("#admin-users tbody");
-      if (utb) {
-        utb.innerHTML = "";
-        (users as any[]).slice().sort((a, b) => b.id - a.id).forEach((u) => {
-          const refFrom = u.referred_by ? "@" + ((db.users[u.referred_by] && db.users[u.referred_by].username) || u.referred_by) : "—";
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${u.id}</td><td>@${u.username}</td><td>${u.atm}</td><td>${u.orders.length}</td><td>${u.ref_code}</td><td>${refFrom}</td><td>${new Date(u.created_at).toLocaleDateString()}</td>`;
-          utb.appendChild(tr);
-        });
-      }
-
-      const otb = document.querySelector("#admin-orders tbody");
-      if (otb) {
-        otb.innerHTML = "";
-        db.orders.slice().reverse().forEach((or) => {
-          const userName = "@" + ((db.users[or.user] && db.users[or.user].username) || or.user);
-          const items = or.items.map((i) => i.code + "×" + i.months).join(", ");
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s, i) => s + i.months, 0)} мес</td><td>${or.method} (${or.dest || '-'})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td><button class="btn" data-act="mark-paid" data-id="${or.id}">Оплачен</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">Отмена</button></td>`;
-          otb.appendChild(tr);
-        });
-      }
-
-      const ttb = document.querySelector("#admin-tasks tbody");
-      if (ttb) {
-        ttb.innerHTML = "";
-        (users as any[]).forEach((u) => {
-          (u.tasks || []).forEach((t, idx) => {
-            if (t.status === "pending") {
-              const def = TASK_DEF.find((d) => d.id === t.id) || { reward: 0, title: "#" + t.id };
-              const tr = document.createElement("tr");
-              tr.innerHTML = `<td>${u.id}</td><td>@${u.username}</td><td>#${t.id} ${def.title || ''}</td><td>${t.proof || ''}</td><td>+${def.reward} ATM</td><td>${t.status}</td><td><button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">Одобрить</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">Отклонить</button></td>`;
-              ttb.appendChild(tr);
-            }
-          });
-        });
-      }
-    };
-
-    // === ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ===
-    const switchTab = (name) => {
-      $$(".tab").forEach((b) => b.classList.toggle("active", (b as HTMLElement).dataset.tab === name));
-      $$(".page").forEach((p) => p.classList.toggle("active", (p as HTMLElement).id === "page-" + name));
-      if (name === "shop") renderCatalog();
-      if (name === "orders") renderOrders();
-      if (name === "ref") renderRefs();
-      if (name === "tasks") renderTasks();
-      if (name === "balance") renderBalance();
-      if (name === "admin") renderAdmin();
-      applyBottomOffset();
-    };
-    const onHashChange = () => switchTab(currentTab());
-    window.addEventListener("hashchange", onHashChange);
-
-    // === PIN ===
-    const pinKey = (uid) => `PIN_OK_${uid}`;
-    const isPinSet = () => !!user().pin;
-    const isUnlocked = () => !isPinSet() || sessionStorage.getItem(pinKey(CURRENT_USER.id)) === '1';
-    const showPinModal = (mode='unlock') => {
-      const m = document.getElementById('modal-pin');
-      const title = document.getElementById('pin-title');
-      const sub = document.getElementById('pin-sub');
-      const action = document.getElementById('pin-action') as HTMLButtonElement | null;
-      const reset = document.getElementById('pin-reset') as HTMLButtonElement | null;
-      const input = document.getElementById('pin-input') as HTMLInputElement | null;
-      if(!m||!title||!sub||!action||!reset||!input) return;
-      if(mode==='set'){
-        title.textContent = 'Создать ПИН-код';
-        sub.textContent = 'Введите 4 цифры. Запомните их: ПИН хранится локально.';
-        action.textContent = 'Сохранить';
-        reset.style.display = 'none';
-        input.value='';
-        (m as HTMLElement).style.display='flex'; input.focus();
-        action.onclick = () => {
-          const v = (input.value||'').replace(/[^0-9]/g,'');
-          if(v.length!==4) return toast('Введите 4 цифры');
-          user().pin = v; saveDB(); toast('ПИН сохранён'); (m as HTMLElement).style.display='none';
-        };
-      } else {
-        title.textContent = 'ПИН-код';
-        sub.textContent = 'Введите 4 цифры, чтобы разблокировать.';
-        action.textContent = 'Разблокировать';
-        reset.style.display = isPinSet()? 'inline-flex':'none';
-        input.value='';
-        (m as HTMLElement).style.display='flex'; input.focus();
-        action.onclick = () => {
-          const v = (input.value||'').replace(/[^0-9]/g,'');
-          if(v.length!==4) return toast('Введите 4 цифры');
-          if(v===user().pin){ sessionStorage.setItem(pinKey(CURRENT_USER.id),'1'); toast('Разблокировано'); (m as HTMLElement).style.display='none'; }
-          else toast('Неверный ПИН');
-        };
-      }
-    };
-    const ensureUnlocked = () => { if(!isUnlocked()){ showPinModal('unlock'); return false;} return true; };
-
-    // === ДИСКЛЕЙМЕР ===
-    const ensureDisclaimer = () => {
-      const ok = db.disclaimerAccepted[CURRENT_USER.id];
-      const modal = document.getElementById("modal-disclaimer");
-      if (!modal) return;
-      (modal as HTMLElement).style.display = ok ? "none" : "flex";
-    };
-
-    // === ОБРАБОТЧИКИ ===
-    const clickHandler = (e) => {
-      const target = e.target as HTMLElement;
-      const btn = target?.closest?.("button, .btn") as HTMLButtonElement | null;
-      if (!btn) return;
-
-      if (btn.classList.contains("tab")) { const t = btn.dataset.tab; if (t) { setHash(t); switchTab(t); } return; }
-
-      const act = btn.dataset.act;
-      if (act === "add") return addToCart(btn.dataset.code);
-      if (act === "remove") return removeFromCart(btn.dataset.code);
-      if (act === "details") return openItemModal(btn.dataset.code);
-
-      if (act === "submit-task") {
-        const id = +(btn.dataset.id || 0);
-        const proofEl = document.getElementById(`proof-${id}`) as HTMLInputElement | null;
-        const proof = (proofEl?.value || "").trim();
-        if (!/^https?:\/\//i.test(proof)) return toast("Добавьте ссылку-пруф");
-        user().tasks = user().tasks || [];
-        user().tasks.push({ id, proof, at: new Date().toISOString(), status: "pending" });
-        saveDB();
-        toast("Отправлено на проверку");
-        if (proofEl) proofEl.value = "";
-        return;
-      }
-
-      if (btn.id === "cart-clear") return clearCart();
-      if (btn.id === "checkout-btn") { if(!ensureUnlocked()) return; return createOrder(); }
-      if (btn.id === "ref-copy") { navigator.clipboard.writeText(user().ref_code).then(()=>toast("Скопировано")); return; }
-      if (btn.id === "ref-bind-btn") {
-        const inp = document.getElementById("ref-bind-input") as HTMLInputElement | null;
-        const code = (inp?.value || "").trim().toUpperCase();
-        if (!code) return toast("Введите код");
-        const owner = Object.values(db.users).find((u:any) => u.ref_code === code) as any;
-        if (!owner) return toast("Код не найден");
-        if (owner.id === CURRENT_USER.id) return toast("Нельзя привязать свой код");
-        if (user().referred_by) return toast("Код уже привязан");
-        user().referred_by = owner.id;
-        owner.referrals.push({ uid: CURRENT_USER.id, at: new Date().toISOString(), paid: false, reward: 0 });
-        saveDB(); renderRefs(); toast("Код привязан"); return;
-      }
-
-      if (btn.id === "admin-refresh") return renderAdmin();
-      if (btn.id === "admin-export") {
-        const blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob); const a = document.createElement("a");
-        a.href = url; a.download = "cryptoatm_export.json"; a.click(); URL.revokeObjectURL(url); return;
-      }
-
-      if (btn.id === "copy-addr") { navigator.clipboard.writeText((document.getElementById("pay-addr")?.textContent || "")); toast("Address copied"); return; }
-      if (btn.id === "copy-amount") { navigator.clipboard.writeText(((document.getElementById("pay-amount")?.textContent) || "").replace("€", "")); toast("Amount copied"); return; }
-      if (btn.id === "copy-memo") { navigator.clipboard.writeText((document.getElementById("pay-memo")?.textContent || "")); toast("Memo copied"); return; }
-      if (btn.id === "paid-btn") { toast("Thanks! We will verify the payment."); closeCrypto(); return; }
-      if (btn.id === "close-crypto") return closeCrypto();
-      if (btn.id === "close-item") return closeItem();
-      if (btn.id === "auth-close") { const m = document.getElementById("modal-auth"); if (m) (m as HTMLElement).style.display = "none"; return; }
-      if (btn.id === "accept") { db.disclaimerAccepted[CURRENT_USER.id] = true; saveDB(); const m = document.getElementById("modal-disclaimer"); if (m) (m as HTMLElement).style.display = "none"; return; }
-
-      // PIN
-      if (btn.id === "pin-manage") { if(isPinSet()){ showPinModal('unlock'); } else { showPinModal('set'); } return; }
-      if (btn.id === "pin-close") { const m = document.getElementById('modal-pin'); if(m) (m as HTMLElement).style.display='none'; return; }
-      if (btn.id === "pin-reset") { if(!isPinSet()) return; user().pin = undefined; saveDB(); sessionStorage.removeItem(pinKey(CURRENT_USER.id)); toast('ПИН удалён'); const m=document.getElementById('modal-pin'); if(m) (m as HTMLElement).style.display='none'; return; }
-
-      // ADMIN
-      if (act === "mark-paid") {
-        if (!ADMIN_IDS.includes(CURRENT_USER.id)) return toast("Нет прав");
-        const id = +(btn.dataset.id || 0);
-        const o = db.orders.find((x) => x.id === id);
-        if (o) {
-          o.status = "paid";
-          // Реферальная награда: 10% от € в ATM (100 ATM = €1)
-          const buyer = db.users[o.user];
-          if (buyer && buyer.referred_by) {
-            const refUser = db.users[buyer.referred_by];
-            if (refUser) {
-              const rec = (refUser.referrals || []).find((r) => r.uid === buyer.id);
-              if (rec && !rec.paid) {
-                rec.paid = true;
-                const atmReward = Math.max(0, Math.round((o.eur_final || 0) * REF_BONUS_PERCENT * ATM_RATE));
-                rec.reward = atmReward;
-                refUser.atm = (refUser.atm || 0) + atmReward;
-              }
-            }
-          }
-          saveDB(); renderOrders(); renderAdmin(); toast("Статус изменён: paid");
-        }
-        return;
-      }
-      if (act === "mark-cancel") {
-        if (!ADMIN_IDS.includes(CURRENT_USER.id)) return toast("Нет прав");
-        const id = +(btn.dataset.id || 0);
-        const o = db.orders.find((x) => x.id === id);
-        if (o) { o.status = "canceled"; saveDB(); renderOrders(); renderAdmin(); toast("Статус изменён: canceled"); }
-        return;
-      }
-      if (act === "task-approve") {
-        if (!ADMIN_IDS.includes(CURRENT_USER.id)) return toast("Нет прав");
-        const uid = +(btn.dataset.uid || 0);
-        const idx = +(btn.dataset.idx || -1);
-        const u = db.users[uid];
-        if (u && u.tasks && u.tasks[idx]) {
-          const t = u.tasks[idx];
-          const def = TASK_DEF.find((d) => d.id === t.id) || { reward: 0 };
-          t.status = "approved";
-          u.atm = (u.atm || 0) + (def.reward || 0);
-          saveDB(); renderAdmin(); renderBalance(); toast(`Задание #${t.id} одобрено (+${def.reward} ATM)`);
-        }
-        return;
-      }
-      if (act === "task-reject") {
-        if (!ADMIN_IDS.includes(CURRENT_USER.id)) return toast("Нет прав");
-        const uid = +(btn.dataset.uid || 0);
-        const idx = +(btn.dataset.idx || -1);
-        const u = db.users[uid];
-        if (u && u.tasks && u.tasks[idx]) {
-          const t = u.tasks[idx];
-          t.status = "rejected";
-          saveDB(); renderAdmin(); toast(`Задание #${t.id} отклонено`);
-        }
-        return;
-      }
-    };
-
-    const changeHandler = (e) => {
-      const el = e.target as HTMLElement;
-      if (!el) return;
-      if (el.id === "period" || el.id === "atm-discount") { renderCatalog(); }
-      if (el.id === "pay-chain-select") {
-        state.pay.chain = (el as HTMLSelectElement).value;
-        state.pay.addr = getActiveAddr();
-        const addrEl = document.getElementById("pay-addr");
-        if (addrEl) addrEl.textContent = state.pay.addr;
-        drawQR(state.pay.addr);
-      }
-      if (el.id === "pay-dest-select") {
-        state.pay.dest = (el as HTMLSelectElement).value;
-        state.pay.addr = getActiveAddr();
-        const addrEl = document.getElementById("pay-addr");
-        if (addrEl) addrEl.textContent = state.pay.addr;
-        drawQR(state.pay.addr);
-      }
-    };
-
-    const touchStart = (e) => { const b = (e.target as HTMLElement)?.closest?.(".btn"); if (b) (b as HTMLElement).classList.add("touching"); };
-    const touchEnd = () => $$(".btn.touching").forEach((b) => (b as HTMLElement).classList.remove("touching"));
-
-    // === BOOT ===
-    const boot = () => {
-      // спрятать админ-вкладку, если не админ
-      const tabAdminBtn = document.querySelector("#tab-admin-btn") as HTMLButtonElement | null;
-      if (tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
-
-      if (CURRENT_USER.id === 0) { const m = document.getElementById("modal-auth"); if (m) (m as HTMLElement).style.display = "flex"; }
-      switchTab(currentTab());
-      renderHeader();
-      applyBottomOffset();
-      ensureDisclaimer();
-
-      // PIN блокировка
-      if (isPinSet()) { sessionStorage.removeItem(pinKey(CURRENT_USER.id)); showPinModal('unlock'); }
-
-      // UI ticker
-      setInterval(() => { const chip = document.getElementById("chip-atm"); if (chip) chip.textContent = String(user().atm); }, 1000);
-    };
-
-    // === ПОДПИСКИ НА СОБЫТИЯ ===
-    document.addEventListener("click", clickHandler);
-    document.addEventListener("change", changeHandler);
-    document.addEventListener("touchstart", touchStart, { passive: true });
-    document.addEventListener("touchend", touchEnd);
-
-    // sanity checks
-    console.assert(typeof priceFor === "function", "priceFor should be defined");
-    console.assert(document.getElementById("catalog") !== null, "#catalog should exist");
-
-    // старт
-    boot();
-
-    // === CLEANUP ===
-    return () => {
-      document.removeEventListener("click", clickHandler);
-      document.removeEventListener("change", changeHandler);
-      document.removeEventListener("touchstart", touchStart);
-      document.removeEventListener("touchend", touchEnd);
-      window.removeEventListener("hashchange", onHashChange);
-    };
-  }, []);
-  return (
-    <>
-      <style>{`
-:root{--bg:#0a0b0e;--panel:#111319;--card:#141821;--muted:#a5adbb;--txt:#f1f5fb;--gold:#d4af37;--gold-2:#f5d77a;--gold-glow:rgba(212,175,55,.28);--accent:#00e5ff;--green:#22e39e;--danger:#ff6a88;--b1:1px solid rgba(255,255,255,.08);--r:14px;--r-xl:18px;--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);--bottom-h:96px;--shadow:0 6px 28px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.04) inset}
-*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.08), transparent 60%), var(--bg);color:var(--txt);font:14px/1.45 system-ui,-apple-system,Inter,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
-.wrap{max-width:1160px;margin:0 auto;padding: calc(10px + var(--safe-top)) 14px calc(var(--bottom-h) + 14px)}
-
-header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8px + var(--safe-top)) 14px 8px; background:linear-gradient(180deg, rgba(10,11,14,.95), rgba(10,11,14,.6)); backdrop-filter:saturate(120%) blur(6px); border-bottom: var(--b1)}
-.hbar{ display:flex; align-items:center; justify-content:space-between; gap:12px }
-.brand{ display:flex; align-items:center; gap:12px; min-width:0 }
-.logo{ width:44px; height:44px; border-radius:12px; background: radial-gradient(140% 140% at 30% 20%, var(--gold-2), var(--gold) 60%, #6e570f); box-shadow: inset 0 2px 10px rgba(255,255,255,.25), 0 4px 18px var(--gold-glow) }
-.brand h1{margin:0;font-size:18px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand small{display:block;color:var(--muted);margin-top:2px;font-size:12px}
-.userchips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:var(--b1);border-radius:999px;padding:8px 12px;color:var(--txt)}
-
-.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
-.tab{appearance:none;border:var(--b1);background:var(--card);color:var(--txt);border-radius:12px;padding:8px 12px;font-weight:800;cursor:pointer}
-.tab.active{background:linear-gradient(135deg, rgba(245,215,122,.18), rgba(212,175,55,.14));box-shadow: 0 0 0 1px rgba(212,175,55,.5) inset}
-.page{display:none}.page.active{display:block}
-
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-.col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}
-@media(max-width:1020px){.col-8,.col-6,.col-4{grid-column:span 12}}
-.card{background:var(--card);border:var(--b1);border-radius:var(--r-xl);padding:14px;box-shadow:var(--shadow)}
-.card h3{margin:0 0 8px}
-.muted{color:var(--muted)}
-.badge{display:inline-block;background:rgba(255,255,255,.06);border:var(--b1);border-radius:8px;padding:4px 8px;color:var(--muted);font-size:12px}
-
-.btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;transition:transform .04s ease, box-shadow .2s ease;background:#1a2030;color:var(--txt);border:1px solid rgba(255,255,255,.1)}
-.btn.primary{background:linear-gradient(135deg, #715d1d, #f3d46b 40%, #c9a529);color:#0b0b0c;text-shadow:0 1px 0 rgba(255,255,255,.35);border:1px solid rgba(245,215,122,.65);box-shadow: 0 4px 18px rgba(212,175,55,.28), 0 1px 0 rgba(255,255,255,.25) inset}
-.btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.3)}
-.btn:active{transform:translateY(1px)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input,select,textarea{width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#11161f;color:var(--txt);outline:none}
-select{padding-right:32px}
-.label{color:var(--muted);font-weight:700}
-.line{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.1);padding-top:10px;margin-top:10px}
-.price{font-weight:900}
-.kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-
-/* bottom bar */
-.bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96));padding:10px 10px calc(10px + var(--safe-bot))}
-.bb-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0e1117;border:var(--b1);border-radius:16px;padding:10px 12px;pointer-events:auto}
-
-/* modals */
-.modal-back{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:20px 14px}
-.modal{max-width:680px;width:100%;background:#0e1117;border:var(--b1);border-radius:18px;box-shadow:var(--shadow);padding:16px}
-.modal h2{margin:0 0 10px}
-.modal .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-
-/* table */
-.table{width:100%;border-collapse:separate;border-spacing:0;border:var(--b1);border-radius:12px;overflow:hidden}
-.table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08)}
-.table th{background:#101421;color:var(--muted);text-align:left}
-.table tr:last-child td{border-bottom:0}
-
-/* a11y + touch */
-.visually-hidden{position:absolute;left:-9999px}
-.btn.touching{filter:brightness(1.03)}
-
-/* animations */
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes pop{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}
-.modal-back[style*="display: flex"]{animation:fadeIn .12s ease-out}
-.modal{animation:pop .18s ease-out}
-.btn:hover{filter:brightness(1.08)}
-      `}</style>
-
-      <div className="wrap">
-        {/* HEADER */}
-        <header>
-          <div className="hbar">
-            <div className="brand">
-              <div className="logo" aria-hidden="true" />
-              <div>
-                <h1 id="brand-title">CRYPTOATM.TECH</h1>
-                <small>Подписки • Пакеты • Копитрейдинг • Рефералы</small>
-              </div>
-            </div>
-            <div className="userchips">
-              <div className="chip">👤 <b id="chip-name">@guest</b></div>
-              <div className="chip">ATM: <b id="chip-atm">0</b></div>
-              <div className="chip">Заказы: <b id="chip-orders">0</b></div>
-            </div>
-          </div>
-
-          <nav className="tabs" id="tabs" aria-label="Навигация">
-            <button className="tab active" data-tab="shop" type="button">🛒 Магазин</button>
-            <button className="tab" data-tab="orders" type="button">📄 Заказы</button>
-            <button className="tab" data-tab="ref" type="button">👥 Рефералы</button>
-            <button className="tab" data-tab="tasks" type="button">🧩 Задания</button>
-            <button className="tab" data-tab="balance" type="button">💰 Баланс</button>
-            <button className="tab" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 Админ</button>
-            <button className="tab" data-tab="faq" type="button">❓ FAQ</button>
-          </nav>
-        </header>
-
-        {/* PAGES */}
-        <main id="pages">
-          {/* SHOP */}
-          <section id="page-shop" className="page active">
-            <div className="grid">
-              <div className="col-12 card">
-                <h3>Оформление подписки</h3>
-                <p className="muted">Выберите срок 1/3/6 мес (скидка ~0/10/20%). ATM можно списать до 25% (100 ATM = €1).</p>
-                <div className="row">
-                  <div className="kv" style={{ minWidth: 240 }}>
-                    <label className="label" htmlFor="period">Срок</label>
-                    <select id="period"><option value="1">1 месяц</option><option value="3">3 месяца</option><option value="6">6 месяцев</option></select>
-                  </div>
-                  <div className="kv" style={{ minWidth: 260 }}>
-                    <label className="label" htmlFor="atm-discount">Списать ATM (макс 25%)</label>
-                    <input id="atm-discount" type="number" min={0} step={50} defaultValue={0} placeholder="0" inputMode="numeric" />
-                  </div>
-                </div>
-              </div>
-
-              <div id="catalog" className="col-12 grid"></div>
-            </div>
-          </section>
-
-          {/* ORDERS */}
-          <section id="page-orders" className="page">
-            <div className="grid">
-              <div className="col-12 card">
-                <h3>История заказов</h3>
-                <table className="table" id="orders-table">
-                  <thead><tr><th>№</th><th>Товар</th><th>Срок</th><th>Метод</th><th>Сумма</th><th>Статус</th><th>Дата</th><th>Intent</th></tr></thead>
-                  <tbody></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-
-          {/* REFERRALS */}
-          <section id="page-ref" className="page">
-            <div className="grid">
-              <div className="col-12 card">
-                <h3>Реферальная программа</h3>
-                <p className="muted">Делитесь кодом и получайте <b>10%</b> от оплаты подписки (в ATM). Ваш код:</p>
-                <div className="row"><input id="ref-code" readOnly /><button className="btn primary" id="ref-copy" type="button">Скопировать</button></div>
-                <div className="line">
-                  <div className="muted">Привязать чужой код</div>
-                  <div className="row"><input id="ref-bind-input" placeholder="REF123456" /><button className="btn" id="ref-bind-btn" type="button">Привязать</button></div>
-                </div>
-                <div style={{ marginTop: 10 }}>
-                  <table className="table" id="ref-table"><thead><tr><th>Партнёр</th><th>Дата</th><th>Оплата</th><th>Вознаграждение</th></tr></thead><tbody></tbody></table>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* TASKS */}
-          <section id="page-tasks" className="page">
-            <div className="grid">
-              <div className="col-12 card">
-                <h3>Задания за ATM</h3>
-                <div id="tasks" className="grid"></div>
-              </div>
-            </div>
-          </section>
-
-          {/* BALANCE */}
-          <section id="page-balance" className="page">
-            <div className="grid">
-              <div className="col-12 card">
-                <h3>Баланс ATM</h3>
-                <p className="muted">Коины выдаются за задания и рефералов. Можно списать до 25% от суммы покупки (100 ATM = €1).</p>
-                <div className="row"><div className="chip">Текущий баланс: <b id="atm-balance">0</b></div></div>
-                <div className="line"><span className="muted">PIN-защита</span><button className="btn" id="pin-manage" type="button">Управление PIN</button></div>
-              </div>
-            </div>
-          </section>
-
-          {/* ADMIN */}
-          <section id="page-admin" className="page">
-            <div className="grid">
-              <div className="col-12 card">
-                <h3>Админ-панель</h3>
-                <p className="muted">Статистика, заказы, задания.</p>
-                <div className="row"><button className="btn" id="admin-refresh" type="button">Обновить</button><button className="btn ghost" id="admin-export" type="button">Экспорт JSON</button></div>
-                <div className="grid" style={{ marginTop: 12 }}>
-                  <div className="col-12 card" id="admin-stats"></div>
-                  <div className="col-12 card"><h3>Пользователи</h3><table className="table" id="admin-users"><thead><tr><th>ID</th><th>Username</th><th>ATM</th><th>Заказы</th><th>Реф-код</th><th>От кого</th><th>Дата</th></tr></thead><tbody></tbody></table></div>
-                  <div className="col-12 card"><h3>Заказы</h3><table className="table" id="admin-orders"><thead><tr><th>#</th><th>User</th><th>Товар</th><th>Срок</th><th>Метод</th><th>€</th><th>ATM</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
-                  <div className="col-12 card"><h3>Задания (модерация)</h3><table className="table" id="admin-tasks"><thead><tr><th>UID</th><th>User</th><th>Задание</th><th>Пруф</th><th>Награда</th><th>Статус</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* FAQ */}
-          <section id="page-faq" className="page">
-            <div className="grid">
-              <div className="col-12 card">
-                <h3>FAQ</h3>
-                <ul className="muted">
-                  <li>Fixed prices in EUR. You can pay in crypto to admin exchange or company wallet.</li>
-                  <li>ATM can cover up to 25% of order (100 ATM = €1).</li>
-                  <li>Referral reward: 10% of paid subscription (credited in ATM to referrer).</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-        </main>
-      </div>
-
-      {/* BOTTOM BAR */}
-      <div className="bottom-bar" id="bottom-bar">
-        <div className="bb-inner">
-          <div className="row">
-            <div className="chip">Позиций: <b id="cart-count">0</b></div>
-            <div className="chip">Итого: <b id="cart-total-eur">€0</b> / <b id="cart-total-atm">0 ATM</b></div>
-            <div className="chip">С учётом ATM: <b id="cart-total-final">€0</b></div>
-          </div>
-          <div className="row">
-            <button className="btn" id="cart-clear" type="button">Очистить</button>
-            <button className="btn primary" id="checkout-btn" type="button">Оплатить</button>
-          </div>
-        </div>
-      </div>
-
-      {/* MODALS */}
-      <div className="modal-back" id="modal-auth" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-        <div className="modal">
-          <h2 id="auth-title">Authorization required</h2>
-          <p className="muted">Open this Mini App inside Telegram to continue (with initData).</p>
-          <div className="foot"><button className="btn" id="auth-close" type="button">Close</button></div>
-        </div>
-      </div>
-
-      <div className="modal-back" id="modal-disclaimer" role="dialog" aria-modal="true" aria-labelledby="disc-title">
-        <div className="modal">
-          <h2 id="disc-title">Disclaimer</h2>
-          <p className="muted">
-            We strongly recommend conducting your own research before purchasing any services.
-            CryptoATM does not provide financial advice and is not responsible for any losses.
-            By continuing, you confirm you understand the risks and accept full responsibility.
-          </p>
-          <div className="foot"><button className="btn primary" id="accept" type="button">I agree</button></div>
-        </div>
-      </div>
-
-      <div className="modal-back" id="modal-crypto" role="dialog" aria-modal="true" aria-labelledby="pay-title">
-        <div className="modal">
-          <h2 id="pay-title">Оплата криптовалютой</h2>
-          <p className="muted">Scan QR or copy address. After payment press “Я оплатил(а)”.</p>
-          <div className="row">
-            <canvas id="qr" width={180} height={180} style={{ background: "#fff", borderRadius: 8 }} />
-            <div style={{ flex: 1 }}>
-              <div className="kv"><span className="label">Получатель</span>
-                <select id="pay-dest-select"><option value="admin">Биржа администратора</option><option value="company">Счёт компании</option></select>
-              </div>
-              <div className="kv"><span className="label">Сеть</span>
-                <select id="pay-chain-select"><option value="BEP20">BEP20</option><option value="TRC20">TRC20</option><option value="ERC20">ERC20</option></select>
-              </div>
-              <div className="kv"><span className="label">Адрес</span><code id="pay-addr" style={{ wordBreak: "break-all" }}></code> <button className="btn" id="copy-addr" type="button" style={{ marginLeft: 8 }}>Copy</button></div>
-              <div className="kv"><span className="label">Сумма</span><b id="pay-amount">—</b> <button className="btn" id="copy-amount" type="button" style={{ marginLeft: 8 }}>Copy</button></div>
-              <div className="kv"><span className="label">Назначение</span><b id="pay-memo">CRYPTOATM</b> <button className="btn" id="copy-memo" type="button" style={{ marginLeft: 8 }}>Copy</button></div>
-              <div className="row" style={{ marginTop: 8 }}>
-                <button className="btn" id="close-crypto" type="button">Закрыть</button>
-                <button className="btn primary" id="paid-btn" type="button">Я оплатил(а)</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="modal-back" id="modal-item" role="dialog" aria-modal="true" aria-labelledby="item-title">
-        <div className="modal">
-          <h2 id="item-title">Товар</h2>
-          <div id="item-desc" className="muted"></div>
-          <div className="foot"><button className="btn" id="close-item" type="button">Закрыть</button></div>
-        </div>
-      </div>
-
-      {/* PIN modal */}
-      <div className="modal-back" id="modal-pin" role="dialog" aria-modal="true" aria-labelledby="pin-title">
-        <div className="modal">
-          <h2 id="pin-title">PIN</h2>
-          <p id="pin-sub" className="muted"></p>
-          <input id="pin-input" inputMode="numeric" maxLength={4} placeholder="••••" />
-          <div className="foot">
-            <button className="btn ghost" id="pin-reset" type="button">Сброс PIN</button>
-            <button className="btn" id="pin-close" type="button">Закрыть</button>
-            <button className="btn primary" id="pin-action" type="button">OK</button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
