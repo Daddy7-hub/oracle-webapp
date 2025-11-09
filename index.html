@@ -1,509 +1,869 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>CryptoATM.tech — Mini App</title>
-<meta name="color-scheme" content="dark">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-:root{
-  --bg:#0a0b0e;--panel:#111319;--card:#141821;--muted:#a5adbb;--txt:#f1f5fb;
-  --gold:#d4af37;--gold-2:#f5d77a;--gold-glow:rgba(212,175,55,.28);
-  --accent:#00e5ff;--green:#22e39e;--danger:#ff6a88;
-  --b1:1px solid rgba(255,255,255,.08);--r:14px;--r-xl:18px;
-  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
-  --shadow:0 6px 28px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.04) inset
-}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.08), transparent 60%), var(--bg);color:var(--txt);font:14px/1.45 system-ui,-apple-system,Inter,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
-.wrap{max-width:1160px;margin:0 auto;padding:calc(10px + var(--safe-top)) 14px 120px}
-header{position:sticky;top:0;z-index:12;margin:0 -14px 14px;padding:calc(8px + var(--safe-top)) 14px 8px;background:linear-gradient(180deg, rgba(10,11,14,.95), rgba(10,11,14,.6));backdrop-filter:saturate(120%) blur(6px);border-bottom:var(--b1)}
-.hbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.brand{display:flex;align-items:center;gap:12px;min-width:0}
-.logo{width:44px;height:44px;border-radius:12px;background:radial-gradient(140% 140% at 30% 20%, var(--gold-2), var(--gold) 60%, #6e570f);box-shadow:inset 0 2px 10px rgba(255,255,255,.25),0 4px 18px var(--gold-glow)}
-.brand h1{margin:0;font-size:18px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand small{display:block;color:var(--muted);margin-top:2px;font-size:12px}
-.userchips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:var(--b1);border-radius:999px;padding:8px 12px;color:var(--txt)}
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-.col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}
-@media(max-width:1020px){.col-8,.col-6,.col-4{grid-column:span 12}}
-.card{background:var(--card);border:var(--b1);border-radius:var(--r-xl);padding:14px;box-shadow:var(--shadow)}
-.card h3{margin:0 0 8px}
-.muted{color:var(--muted)}
-.badge{display:inline-block;background:rgba(255,255,255,.06);border:var(--b1);border-radius:8px;padding:4px 8px;color:var(--muted);font-size:12px}
-.btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;transition:transform .04s ease,box-shadow .2s ease;background:#1a2030;color:var(--txt);border:1px solid rgba(255,255,255,.1)}
-.btn.primary{background:linear-gradient(135deg,#715d1d,#f3d46b 40%,#c9a529);color:#0b0b0c;text-shadow:0 1px 0 rgba(255,255,255,.35);border:1px solid rgba(245,215,122,.65);box-shadow:0 4px 18px rgba(212,175,55,.28),0 1px 0 rgba(255,255,255,.25) inset}
-.btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.3)}
-.btn:active{transform:translateY(1px)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input,select,textarea{width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#11161f;color:var(--txt);outline:none}
-select{padding-right:32px}
-.label{color:var(--muted);font-weight:700}
-.line{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.1);padding-top:10px;margin-top:10px}
-.price{font-weight:900}
-.kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-.table{width:100%;border-collapse:separate;border-spacing:0;border:var(--b1);border-radius:12px;overflow:hidden}
-.table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08)}
-.table th{background:#101421;color:var(--muted);text-align:left}
-.table tr:last-child td{border-bottom:0}
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:8px 10px calc(8px + var(--safe-bot));background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96))}
-.tabbar-inner{max-width:1160px;margin:0 auto;display:flex;gap:8px;justify-content:space-between;background:#0e1117;border:var(--b1);border-radius:16px;padding:6px}
-.tnav{display:grid;grid-auto-flow:column;gap:6px;overflow:auto}
-.tnav::-webkit-scrollbar{display:none}
-.tbtn{appearance:none;background:transparent;border:1px solid rgba(255,255,255,.08);color:var(--txt);border-radius:12px;padding:8px 10px;display:flex;align-items:center;gap:8px;min-width:110px;justify-content:center;cursor:pointer}
-.tbtn.active{background:linear-gradient(135deg, rgba(245,215,122,.18), rgba(212,175,55,.14));box-shadow:0 0 0 1px rgba(212,175,55,.5) inset}
-.cartbar{display:none;align-items:center;gap:10px}
-.modal-back{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:20px 14px}
-.modal{max-width:680px;width:100%;background:#0e1117;border:var(--b1);border-radius:18px;box-shadow:var(--shadow);padding:16px}
-.modal h2{margin:0 0 10px}.modal .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-.splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.12), transparent 60%), var(--bg);z-index:60}
-.s-logo{width:128px;height:128px;border-radius:24px;background:radial-gradient(140% 140% at 30% 20%, var(--gold-2), var(--gold) 60%, #6e570f);box-shadow:inset 0 2px 10px rgba(255,255,255,.25),0 8px 40px var(--gold-glow);animation:float 2.2s ease-in-out infinite}
-.s-title{font-weight:900;font-size:28px;letter-spacing:.6px;margin-top:16px;text-align:center}
-.s-sub{color:var(--muted);text-align:center;margin-top:4px}
-@keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>CryptoATM.tech — Mini App</title>
+  <meta name="color-scheme" content="dark" />
+
+  <!-- Telegram WebApp API -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- React + ReactDOM (UMD) + Babel (для JSX без сборки) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0a0b0e;--panel:#111319;--card:#141821;--muted:#a5adbb;--txt:#f1f5fb;
+      --gold:#d4af37;--gold-2:#f5d77a;--gold-glow:rgba(212,175,55,.28);
+      --accent:#00e5ff;--green:#22e39e;--danger:#ff6a88;
+      --b1:1px solid rgba(255,255,255,.08);--r:14px;--r-xl:18px;
+      --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
+      --bottom-h:96px;--shadow:0 6px 28px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.04) inset
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.08), transparent 60%), var(--bg);
+      color:var(--txt);
+      font:14px/1.45 system-ui,-apple-system,Inter,Segoe UI,Roboto,sans-serif;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale
+    }
+    :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
+    .wrap{max-width:1160px;margin:0 auto;padding: calc(10px + var(--safe-top)) 14px calc(var(--bottom-h) + 14px)}
+
+    /* Header */
+    header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8px + var(--safe-top)) 14px 8px; background:linear-gradient(180deg, rgba(10,11,14,.95), rgba(10,11,14,.6)); backdrop-filter:saturate(120%) blur(6px); border-bottom: var(--b1)}
+    .hbar{ display:flex; align-items:center; justify-content:space-between; gap:12px }
+    .brand{ display:flex; align-items:center; gap:12px; min-width:0 }
+    .logo{ width:44px; height:44px; border-radius:12px; background: radial-gradient(140% 140% at 30% 20%, var(--gold-2), var(--gold) 60%, #6e570f); box-shadow: inset 0 2px 10px rgba(255,255,255,.25), 0 4px 18px var(--gold-glow) }
+    .brand h1{margin:0;font-size:18px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand small{display:block;color:var(--muted);margin-top:2px;font-size:12px}
+    .userchips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:var(--b1);border-radius:999px;padding:8px 12px;color:var(--txt)}
+
+    /* Tabs/pages */
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+    .tab{appearance:none;border:var(--b1);background:var(--card);color:var(--txt);border-radius:12px;padding:8px 12px;font-weight:800;cursor:pointer}
+    .tab.active{background:linear-gradient(135deg, rgba(245,215,122,.18), rgba(212,175,55,.14));box-shadow: 0 0 0 1px rgba(212,175,55,.5) inset}
+    .page{display:none}
+    .page.active{display:block}
+
+    /* Grid/Cards */
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}
+    @media(max-width:1020px){.col-8,.col-6,.col-4{grid-column:span 12}}
+    .card{background:var(--card);border:var(--b1);border-radius:var(--r-xl);padding:14px;box-shadow:var(--shadow)}
+    .card h3{margin:0 0 8px}
+    .muted{color:var(--muted)}
+    .badge{display:inline-block;background:rgba(255,255,255,.06);border:var(--b1);border-radius:8px;padding:4px 8px;color:var(--muted);font-size:12px}
+
+    /* Buttons / Inputs */
+    .btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;transition:transform .04s ease, box-shadow .2s ease;background:#1a2030;color:var(--txt);border:1px solid rgba(255,255,255,.1)}
+    .btn.primary{background:linear-gradient(135deg, #715d1d, #f3d46b 40%, #c9a529);color:#0b0b0c;text-shadow:0 1px 0 rgba(255,255,255,.35);border:1px solid rgba(245,215,122,.65);box-shadow: 0 4px 18px rgba(212,175,55,.28), 0 1px 0 rgba(255,255,255,.25) inset}
+    .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.3)}
+    .btn:active{transform:translateY(1px)}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    input,select,textarea{width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#11161f;color:var(--txt);outline:none}
+    select{padding-right:32px}
+    .label{color:var(--muted);font-weight:700}
+    .line{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed rgba(255,255,255,.1);padding-top:10px;margin-top:10px}
+    .price{font-weight:900}
+    .kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+
+    /* Bottom bar */
+    .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96));padding:10px 10px calc(10px + var(--safe-bot))}
+    .bb-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0e1117;border:var(--b1);border-radius:16px;padding:10px 12px;pointer-events:auto}
+
+    /* Modals */
+    .modal-back{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:20px 14px}
+    .modal{max-width:680px;width:100%;background:#0e1117;border:var(--b1);border-radius:18px;box-shadow:var(--shadow);padding:16px}
+    .modal h2{margin:0 0 10px}
+    .modal .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+    /* Table */
+    .table{width:100%;border-collapse:separate;border-spacing:0;border:var(--b1);border-radius:12px;overflow:hidden}
+    .table th,.table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .table th{background:#101421;color:var(--muted);text-align:left}
+    .table tr:last-child td{border-bottom:0}
+
+    .visually-hidden{position:absolute;left:-9999px}
+    .btn.touching{filter:brightness(1.03)}
+
+    /* Splash */
+    .splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.12), transparent 60%), var(--bg);z-index:50}
+    .s-logo{width:128px;height:128px;border-radius:24px;background: radial-gradient(140% 140% at 30% 20%, var(--gold-2), var(--gold) 60%, #6e570f);box-shadow: inset 0 2px 10px rgba(255,255,255,.25), 0 8px 40px var(--gold-glow)}
+    .s-title{font-weight:900;font-size:28px;letter-spacing:.6px;margin-top:16px;text-align:center}
+    .s-sub{color:var(--muted);text-align:center;margin-top:4px}
+    @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+    .s-logo{animation:float 2.2s ease-in-out infinite}
+
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes pop{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}
+    .modal-back[style*="display: flex"]{animation:fadeIn .12s ease-out}
+    .modal{animation:pop .18s ease-out}
+    .btn:hover{filter:brightness(1.08)}
+  </style>
 </head>
 <body>
+  <div id="root"></div>
 
-<!-- Splash -->
-<div id="splash" class="splash">
-  <div style="text-align:center">
-    <div class="s-logo" aria-hidden="true"></div>
-    <div class="s-title">CRYPTOATM</div>
-    <div class="s-sub">Subscriptions • Alerts • Copy-trading</div>
-  </div>
-</div>
+  <script type="text/babel">
+    const { useEffect, useState } = React;
 
-<div class="wrap">
-  <header>
-    <div class="hbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1 id="brand-title">CRYPTOATM.TECH</h1>
-          <small id="brand-sub">Подписки • Пакеты • Копитрейдинг • Рефералы</small>
-        </div>
-      </div>
-      <div class="userchips">
-        <button class="chip" id="lang-toggle" type="button">🌐 Язык: <b id="lang-code">RU</b></button>
-        <div class="chip">👤 <b id="chip-name">@guest</b></div>
-        <div class="chip">ATM: <b id="chip-atm">0</b></div>
-        <div class="chip">Заказы: <b id="chip-orders">0</b></div>
-      </div>
-    </div>
-  </header>
+    /* i18n */
+    const DEFAULT_LANG = localStorage.getItem('CATM_LANG') || ((navigator.language||'en').toLowerCase().startsWith('ru') ? 'ru' : 'en');
+    const tdict = {
+      ru: {
+        brandSub:'Подписки • Пакеты • Копитрейдинг • Рефералы',
+        shop:'Магазин', orders:'Заказы', ref:'Рефералы', tasks:'Задания', balance:'Баланс', admin:'Админ', faq:'FAQ',
+        subTitle:'Оформление подписки',
+        subHelp:'Выберите срок 1/3/6 мес (скидка ~0/10/20%). ATM можно списать до 25% (100 ATM = €1).',
+        term:'Срок', term1:'1 месяц', term3:'3 месяца', term6:'6 месяцев',
+        atmWriteOff:'Списать ATM (макс 25%)',
+        more:'Подробнее', add:'В корзину', remove:'Убрать',
+        history:'История заказов', number:'№', product:'Товар', termCol:'Срок', method:'Метод', amount:'Сумма', status:'Статус', date:'Дата', intent:'Intent',
+        referralTitle:'Реферальная программа',
+        referralHelp:'Делитесь кодом и получайте 10% от оплаты подписки (в ATM). Ваш код:',
+        copy:'Скопировать',
+        bindForeign:'Привязать чужой код', bind:'Привязать',
+        partner:'Партнёр', paid:'Оплата', reward:'Вознаграждение',
+        tasksTitle:'Задания за ATM', rewardPlus:'Награда', proofHint:'URL-пруф', submit:'Отправить',
+        balanceTitle:'Баланс ATM', balanceHelp:'Коины выдаются за задания и рефералов. Можно списать до 25% заказа (100 ATM = €1).',
+        pinManage:'Управление PIN',
+        adminTitle:'Админ-панель', adminHelp:'Статистика, заказы, задания.',
+        update:'Обновить', export:'Экспорт JSON',
+        users:'Пользователи', orders2:'Заказы', revenue:'Выручка', atmOnBalances:'ATM на балансах',
+        usersTbl:'Пользователи', uid:'ID', username:'Username', atm:'ATM', ordersCount:'Заказы', refCode:'Реф-код', from:'От кого',
+        ordersTbl:'Заказы', userCol:'User', items:'Товар', euro:'€', actions:'Действия', markPaid:'Оплачен', cancel:'Отмена',
+        tasksMod:'Задания (модерация)', task:'Задание', proof:'Пруф', approve:'Одобрить', reject:'Отклонить',
+        faqTitle:'FAQ',
+        faq1:'Фиксированные цены в EUR. Оплата — на биржу админа или счёт компании.',
+        faq2:'ATM покрывают до 25% заказа (100 ATM = €1).',
+        faq3:'Реферальная награда: 10% от оплаченной подписки (в ATM).',
+        positions:'Позиций', total:'Итого', totalWithAtm:'С учётом ATM', clear:'Очистить', pay:'Оплатить',
+        authTitle:'Требуется авторизация', authBody:'Откройте Mini App внутри Telegram (с initData).', close:'Закрыть',
+        disclaimer:'Disclaimer', agree:'I agree',
+        disclaimerBody:'We strongly recommend conducting your own research before purchasing any services. CryptoATM does not provide financial advice and is not responsible for any losses. By continuing, you confirm you understand the risks and accept full responsibility.',
+        cryptoPay:'Оплата криптовалютой', scanOrCopy:'Сканируйте QR или скопируйте адрес. После оплаты нажмите «Я оплатил(а)».',
+        recipient:'Получатель', adminExch:'Биржа администратора', companyAcc:'Счёт компании',
+        chain:'Сеть', address:'Адрес', amountEur:'Сумма', memo:'Назначение', iPaid:'Я оплатил(а)',
+        item:'Товар',
+        pin:'PIN', pinSet:'Создать ПИН-код', pinSubSet:'Введите 4 цифры. ПИН хранится локально.', save:'Сохранить',
+        pinUnlock:'ПИН-код', pinSubUnlock:'Введите 4 цифры, чтобы разблокировать.', unlock:'Разблокировать', pinReset:'Сброс PIN',
+        splashTitle:'CRYPTOATM', splashSub:'Subscriptions • Alerts • Copy-trading',
+        lang:'Язык'
+      },
+      en: {
+        brandSub:'Subscriptions • Bundles • Copy-trading • Referrals',
+        shop:'Shop', orders:'Orders', ref:'Referrals', tasks:'Tasks', balance:'Balance', admin:'Admin', faq:'FAQ',
+        subTitle:'Subscription checkout',
+        subHelp:'Choose 1/3/6 months (~0/10/20%). You can redeem up to 25% with ATM (100 ATM = €1).',
+        term:'Term', term1:'1 month', term3:'3 months', term6:'6 months',
+        atmWriteOff:'Redeem ATM (max 25%)',
+        more:'Details', add:'Add', remove:'Remove',
+        history:'Order history', number:'#', product:'Product', termCol:'Term', method:'Method', amount:'Amount', status:'Status', date:'Date', intent:'Intent',
+        referralTitle:'Referral program',
+        referralHelp:'Share your code and earn 10% of the friend’s paid subscription (in ATM). Your code:',
+        copy:'Copy',
+        bindForeign:'Bind a referral code', bind:'Bind',
+        partner:'Partner', paid:'Paid', reward:'Reward',
+        tasksTitle:'Tasks for ATM', rewardPlus:'Reward', proofHint:'Proof URL', submit:'Submit',
+        balanceTitle:'ATM balance', balanceHelp:'Earn ATM from tasks and referrals. Redeem up to 25% (100 ATM = €1).',
+        pinManage:'PIN management',
+        adminTitle:'Admin panel', adminHelp:'Stats, orders, tasks.',
+        update:'Refresh', export:'Export JSON',
+        users:'Users', orders2:'Orders', revenue:'Revenue', atmOnBalances:'ATM on balances',
+        usersTbl:'Users', uid:'ID', username:'Username', atm:'ATM', ordersCount:'Orders', refCode:'Ref code', from:'From',
+        ordersTbl:'Orders', userCol:'User', items:'Items', euro:'€', actions:'Actions', markPaid:'Mark paid', cancel:'Cancel',
+        tasksMod:'Tasks moderation', task:'Task', proof:'Proof', approve:'Approve', reject:'Reject',
+        faqTitle:'FAQ',
+        faq1:'Fixed prices in EUR. Pay to admin exchange or company wallet.',
+        faq2:'ATM can cover up to 25% of order (100 ATM = €1).',
+        faq3:'Referral reward: 10% of the paid subscription (credited in ATM).',
+        positions:'Items', total:'Total', totalWithAtm:'With ATM', clear:'Clear', pay:'Pay',
+        authTitle:'Authorization required', authBody:'Open this Mini App inside Telegram (with initData).', close:'Close',
+        disclaimer:'Disclaimer', agree:'I agree',
+        disclaimerBody:'We strongly recommend conducting your own research before purchasing any services. CryptoATM does not provide financial advice and is not responsible for any losses. By continuing, you confirm you understand the risks and accept full responsibility.',
+        cryptoPay:'Crypto payment', scanOrCopy:'Scan QR or copy address. After payment press “I paid”.',
+        recipient:'Recipient', adminExch:'Admin exchange', companyAcc:'Company account',
+        chain:'Network', address:'Address', amountEur:'Amount', memo:'Memo', iPaid:'I paid',
+        item:'Item',
+        pin:'PIN', pinSet:'Create PIN', pinSubSet:'Enter 4 digits. PIN is stored locally.', save:'Save',
+        pinUnlock:'PIN', pinSubUnlock:'Enter 4 digits to unlock.', unlock:'Unlock', pinReset:'Reset PIN',
+        splashTitle:'CRYPTOATM', splashSub:'Subscriptions • Alerts • Copy-trading',
+        lang:'Lang'
+      }
+    };
+    function useI18n(){
+      const [lang,setLang] = useState(DEFAULT_LANG);
+      const t = (k)=> (tdict[lang] && tdict[lang][k]) || (tdict.en && tdict.en[k]) || k;
+      const toggle = ()=> { const next = lang==='ru' ? 'en' : 'ru'; setLang(next); localStorage.setItem('CATM_LANG', next); document.documentElement.lang = next; };
+      useEffect(()=>{ document.documentElement.lang = lang; },[lang]);
+      return {lang, t, toggle};
+    }
 
-  <main id="pages">
-    <section id="page-shop" class="page active">
-      <div class="grid">
-        <div class="col-12 card">
-          <h3 id="sub-title">Оформление подписки</h3>
-          <p class="muted" id="sub-help">Выберите срок 1/3/6 мес (скидка ~0/10/20%). ATM можно списать до 25% (100 ATM = €1).</p>
-          <div class="row">
-            <div class="kv" style="min-width:240px">
-              <label class="label" for="period" id="lbl-term">Срок</label>
-              <select id="period"><option value="1">1 месяц</option><option value="3">3 месяца</option><option value="6">6 месяцев</option></select>
+    function App(){
+      const { lang, t, toggle } = useI18n();
+      const [showSplash, setShowSplash] = useState(true);
+
+      useEffect(()=>{
+        const tg = (window && window.Telegram && window.Telegram.WebApp) || null;
+        try{
+          tg && tg.expand && tg.expand();
+          tg && tg.setHeaderColor && tg.setHeaderColor('#0a0b0e');
+          tg && tg.setBackgroundColor && tg.setBackgroundColor('#0a0b0e');
+        }catch(e){}
+
+        /* ===== CONFIG (code access fully removed) ===== */
+        const ADMIN_IDS = [568646738];             // <=== ЗАМЕНИ на свой Telegram ID
+        const START_BONUS_ATM = 250;
+        const REF_BONUS_PERCENT = 0.10;            // 10% от € в ATM
+        const ATM_RATE = 100;                      // 100 ATM = €1
+
+        // PIN policy
+        const REQUIRE_PIN_AT_START = false;        // не спрашиваем PIN при входе
+        const REQUIRE_PIN_AT_CHECKOUT = true;      // PIN только при оплате
+
+        // Dev режим
+        const DEV_MODE = /\bdev=1\b/i.test(location.search) || location.hostname === 'localhost';
+
+        // Каталог и описания
+        const CATALOG = [
+          {type:'bot',code:'CRYPTO_ATM',name:'Crypto ATM Bot',price:71,desc:'BTC analytics, daily signals & levels.'},
+          {type:'bot',code:'ALERTS',name:'Alerts Bot',price:39,desc:'Whales, liquidations, funding, OI & volume alerts.'},
+          {type:'bot',code:'NEWS',name:'News Bot',price:29,desc:'CoinMarketCal + RSS + translation + tone analysis.'},
+          {type:'pack',code:'PREMIUM',name:'Premium',price:99,desc:'All 3 bots with discount.'},
+          {type:'pack',code:'ENTERPRISE',name:'Enterprise',price:199,desc:'Full access + consulting.'},
+          {type:'service',code:'COPY',name:'Copy-trading',price:50,desc:'€50/month + profit share. Risk-managed.'},
+        ];
+        const CATALOG_LONG = {
+          CRYPTO_ATM:{bullets:['BTC analytics: levels & zones','Signals with probabilities + comments','Daily OI, funding, volumes']},
+          ALERTS:{bullets:['Whale trades (spot/futures), liquidations','Funding/OI, volume spikes, local levels','Direction + trigger explanation']},
+          NEWS:{bullets:['CoinMarketCal + RSS + tone','Top-3 digest, translate','Analytics export + keywords']},
+          PREMIUM:{bullets:['All 3 bots, one payment','Discount included']},
+          ENTERPRISE:{bullets:['Priority support','Consulting & full access']},
+          COPY:{bullets:['€50/month + profit share','Transparent reports & risk control']},
+        };
+        const PERIOD_DISCOUNT = {1:0,3:0.1,6:0.2};
+
+        // Реквизиты
+        const PAY_ADDR_ADMIN = {
+          BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c',
+          TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs',
+          ERC20:'0x1111222233334444555566667777888899990000'
+        };
+        const PAY_ADDR_COMPANY = {
+          BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c',
+          TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs',
+          ERC20:'0x1111222233334444555566667777888899990000'
+        };
+
+        /* DB + helpers */
+        const $ = s => document.querySelector(s);
+        const $$ = s => Array.from(document.querySelectorAll(s));
+        const DBKEY = 'CATM_DB_HTMLv3'; // новая схема без accessOK
+        function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)||'null') || {users:{},orders:[],tasks:[],disclaimerAccepted:{}} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:{}} } }
+        const db = loadDB();
+        const saveDB = ()=> localStorage.setItem(DBKEY, JSON.stringify(db));
+
+        /* TG auth */
+        const rawUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+        const CURRENT_USER = rawUser ? {
+          id: rawUser.id, username: rawUser.username||'user',
+          name: (rawUser.first_name||'') + (rawUser.last_name?(' '+rawUser.last_name):'')
+        } : { id:0, username:'guest', name:'Guest' };
+
+        // Dev-подмена вне Telegram
+        if ((!rawUser || CURRENT_USER.id === 0) && DEV_MODE) {
+          CURRENT_USER.id = ADMIN_IDS[0] || 1;
+          CURRENT_USER.username = 'devadmin';
+        }
+
+        // Создание пользователя
+        if (!db.users[CURRENT_USER.id]){
+          db.users[CURRENT_USER.id] = {
+            id: CURRENT_USER.id, username: CURRENT_USER.username, created_at: new Date().toISOString(),
+            atm: START_BONUS_ATM, ref_code: 'REF'+(CURRENT_USER.id||Math.floor(Math.random()*1e6)),
+            referred_by: null, orders: [], referrals: [], tasks: [], start_bonus_given: true, pin: undefined
+          };
+          saveDB();
+        }
+        function user(){ return db.users[CURRENT_USER.id]; }
+
+        const state = { period:1, atmDiscount:0, cart:[], pay:{chain:'BEP20', dest:'admin', addr: PAY_ADDR_ADMIN.BEP20, amount:0, memo:''} };
+
+        function applyBottomOffset(){ const bar=$('#bottom-bar'); if(!bar) return; document.documentElement.style.setProperty('--bottom-h', Math.ceil(bar.getBoundingClientRect().height)+'px'); }
+        function text(el, s){ if(el) el.textContent = s; }
+
+        function renderHeader(){
+          text($('#chip-name'), '@'+(CURRENT_USER.username||'guest'));
+          text($('#chip-atm'), String(user().atm));
+          text($('#chip-orders'), String(user().orders.length));
+          const refCode = $('#ref-code'); if(refCode) refCode.value = user().ref_code;
+        }
+
+        function priceFor(item, months){ const disc=PERIOD_DISCOUNT[months]||0; const perMonth=Math.round(item.price*(1-disc)); return perMonth*months; }
+
+        function updateCartUI(){
+          const eur = state.cart.reduce((s,x)=>s+x.amount,0);
+          const atmMax = Math.floor(eur*0.25)*100;
+          const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
+          const eurMinus = Math.floor(wantATM/100);
+          const finalEur = Math.max(0, eur-eurMinus);
+          text($('#cart-count'), String(state.cart.length));
+          text($('#cart-total-eur'), '€'+eur);
+          text($('#cart-total-atm'), wantATM+' ATM');
+          text($('#cart-total-final'), '€'+finalEur);
+          renderHeader(); applyBottomOffset();
+        }
+
+        function renderCatalog(){
+          const grid = $('#catalog'); if(!grid) return; grid.innerHTML='';
+          const months = state.period = parseInt(($('#period') && $('#period').value) || '1',10);
+          state.atmDiscount = Math.max(0, parseInt(($('#atm-discount') && $('#atm-discount').value) || '0',10));
+          const eur = state.cart.reduce((s,x)=>s+x.amount,0); const atmMax=Math.floor(eur*0.25)*100;
+          if(state.atmDiscount>atmMax){ state.atmDiscount=atmMax; if($('#atm-discount')) $('#atm-discount').value = String(atmMax); }
+          CATALOG.forEach(it=>{
+            const total = priceFor(it, months); const inCart = state.cart.find(x=>x.code===it.code && x.months===months);
+            const card = document.createElement('div'); card.className='col-4 card';
+            card.innerHTML = `
+              <div class="row" style="justify-content:space-between;align-items:start">
+                <span class="badge">${it.type.toUpperCase()}</span>
+                <span class="price" style="color:var(--gold)">€${total} / ${months}м</span>
+              </div>
+              <h3 style="margin-top:6px">${it.name}</h3>
+              <p class="muted">${it.desc}</p>
+              <div class="line">
+                <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
+                ${ inCart ? `<button class="btn" data-act="remove" data-code="${it.code}">${t('remove')}</button>` : `<button class="btn primary" data-act="add" data-code="${it.code}">${t('add')}</button>` }
+              </div>`;
+            grid.appendChild(card);
+          });
+          updateCartUI();
+        }
+
+        function addToCart(code){
+          const months=state.period; const it=CATALOG.find(x=>x.code===code); if(!it) return;
+          if(state.cart.find(x=>x.code===code && x.months===months)) return;
+          state.cart.push({code:it.code,name:it.name,months,amount:priceFor(it,months)});
+          updateCartUI(); renderCatalog();
+        }
+        function removeFromCart(code){
+          const months=state.period;
+          state.cart = state.cart.filter(x=>!(x.code===code && x.months===months));
+          updateCartUI(); renderCatalog();
+        }
+        function clearCart(){ state.cart=[]; updateCartUI(); renderCatalog(); }
+
+        function renderOrders(){
+          const tb = $('#orders-table tbody'); if(!tb) return; tb.innerHTML='';
+          const rows = db.orders.filter(o=>o.user===CURRENT_USER.id).slice().reverse();
+          rows.forEach(o=>{
+            const tr = document.createElement('tr');
+            const names = o.items.map(i=>i.name+' ×'+i.months+'м').join(', ');
+            tr.innerHTML = `<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${o.method} (${o.dest||'-'})</td><td>€${o.eur_final} ${o.atm_used?`(+${o.atm_used} ATM)`:''}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.intent_id||'—'}</td>`;
+            tb.appendChild(tr);
+          });
+          renderHeader();
+        }
+
+        function toast(tmsg){ const tg = window.Telegram && window.Telegram.WebApp; if(tg&&tg.showPopup){ tg.showPopup({title:'',message:String(tmsg),buttons:[{type:'close'}]}); } else { console.log('[toast]', tmsg); } }
+
+        function openItemModal(code){
+          const it = CATALOG.find(x=>x.code===code); if(!it) return;
+          const long = (CATALOG_LONG[code] && CATALOG_LONG[code].bullets) || [];
+          text($('#item-title'), t('item')+': '+it.name);
+          $('#item-desc').innerHTML = `
+            <div class="muted" style="margin-bottom:8px">${it.desc}</div>
+            ${long.length ? `<ul class="muted">${long.map(b=>`<li>${b}</li>`).join('')}</ul>` : ''}
+          `;
+          $('#modal-item').style.display='flex';
+        }
+        function closeItem(){ $('#modal-item').style.display='none'; }
+
+        function getActiveAddr(){ const book = state.pay.dest==='company'? PAY_ADDR_COMPANY : PAY_ADDR_ADMIN; return book[state.pay.chain]; }
+        function drawQR(text){
+          const c = document.getElementById('qr'); if(!c) return; const ctx = c.getContext && c.getContext('2d'); if(!ctx) return;
+          ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle='#000';
+          let seed=0; for(let i=0;i<text.length;i++) seed=((seed*33+text.charCodeAt(i))>>>0);
+          const n=21,s=Math.floor((c.width-20)/n),off=10;
+          for(let y=0;y<n;y++) for(let x=0;x<n;x++){ seed=(seed*1103515245+12345)>>>0; const v=seed&1; if(v) ctx.fillRect(off+x*s, off+y*s, s-1, s-1); }
+        }
+        function openCryptoModal(eur, chain='BEP20', memo=''){
+          state.pay.chain = chain; state.pay.addr = getActiveAddr();
+          const chainSel = document.getElementById('pay-chain-select'), destSel = document.getElementById('pay-dest-select');
+          if(chainSel) chainSel.value = chain; if(destSel) destSel.value = state.pay.dest;
+          text(document.getElementById('pay-addr'), state.pay.addr);
+          text(document.getElementById('pay-amount'), `€${eur}`);
+          text(document.getElementById('pay-memo'), memo || 'CRYPTOATM');
+          document.getElementById('modal-crypto').style.display='flex';
+          drawQR(state.pay.addr); applyBottomOffset();
+        }
+        function closeCrypto(){ document.getElementById('modal-crypto').style.display='none'; }
+
+        async function createPaymentIntent(order){
+          try{ await new Promise(r=>setTimeout(r,350)); return 'intent_'+Math.random().toString(36).slice(2,9); }
+          catch(e){ console.error(e); return null; }
+        }
+
+        function createOrder(){
+          if(state.cart.length===0) return toast('Cart is empty');
+          const eur = state.cart.reduce((s,x)=>s+x.amount,0);
+          const atmMax = Math.floor(eur*0.25)*100;
+          const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
+          const eurMinus = Math.floor(wantATM/100);
+          const finalEur = Math.max(0, eur-eurMinus);
+          if(wantATM>0) user().atm = Math.max(0, user().atm - wantATM);
+
+          const memo='ORDER-'+(db.orders.length+1);
+          const order = { id: db.orders.length+1, user: CURRENT_USER.id, items: state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})), method:'crypto', dest: state.pay.dest, eur, atm_used: wantATM, eur_final: finalEur, status:'waiting', created_at:new Date().toISOString(), memo, intent_id: null };
+          db.orders.push(order); user().orders.push(order.id); saveDB();
+
+          state.cart=[]; state.atmDiscount=0; const atmInput=document.getElementById('atm-discount'); if(atmInput) atmInput.value='0';
+          updateCartUI(); renderOrders();
+
+          state.pay.amount=finalEur; state.pay.memo=memo;
+          openCryptoModal(finalEur, state.pay.chain, memo);
+
+          createPaymentIntent(order).then(id=>{
+            order.intent_id=id; saveDB(); renderOrders(); if(id){ const memoEl=document.getElementById('pay-memo'); if(memoEl) memoEl.textContent=id; }
+          });
+        }
+
+        function renderRefs(){
+          const rc = document.getElementById('ref-code'); if(rc) rc.value = user().ref_code;
+          const tb = document.querySelector('#ref-table tbody'); if(tb){ tb.innerHTML=''; for(const r of (user().referrals||[]).slice().reverse()){ const tr=document.createElement('tr'); tr.innerHTML = `<td>@${(db.users[r.uid] && db.users[r.uid].username) || r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid?'Да':'—'}</td><td>${r.reward||0} ATM</td>`; tb.appendChild(tr); } }
+          const hasRef = !!user().referred_by; const bindInput=document.getElementById('ref-bind-input'); const bindBtn=document.getElementById('ref-bind-btn'); if(bindInput) bindInput.disabled=hasRef; if(bindBtn) bindBtn.disabled=hasRef;
+        }
+
+        const TASK_DEF=[{id:1,title:'TikTok subscribe',reward:100,hint:'URL profile/screenshot'},{id:2,title:'Repost to stories',reward:120,hint:'URL story'},{id:3,title:'Project review',reward:150,hint:'URL post/review'},{id:4,title:'Sticker on car',reward:500,hint:'URL photo'}];
+        function renderTasks(){
+          const holder = document.getElementById('tasks'); if(!holder) return; holder.innerHTML='';
+          TASK_DEF.forEach(tk=>{
+            const col=document.createElement('div'); col.className='col-6 card';
+            col.innerHTML = `<h3>#${tk.id} ${tk.title}</h3><p class="muted">${t('rewardPlus')}: <b>+${tk.reward} ATM</b></p><input id="proof-${tk.id}" type="url" placeholder="${t('proofHint')}"><div class="line"><span class="muted">Moderation</span><button class="btn primary" data-act="submit-task" data-id="${tk.id}">${t('submit')}</button></div>`;
+            holder.appendChild(col);
+          });
+        }
+
+        function renderBalance(){ const el=document.getElementById('atm-balance'); if(el) el.textContent = String(user().atm); }
+
+        function renderAdmin(){
+          const tabAdminBtn = document.querySelector('#tab-admin-btn'); if(tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
+
+          const users = Object.values(db.users); const o=db.orders; const totalEur=o.reduce((s,x)=>s+x.eur_final,0); const totalAtm=users.reduce((s,u)=>s+u.atm,0);
+          const stats = document.getElementById('admin-stats'); if(stats) stats.innerHTML = `<div class="row"><div class="chip">${t('users')}: <b>${users.length}</b></div><div class="chip">${t('orders2')}: <b>${o.length}</b></div><div className="chip">${t('revenue')}: <b>€${totalEur}</b></div><div className="chip">${t('atmOnBalances')}: <b>${totalAtm}</b></div></div>`;
+          const utb = document.querySelector('#admin-users tbody'); if(utb){ utb.innerHTML=''; users.slice().sort((a,b)=>b.id-a.id).forEach(u=>{ const refFrom=u.referred_by ? '@'+((db.users[u.referred_by] && db.users[u.referred_by].username)||u.referred_by) : '—'; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>${u.atm}</td><td>${u.orders.length}</td><td>${u.ref_code}</td><td>${refFrom}</td><td>${new Date(u.created_at).toLocaleDateString()}</td>`; utb.appendChild(tr); }); }
+          const otb = document.querySelector('#admin-orders tbody'); if(otb){ otb.innerHTML=''; db.orders.slice().reverse().forEach(or=>{ const userName='@'+((db.users[or.user] && db.users[or.user].username)||or.user); const items = or.items.map(i=>i.code+'×'+i.months).join(', '); const tr=document.createElement('tr'); tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${or.method} (${or.dest||'-'})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td><button class="btn" data-act="mark-paid" data-id="${or.id}">${t('markPaid')}</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">${t('cancel')}</button></td>`; otb.appendChild(tr); }); }
+          const ttb = document.querySelector('#admin-tasks tbody'); if(ttb){ ttb.innerHTML=''; users.forEach(u=>{ (u.tasks||[]).forEach((tk,idx)=>{ if(tk.status==='pending'){ const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0,title:'#'+tk.id}; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>#${tk.id} ${def.title||''}</td><td>${tk.proof||''}</td><td>+${def.reward} ATM</td><td>${tk.status}</td><td><button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">${t('approve')}</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">${t('reject')}</button></td>`; ttb.appendChild(tr); } }) }); }
+        }
+
+        function switchTab(name){
+          $$('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+          $$('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+name));
+          if(name==='shop') renderCatalog();
+          if(name==='orders') renderOrders();
+          if(name==='ref') renderRefs();
+          if(name==='tasks') renderTasks();
+          if(name==='balance') renderBalance();
+          if(name==='admin') renderAdmin();
+          applyBottomOffset();
+        }
+        function currentTab(){ return (location.hash.replace('#/','') || 'shop'); }
+        function setHash(tab){ location.hash = '#/'+tab; }
+
+        /* PIN */
+        function getPinKey(uid){ return `PIN_OK_${uid}` }
+        function isPinSet(){ return !!user().pin; }
+        function isUnlocked(){ return !isPinSet() || sessionStorage.getItem(getPinKey(CURRENT_USER.id))==='1'; }
+        function showPinModal(mode){
+          const m=document.getElementById('modal-pin'), title=document.getElementById('pin-title'), sub=document.getElementById('pin-sub'), action=document.getElementById('pin-action'), reset=document.getElementById('pin-reset'), input=document.getElementById('pin-input');
+          if(!m||!title||!sub||!action||!reset||!input) return;
+          if(mode==='set'){
+            title.textContent = t('pinSet'); sub.textContent = t('pinSubSet'); action.textContent = t('save'); reset.style.display='none'; input.value=''; m.style.display='flex'; input.focus();
+            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Enter 4 digits'); user().pin=v; saveDB(); toast('PIN saved'); m.style.display='none'; };
+          } else {
+            title.textContent = t('pinUnlock'); sub.textContent = t('pinSubUnlock'); action.textContent = t('unlock'); reset.style.display = isPinSet()? 'inline-flex':'none'; input.value=''; m.style.display='flex'; input.focus();
+            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Enter 4 digits'); if(v===user().pin){ sessionStorage.setItem(getPinKey(CURRENT_USER.id),'1'); toast('Unlocked'); m.style.display='none'; } else toast('Wrong PIN'); };
+          }
+        }
+        function ensureUnlocked(){
+          if (ADMIN_IDS.includes(CURRENT_USER.id)) return true;              // админ игнорирует PIN
+          if (!REQUIRE_PIN_AT_CHECKOUT) return true;                         // PIN не требуется
+          if(!isUnlocked()){ showPinModal('unlock'); return false; }
+          return true;
+        }
+
+        /* Disclaimer */
+        function ensureDisclaimer(){ const ok=db.disclaimerAccepted[CURRENT_USER.id]; document.getElementById('modal-disclaimer').style.display = ok ? 'none' : 'flex'; }
+
+        function onHashChange(){ switchTab(currentTab()); }
+        window.addEventListener('hashchange', onHashChange);
+
+        function clickHandler(e){
+          const btn = e.target && e.target.closest && e.target.closest('button, .btn'); if(!btn) return;
+          if(btn.classList.contains('tab')){ const tname=btn.dataset.tab; if(tname){ setHash(tname); switchTab(tname); } return; }
+          const act=btn.dataset.act;
+
+          if(act==='add'){ addToCart(btn.dataset.code); return; }
+          if(act==='remove'){ removeFromCart(btn.dataset.code); return; }
+          if(act==='details'){ openItemModal(btn.dataset.code); return; }
+
+          if(act==='submit-task'){
+            const id=+btn.dataset.id; const proofEl=document.getElementById('proof-'+id); const proof=(proofEl && proofEl.value && proofEl.value.trim()) || '';
+            if(!/^https?:\/\//i.test(proof)) return toast('Add a valid URL proof');
+            user().tasks=user().tasks||[]; user().tasks.push({id,proof,at:new Date().toISOString(),status:'pending'}); saveDB(); toast('Sent to moderation'); if(proofEl) proofEl.value=''; return;
+          }
+
+          if(btn.id==='lang-toggle'){ toggle(); renderHeader(); renderCatalog(); return; }
+          if(btn.id==='cart-clear'){ clearCart(); return; }
+
+          if(btn.id==='checkout-btn'){
+            if (!ADMIN_IDS.includes(CURRENT_USER.id)) {
+              if (!ensureUnlocked()) return; // PIN при оплате
+            }
+            createOrder();
+            return;
+          }
+
+          if(btn.id==='ref-copy'){ navigator.clipboard.writeText(user().ref_code).then(()=>toast('Copied')); return; }
+          if(btn.id==='ref-bind-btn'){ const inp=document.getElementById('ref-bind-input'); const code=(inp && inp.value && inp.value.trim().toUpperCase()) || ''; if(!code) return toast('Enter code'); const owner=Object.values(db.users).find(u=>u.ref_code===code); if(!owner) return toast('Code not found'); if(owner.id===CURRENT_USER.id) return toast('Cannot bind your own code'); if(user().referred_by) return toast('Already bound'); user().referred_by=owner.id; owner.referrals.push({uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0}); saveDB(); renderRefs(); toast('Bound'); return; }
+
+          if(btn.id==='admin-refresh'){ renderAdmin(); return; }
+          if(btn.id==='admin-export'){ const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='cryptoatm_export.json'; a.click(); URL.revokeObjectURL(url); return; }
+
+          if(btn.id==='copy-addr'){ navigator.clipboard.writeText((document.getElementById('pay-addr')?.textContent)||''); toast('Address copied'); return; }
+          if(btn.id==='copy-amount'){ navigator.clipboard.writeText(((document.getElementById('pay-amount')?.textContent)||'').replace('€','')); toast('Amount copied'); return; }
+          if(btn.id==='copy-memo'){ navigator.clipboard.writeText((document.getElementById('pay-memo')?.textContent)||''); toast('Memo copied'); return; }
+          if(btn.id==='paid-btn'){ toast('Thanks! We will verify the payment.'); closeCrypto(); return; }
+          if(btn.id==='close-crypto'){ closeCrypto(); return; }
+          if(btn.id==='close-item'){ closeItem(); return; }
+          if(btn.id==='auth-close'){ document.getElementById('modal-auth').style.display='none'; return; }
+          if(btn.id==='accept'){ db.disclaimerAccepted[CURRENT_USER.id]=true; saveDB(); document.getElementById('modal-disclaimer').style.display='none'; return; }
+
+          if(btn.id==='pin-manage'){ if(isPinSet()){ showPinModal('unlock'); } else { showPinModal('set'); } return; }
+          if(btn.id==='pin-close'){ document.getElementById('modal-pin').style.display='none'; return; }
+          if(btn.id==='pin-reset'){ user().pin=undefined; saveDB(); sessionStorage.removeItem(getPinKey(CURRENT_USER.id)); toast('PIN removed'); document.getElementById('modal-pin').style.display='none'; return; }
+
+          // Admin actions
+          if(act==='mark-paid'){
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
+            const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id);
+            if(o){ o.status='paid';
+              const buyer=db.users[o.user];
+              if(buyer && buyer.referred_by){
+                const refUser=db.users[buyer.referred_by];
+                if(refUser){
+                  const rec=(refUser.referrals||[]).find(r=>r.uid===buyer.id);
+                  if(rec && !rec.paid){
+                    rec.paid=true;
+                    const atmReward=Math.max(0, Math.round((o.eur_final||0) * REF_BONUS_PERCENT * 100)); // 100 ATM = €1
+                    rec.reward=atmReward; refUser.atm=(refUser.atm||0)+atmReward;
+                  }
+                }
+              }
+              saveDB(); renderOrders(); renderAdmin(); toast('Marked as paid');
+            }
+            return;
+          }
+          if(act==='mark-cancel'){
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
+            const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id);
+            if(o){ o.status='canceled'; saveDB(); renderOrders(); renderAdmin(); toast('Canceled'); }
+            return;
+          }
+          if(act==='task-approve'){
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
+            const uid=+(btn.dataset.uid||0); const idx=+(btn.dataset.idx||-1); const u=db.users[uid];
+            if(u && u.tasks && u.tasks[idx]){ const tk=u.tasks[idx]; const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0}; tk.status='approved'; u.atm=(u.atm||0)+(def.reward||0); saveDB(); renderAdmin(); renderBalance(); toast('Approved #'+tk.id+' (+'+def.reward+' ATM)'); }
+            return;
+          }
+          if(act==='task-reject'){
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
+            const uid=+(btn.dataset.uid||0); const idx=+(btn.dataset.idx||-1); const u=db.users[uid];
+            if(u && u.tasks && u.tasks[idx]){ const tk=u.tasks[idx]; tk.status='rejected'; saveDB(); renderAdmin(); toast('Rejected #'+tk.id); }
+            return;
+          }
+        }
+
+        function changeHandler(e){
+          const el=e.target; if(!el) return;
+          if(el.id==='period' || el.id==='atm-discount'){ renderCatalog(); }
+          if(el.id==='pay-chain-select'){ state.pay.chain = el.value; state.pay.addr=getActiveAddr(); text(document.getElementById('pay-addr'), state.pay.addr); drawQR(state.pay.addr); }
+          if(el.id==='pay-dest-select'){ state.pay.dest = el.value; state.pay.addr=getActiveAddr(); text(document.getElementById('pay-addr'), state.pay.addr); drawQR(state.pay.addr); }
+        }
+
+        function touchStart(e){ const b=e.target && e.target.closest && e.target.closest('.btn'); if(b) b.classList.add('touching'); }
+        function touchEnd(){ $$('.btn.touching').forEach(b=>b.classList.remove('touching')); }
+
+        function boot(){
+          // Splash hide
+          setTimeout(()=> setShowSplash(false), 900);
+
+          // Admin tab visibility
+          const tabAdminBtn = document.querySelector('#tab-admin-btn'); if(tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
+
+          if(CURRENT_USER.id===0){ document.getElementById('modal-auth').style.display='flex'; }
+
+          switchTab(currentTab()); renderHeader(); applyBottomOffset(); ensureDisclaimer();
+
+          // Не блокируем старт ПИНом (если флаг выключен)
+          if (REQUIRE_PIN_AT_START && isPinSet()) {
+            sessionStorage.removeItem(getPinKey(CURRENT_USER.id));
+            showPinModal('unlock');
+          }
+
+          setInterval(()=>{ const chip=document.getElementById('chip-atm'); if(chip) chip.textContent=String(user().atm); }, 1000);
+        }
+
+        document.addEventListener('click', clickHandler);
+        document.addEventListener('change', changeHandler);
+        document.addEventListener('touchstart', touchStart, {passive:true});
+        document.addEventListener('touchend', touchEnd);
+        window.addEventListener('hashchange', onHashChange);
+
+        console.assert(document.getElementById('catalog')!==null,'#catalog should exist');
+
+        boot();
+        return ()=>{};
+      },[lang]);
+
+      return (
+        <>
+          {/* Splash */}
+          {showSplash && (
+            <div className="splash">
+              <div style={{textAlign:'center'}}>
+                <div className="s-logo" />
+                <div className="s-title">{tdict[lang].splashTitle}</div>
+                <div className="s-sub">{tdict[lang].splashSub}</div>
+              </div>
             </div>
-            <div class="kv" style="min-width:260px">
-              <label class="label" for="atm-discount" id="lbl-atm">Списать ATM (макс 25%)</label>
-              <input id="atm-discount" type="number" min="0" step="50" value="0" placeholder="0" inputmode="numeric">
+          )}
+
+          <div className="wrap">
+            <header>
+              <div className="hbar">
+                <div className="brand">
+                  <div className="logo" aria-hidden="true"></div>
+                  <div>
+                    <h1 id="brand-title">CRYPTOATM.TECH</h1>
+                    <small>{tdict[lang].brandSub}</small>
+                  </div>
+                </div>
+                <div className="userchips">
+                  <button className="chip" id="lang-toggle" type="button">🌐 {tdict[lang].lang}: <b style={{marginLeft:6}}>{lang.toUpperCase()}</b></button>
+                  <div className="chip">👤 <b id="chip-name">@guest</b></div>
+                  <div className="chip">ATM: <b id="chip-atm">0</b></div>
+                  <div className="chip">{tdict[lang].orders2}: <b id="chip-orders">0</b></div>
+                </div>
+              </div>
+              <nav className="tabs" id="tabs" aria-label="Навигация">
+                <button className="tab active" data-tab="shop" type="button">🛒 {tdict[lang].shop}</button>
+                <button className="tab" data-tab="orders" type="button">📄 {tdict[lang].orders}</button>
+                <button className="tab" data-tab="ref" type="button">👥 {tdict[lang].ref}</button>
+                <button className="tab" data-tab="tasks" type="button">🧩 {tdict[lang].tasks}</button>
+                <button className="tab" data-tab="balance" type="button">💰 {tdict[lang].balance}</button>
+                <button className="tab" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 {tdict[lang].admin}</button>
+                <button className="tab" data-tab="faq" type="button">❓ {tdict[lang].faq}</button>
+              </nav>
+            </header>
+
+            <main id="pages">
+              {/* SHOP */}
+              <section id="page-shop" className="page active">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>{tdict[lang].subTitle}</h3>
+                    <p className="muted">{tdict[lang].subHelp}</p>
+                    <div className="row">
+                      <div className="kv" style={{minWidth:240}}>
+                        <label className="label" htmlFor="period">{tdict[lang].term}</label>
+                        <select id="period"><option value="1">{tdict[lang].term1}</option><option value="3">{tdict[lang].term3}</option><option value="6">{tdict[lang].term6}</option></select>
+                      </div>
+                      <div className="kv" style={{minWidth:260}}>
+                        <label className="label" htmlFor="atm-discount">{tdict[lang].atmWriteOff}</label>
+                        <input id="atm-discount" type="number" min="0" step="50" defaultValue="0" placeholder="0" inputMode="numeric" />
+                      </div>
+                    </div>
+                  </div>
+                  <div id="catalog" className="col-12 grid"></div>
+                </div>
+              </section>
+
+              {/* ORDERS */}
+              <section id="page-orders" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>{tdict[lang].history}</h3>
+                    <table className="table" id="orders-table">
+                      <thead>
+                        <tr>
+                          <th>{tdict[lang].number}</th><th>{tdict[lang].product}</th><th>{tdict[lang].termCol}</th><th>{tdict[lang].method}</th><th>{tdict[lang].amount}</th><th>{tdict[lang].status}</th><th>{tdict[lang].date}</th><th>{tdict[lang].intent}</th>
+                        </tr>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+
+              {/* REFERRALS */}
+              <section id="page-ref" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>{tdict[lang].referralTitle}</h3>
+                    <p className="muted">{tdict[lang].referralHelp}</p>
+                    <div className="row"><input id="ref-code" readOnly /><button className="btn primary" id="ref-copy" type="button">{tdict[lang].copy}</button></div>
+                    <div className="line">
+                      <div className="muted">{tdict[lang].bindForeign}</div>
+                      <div className="row"><input id="ref-bind-input" placeholder="REF123456" /><button className="btn" id="ref-bind-btn" type="button">{tdict[lang].bind}</button></div>
+                    </div>
+                    <div style={{marginTop:10}}>
+                      <table className="table" id="ref-table"><thead><tr><th>{tdict[lang].partner}</th><th>{tdict[lang].date}</th><th>{tdict[lang].paid}</th><th>{tdict[lang].reward}</th></tr></thead><tbody></tbody></table>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* TASKS */}
+              <section id="page-tasks" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>{tdict[lang].tasksTitle}</h3>
+                    <div id="tasks" className="grid"></div>
+                  </div>
+                </div>
+              </section>
+
+              {/* BALANCE */}
+              <section id="page-balance" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>{tdict[lang].balanceTitle}</h3>
+                    <p className="muted">{tdict[lang].balanceHelp}</p>
+                    <div className="row"><div className="chip">Balance: <b id="atm-balance">0</b></div></div>
+                    <div className="line"><span className="muted">PIN</span><button className="btn" id="pin-manage" type="button">{tdict[lang].pinManage}</button></div>
+                  </div>
+                </div>
+              </section>
+
+              {/* ADMIN */}
+              <section id="page-admin" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>{tdict[lang].adminTitle}</h3>
+                    <p className="muted">{tdict[lang].adminHelp}</p>
+                    <div className="row"><button className="btn" id="admin-refresh" type="button">{tdict[lang].update}</button><button className="btn ghost" id="admin-export" type="button">{tdict[lang].export}</button></div>
+                    <div className="grid" style={{marginTop:12}}>
+                      <div className="col-12 card" id="admin-stats"></div>
+                      <div className="col-12 card"><h3>{tdict[lang].usersTbl}</h3><table className="table" id="admin-users"><thead><tr><th>{tdict[lang].uid}</th><th>{tdict[lang].username}</th><th>{tdict[lang].atm}</th><th>{tdict[lang].ordersCount}</th><th>{tdict[lang].refCode}</th><th>{tdict[lang].from}</th><th>{tdict[lang].date}</th></tr></thead><tbody></tbody></table></div>
+                      <div className="col-12 card"><h3>{tdict[lang].ordersTbl}</h3><table className="table" id="admin-orders"><thead><tr><th>#</th><th>{tdict[lang].userCol}</th><th>{tdict[lang].items}</th><th>{tdict[lang].termCol}</th><th>{tdict[lang].method}</th><th>{tdict[lang].euro}</th><th>ATM</th><th>{tdict[lang].status}</th><th>{tdict[lang].date}</th><th>{tdict[lang].actions}</th></tr></thead><tbody></tbody></table></div>
+                      <div className="col-12 card"><h3>{tdict[lang].tasksMod}</h3><table className="table" id="admin-tasks"><thead><tr><th>{tdict[lang].uid}</th><th>{tdict[lang].userCol}</th><th>{tdict[lang].task}</th><th>{tdict[lang].proof}</th><th>{tdict[lang].reward}</th><th>{tdict[lang].status}</th><th>{tdict[lang].actions}</th></tr></thead><tbody></tbody></table></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* FAQ */}
+              <section id="page-faq" className="page">
+                <div className="grid">
+                  <div className="col-12 card">
+                    <h3>{tdict[lang].faqTitle}</h3>
+                    <ul className="muted">
+                      <li>{tdict[lang].faq1}</li>
+                      <li>{tdict[lang].faq2}</li>
+                      <li>{tdict[lang].faq3}</li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+            </main>
+          </div>
+
+          {/* bottom bar */}
+          <div className="bottom-bar" id="bottom-bar">
+            <div className="bb-inner">
+              <div className="row">
+                <div className="chip">{tdict[lang].positions}: <b id="cart-count">0</b></div>
+                <div className="chip">{tdict[lang].total}: <b id="cart-total-eur">€0</b> / <b id="cart-total-atm">0 ATM</b></div>
+                <div className="chip">{tdict[lang].totalWithAtm}: <b id="cart-total-final">€0</b></div>
+              </div>
+              <div className="row">
+                <button className="btn" id="cart-clear" type="button">{tdict[lang].clear}</button>
+                <button className="btn primary" id="checkout-btn" type="button">{tdict[lang].pay}</button>
+              </div>
             </div>
           </div>
-        </div>
-        <div id="catalog" class="col-12 grid"></div>
-      </div>
-    </section>
 
-    <section id="page-orders" class="page" hidden>
-      <div class="grid">
-        <div class="col-12 card">
-          <h3 id="orders-title">История заказов</h3>
-          <table class="table" id="orders-table">
-            <thead><tr>
-              <th id="th-num">№</th><th id="th-prod">Товар</th><th id="th-term">Срок</th><th id="th-meth">Метод</th><th id="th-sum">Сумма</th><th id="th-st">Статус</th><th id="th-date">Дата</th><th>Intent</th>
-            </tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section id="page-ref" class="page" hidden>
-      <div class="grid">
-        <div class="col-12 card">
-          <h3 id="ref-title">Реферальная программа</h3>
-          <p class="muted" id="ref-help">Делитесь кодом и получайте 10% от оплаты подписки (в ATM). Ваш код:</p>
-          <div class="row"><input id="ref-code" readonly><button class="btn primary" id="ref-copy" type="button">Скопировать</button></div>
-          <div class="line">
-            <div class="muted" id="bind-title">Привязать чужой код</div>
-            <div class="row"><input id="ref-bind-input" placeholder="REF123456"><button class="btn" id="ref-bind-btn" type="button">Привязать</button></div>
+          {/* modals */}
+          <div className="modal-back" id="modal-auth" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+            <div className="modal">
+              <h2 id="auth-title">{tdict[lang].authTitle}</h2>
+              <p className="muted">{tdict[lang].authBody}</p>
+              <div className="foot"><button className="btn" id="auth-close" type="button">{tdict[lang].close}</button></div>
+            </div>
           </div>
-          <div style="margin-top:10px">
-            <table class="table" id="ref-table"><thead><tr><th id="th-partner">Партнёр</th><th id="th-date2">Дата</th><th id="th-paid">Оплата</th><th id="th-reward">Вознаграждение</th></tr></thead><tbody></tbody></table>
+
+          <div className="modal-back" id="modal-disclaimer" role="dialog" aria-modal="true" aria-labelledby="disc-title">
+            <div className="modal">
+              <h2 id="disc-title">{tdict[lang].disclaimer}</h2>
+              <p className="muted">{tdict[lang].disclaimerBody}</p>
+              <div className="foot"><button className="btn primary" id="accept" type="button">{tdict[lang].agree}</button></div>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <section id="page-tasks" class="page" hidden>
-      <div class="grid">
-        <div class="col-12 card">
-          <h3 id="tasks-title">Задания за ATM</h3>
-          <div id="tasks" class="grid"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="page-balance" class="page" hidden>
-      <div class="grid">
-        <div class="col-12 card">
-          <h3 id="bal-title">Баланс ATM</h3>
-          <p class="muted" id="bal-help">Коины выдаются за задания и рефералов. Можно списать до 25% заказа (100 ATM = €1).</p>
-          <div class="row"><div class="chip">Balance: <b id="atm-balance">0</b></div></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="page-admin" class="page" hidden>
-      <div class="grid">
-        <div class="col-12 card">
-          <h3 id="adm-title">Админ-панель</h3>
-          <p class="muted" id="adm-help">Статистика, заказы, задания.</p>
-          <div class="row"><button class="btn" id="admin-refresh" type="button">Обновить</button><button class="btn ghost" id="admin-export" type="button">Экспорт JSON</button></div>
-          <div class="grid" style="margin-top:12px">
-            <div class="col-12 card" id="admin-stats"></div>
-            <div class="col-12 card"><h3 id="adm-users-h">Пользователи</h3><table class="table" id="admin-users"><thead><tr><th>ID</th><th>Username</th><th>ATM</th><th>Заказы</th><th>Реф-код</th><th>От кого</th><th>Дата</th></tr></thead><tbody></tbody></table></div>
-            <div class="col-12 card"><h3 id="adm-orders-h">Заказы</h3><table class="table" id="admin-orders"><thead><tr><th>#</th><th>User</th><th>Товар</th><th>Срок</th><th>Метод</th><th>€</th><th>ATM</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
-            <div class="col-12 card"><h3 id="adm-tasks-h">Задания (модерация)</h3><table class="table" id="admin-tasks"><thead><tr><th>ID</th><th>User</th><th>Задание</th><th>Пруф</th><th>Награда</th><th>Статус</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
+          <div className="modal-back" id="modal-crypto" role="dialog" aria-modal="true" aria-labelledby="pay-title">
+            <div className="modal">
+              <h2 id="pay-title">{tdict[lang].cryptoPay}</h2>
+              <p className="muted">{tdict[lang].scanOrCopy}</p>
+              <div className="row">
+                <canvas id="qr" width="180" height="180" style={{background:'#fff',borderRadius:'8px'}}></canvas>
+                <div style={{flex:1}}>
+                  <div className="kv"><span className="label">{tdict[lang].recipient}</span>
+                    <select id="pay-dest-select"><option value="admin">{tdict[lang].adminExch}</option><option value="company">{tdict[lang].companyAcc}</option></select>
+                  </div>
+                  <div className="kv"><span className="label">{tdict[lang].chain}</span>
+                    <select id="pay-chain-select"><option value="BEP20">BEP20</option><option value="TRC20">TRC20</option><option value="ERC20">ERC20</option></select>
+                  </div>
+                  <div className="kv"><span className="label">{tdict[lang].address}</span><code id="pay-addr" style={{wordBreak:'break-all'}}></code> <button className="btn" id="copy-addr" type="button" style={{marginLeft:'8px'}}>{tdict[lang].copy}</button></div>
+                  <div className="kv"><span className="label">{tdict[lang].amountEur}</span><b id="pay-amount">—</b> <button className="btn" id="copy-amount" type="button" style={{marginLeft:'8px'}}>{tdict[lang].copy}</button></div>
+                  <div className="kv"><span className="label">{tdict[lang].memo}</span><b id="pay-memo">CRYPTOATM</b> <button className="btn" id="copy-memo" type="button" style={{marginLeft:'8px'}}>{tdict[lang].copy}</button></div>
+                  <div className="row" style={{marginTop:'8px'}}><button className="btn" id="close-crypto" type="button">{tdict[lang].close}</button><button className="btn primary" id="paid-btn" type="button">{tdict[lang].iPaid}</button></div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <section id="page-faq" class="page" hidden>
-      <div class="grid">
-        <div class="col-12 card">
-          <h3>FAQ</h3>
-          <ul class="muted" id="faq-list">
-            <li>Фиксированные цены в EUR. Оплата — на биржу админа или счёт компании.</li>
-            <li>ATM покрывают до 25% заказа (100 ATM = €1).</li>
-            <li>Реферальная награда: 10% от оплаченной подписки (в ATM).</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-  </main>
-</div>
+          <div className="modal-back" id="modal-item" role="dialog" aria-modal="true" aria-labelledby="item-title">
+            <div className="modal">
+              <h2 id="item-title">{tdict[lang].item}</h2>
+              <div id="item-desc" className="muted"></div>
+              <div className="foot"><button className="btn" id="close-item" type="button">{tdict[lang].close}</button></div>
+            </div>
+          </div>
 
-<!-- Bottom nav + Cart -->
-<div class="tabbar">
-  <div class="tabbar-inner">
-    <div class="tnav">
-      <button class="tbtn active" data-tab="shop" type="button">🛒 Магазин</button>
-      <button class="tbtn" data-tab="orders" type="button">📄 Заказы</button>
-      <button class="tbtn" data-tab="ref" type="button">👥 Рефералы</button>
-      <button class="tbtn" data-tab="tasks" type="button">🧩 Задания</button>
-      <button class="tbtn" data-tab="balance" type="button">💰 Баланс</button>
-      <button class="tbtn" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 Админ</button>
-      <button class="tbtn" data-tab="faq" type="button">❓ FAQ</button>
-    </div>
-    <div class="cartbar" id="cartbar">
-      <div class="row">
-        <div class="chip">Позиций: <b id="cart-count">0</b></div>
-        <div class="chip">Итого: <b id="cart-total-eur">€0</b> / <b id="cart-total-atm">0 ATM</b></div>
-        <div class="chip">С учётом ATM: <b id="cart-total-final">€0</b></div>
-      </div>
-      <div class="row">
-        <button class="btn" id="cart-clear" type="button">Очистить</button>
-        <button class="btn primary" id="checkout-btn" type="button">Оплатить</button>
-      </div>
-    </div>
-  </div>
-</div>
+          <div className="modal-back" id="modal-pin" role="dialog" aria-modal="true" aria-labelledby="pin-title">
+            <div className="modal">
+              <h2 id="pin-title">{tdict[lang].pin}</h2>
+              <p id="pin-sub" className="muted"></p>
+              <input id="pin-input" inputMode="numeric" maxLength="4" placeholder="••••" />
+              <div className="foot">
+                <button className="btn ghost" id="pin-reset" type="button">{tdict[lang].pinReset}</button>
+                <button className="btn" id="pin-close" type="button">{tdict[lang].close}</button>
+                <button className="btn primary" id="pin-action" type="button">OK</button>
+              </div>
+            </div>
+          </div>
+        </>
+      );
+    }
 
-<!-- Modals -->
-<div class="modal-back" id="modal-auth"><div class="modal"><h2 id="auth-title">Требуется авторизация</h2><p class="muted" id="auth-body">Откройте Mini App внутри Telegram (с initData).</p><div class="foot"><button class="btn" id="auth-close" type="button">Закрыть</button></div></div></div>
-<div class="modal-back" id="modal-disclaimer"><div class="modal"><h2>Disclaimer</h2><p class="muted" id="disc-body">We strongly recommend conducting your own research before purchasing any services. CryptoATM does not provide financial advice and is not responsible for any losses. By continuing, you confirm you understand the risks and accept full responsibility.</p><div class="foot"><button class="btn primary" id="accept" type="button">I agree</button></div></div></div>
-<div class="modal-back" id="modal-crypto">
-  <div class="modal">
-    <h2 id="pay-title">Оплата криптовалютой</h2>
-    <p class="muted" id="pay-help">Сканируйте QR или скопируйте адрес. После оплаты нажмите «Я оплатил(а)».</p>
-    <div class="row">
-      <canvas id="qr" width="180" height="180" style="background:#fff;border-radius:8px"></canvas>
-      <div style="flex:1">
-        <div class="kv"><span class="label" id="lbl-recipient">Получатель</span>
-          <select id="pay-dest-select"><option value="admin">Биржа администратора</option><option value="company">Счёт компании</option></select>
-        </div>
-        <div class="kv"><span class="label" id="lbl-chain">Сеть</span>
-          <select id="pay-chain-select"><option value="BEP20">BEP20</option><option value="TRC20">TRC20</option><option value="ERC20">ERC20</option></select>
-        </div>
-        <div class="kv"><span class="label" id="lbl-addr">Адрес</span><code id="pay-addr" style="word-break:break-all"></code> <button class="btn" id="copy-addr" type="button" style="margin-left:8px">Скопировать</button></div>
-        <div class="kv"><span class="label" id="lbl-amt">Сумма</span><b id="pay-amount">—</b> <button class="btn" id="copy-amount" type="button" style="margin-left:8px">Скопировать</button></div>
-        <div class="kv"><span class="label" id="lbl-memo">Назначение</span><b id="pay-memo">CRYPTOATM</b> <button class="btn" id="copy-memo" type="button" style="margin-left:8px">Скопировать</button></div>
-        <div class="row" style="margin-top:8px"><button class="btn" id="close-crypto" type="button">Закрыть</button><button class="btn primary" id="paid-btn" type="button">Я оплатил(а)</button></div>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="modal-back" id="modal-item"><div class="modal"><h2 id="item-title">Товар</h2><div id="item-desc" class="muted"></div><div class="foot"><button class="btn" id="close-item" type="button">Закрыть</button></div></div></div>
-
-<script>
-/* ====== CONFIG ====== */
-const tg = window.Telegram?.WebApp;
-try{ tg?.expand(); tg?.setHeaderColor('#0a0b0e'); tg?.setBackgroundColor('#0a0b0e'); }catch(e){}
-const ADMIN_IDS = [568646738];             // <== замени на свой ID
-const START_BONUS_ATM = 250;
-const REF_BONUS_PERCENT = 0.10;            // 10% от € в ATM (100 ATM = €1)
-const PERIOD_DISCOUNT = {1:0,3:0.10,6:0.20};
-const PAY_ADDR_ADMIN  = { BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c', TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs', ERC20:'0x1111222233334444555566667777888899990000' };
-const PAY_ADDR_COMPANY= { BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c', TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs', ERC20:'0x1111222233334444555566667777888899990000' };
-const CATALOG=[
-  {type:'bot', code:'CRYPTO_ATM', name:'Crypto ATM Bot',   price:71,  desc:'BTC analytics, daily signals & levels.'},
-  {type:'bot', code:'ALERTS',     name:'Alerts Bot',       price:39,  desc:'Whales, liquidations, funding, OI & volumes.'},
-  {type:'bot', code:'NEWS',       name:'News Bot',         price:29,  desc:'CoinMarketCal + RSS + translate + tone.'},
-  {type:'pack',code:'PREMIUM',    name:'Premium',          price:99,  desc:'All 3 bots with discount.'},
-  {type:'pack',code:'ENTERPRISE', name:'Enterprise',       price:199, desc:'Full access + priority + consulting.'},
-  {type:'service',code:'COPY',    name:'Copy-trading',     price:50,  desc:'€50/month + profit share. Risk managed.'},
-];
-const CATALOG_LONG={
-  CRYPTO_ATM:{bullets:['BTC analytics: levels & zones','Signals with probability + comments','Daily OI, funding, volumes']},
-  ALERTS:{bullets:['Whales trades & liquidations','Funding/OI & volume spikes','Direction & trigger explanation']},
-  NEWS:{bullets:['CMC + RSS + auto-translate','Top-3 digest & tone','Export & smart keywords']},
-  PREMIUM:{bullets:['All 3 bots, one payment','Discount included']},
-  ENTERPRISE:{bullets:['Priority support','Consulting & settings']},
-  COPY:{bullets:['€50/month + profit share','Reports & risk management']},
-};
-
-/* ====== UTIL ====== */
-const $ = s=>document.querySelector(s);
-const $$= s=>Array.from(document.querySelectorAll(s));
-const DBKEY='CATM_DB_html_noReact';
-function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)) || {users:{},orders:[],tasks:[],disclaimerAccepted:{}} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:{}} } }
-const db=loadDB(); const saveDB=()=>localStorage.setItem(DBKEY, JSON.stringify(db));
-
-/* ====== i18n (ru/en) ====== */
-const i18n = {
-  ru:{ brandSub:'Подписки • Пакеты • Копитрейдинг • Рефералы', shop:'Магазин',orders:'Заказы',ref:'Рефералы',tasks:'Задания',balance:'Баланс',admin:'Админ',faq:'FAQ',
-       subTitle:'Оформление подписки',subHelp:'Выберите срок 1/3/6 мес (скидка ~0/10/20%). ATM можно списать до 25% (100 ATM = €1).',
-       term:'Срок', atmWrite:'Списать ATM (макс 25%)', more:'Подробнее', add:'В корзину', remove:'Убрать',
-       ordersTitle:'История заказов', num:'№', prod:'Товар', termCol:'Срок', meth:'Метод', sum:'Сумма', st:'Статус', date:'Дата',
-       refTitle:'Реферальная программа', refHelp:'Делитесь кодом и получайте 10% от оплаты подписки (в ATM). Ваш код:', copy:'Скопировать',
-       bindTitle:'Привязать чужой код', bind:'Привязать', partner:'Партнёр', paid:'Оплата', reward:'Вознаграждение',
-       tasksTitle:'Задания за ATM', proofHint:'URL-пруф', submit:'Отправить',
-       balTitle:'Баланс ATM', balHelp:'Коины выдаются за задания и рефералов. Списание до 25% (100 ATM = €1).',
-       adminTitle:'Админ-панель', adminHelp:'Статистика, заказы, задания.', refresh:'Обновить', export:'Экспорт JSON',
-       users:'Пользователи', orders2:'Заказы', revenue:'Выручка', atmHold:'ATM на балансах',
-       faq1:'Фиксированные цены в EUR. Оплата — на биржу админа или счёт компании.', faq2:'ATM покрывают до 25% заказа (100 ATM = €1).', faq3:'Реферальная награда: 10% от оплаченной подписки (в ATM).',
-       recipient:'Получатель', adminEx:'Биржа администратора', compAcc:'Счёт компании', chain:'Сеть', addr:'Адрес', amount:'Сумма', memo:'Назначение', iPaid:'Я оплатил(а)'},
-  en:{ brandSub:'Subscriptions • Bundles • Copy-trading • Referrals', shop:'Shop',orders:'Orders',ref:'Referrals',tasks:'Tasks',balance:'Balance',admin:'Admin',faq:'FAQ',
-       subTitle:'Subscription checkout',subHelp:'Choose 1/3/6 months (~0/10/20%). Redeem up to 25% with ATM (100 ATM = €1).',
-       term:'Term', atmWrite:'Redeem ATM (max 25%)', more:'Details', add:'Add', remove:'Remove',
-       ordersTitle:'Order history', num:'#', prod:'Product', termCol:'Term', meth:'Method', sum:'Amount', st:'Status', date:'Date',
-       refTitle:'Referral program', refHelp:'Share your code and earn 10% of paid subscription (in ATM). Your code:', copy:'Copy',
-       bindTitle:'Bind referral code', bind:'Bind', partner:'Partner', paid:'Paid', reward:'Reward',
-       tasksTitle:'Tasks for ATM', proofHint:'Proof URL', submit:'Submit',
-       balTitle:'ATM balance', balHelp:'Earn ATM with tasks & referrals. Redeem up to 25% (100 ATM = €1).',
-       adminTitle:'Admin panel', adminHelp:'Stats, orders, tasks.', refresh:'Refresh', export:'Export JSON',
-       users:'Users', orders2:'Orders', revenue:'Revenue', atmHold:'ATM on balances',
-       faq1:'Fixed EUR prices. Pay to admin exchange or company wallet.', faq2:'ATM can cover up to 25% (100 ATM = €1).', faq3:'Referral reward: 10% of paid subscription (in ATM).',
-       recipient:'Recipient', adminEx:'Admin exchange', compAcc:'Company account', chain:'Network', addr:'Address', amount:'Amount', memo:'Memo', iPaid:'I paid'}
-};
-let lang = localStorage.getItem('CATM_LANG') || ((navigator.language||'en').toLowerCase().startsWith('ru')?'ru':'en');
-function t(k){ return (i18n[lang] && i18n[lang][k]) || (i18n.en && i18n.en[k]) || k; }
-function applyLang(){
-  $('#brand-sub').textContent = t('brandSub'); $('#lang-code').textContent = lang.toUpperCase();
-  $('[data-tab="shop"]').innerHTML=`🛒 ${t('shop')}`;$('[data-tab="orders"]').innerHTML=`📄 ${t('orders')}`;
-  $('[data-tab="ref"]').innerHTML=`👥 ${t('ref')}`;$('[data-tab="tasks"]').innerHTML=`🧩 ${t('tasks')}`;
-  $('[data-tab="balance"]').innerHTML=`💰 ${t('balance')}`;$('[data-tab="admin"]').innerHTML=`🛠 ${t('admin')}`;$('[data-tab="faq"]').innerHTML=`❓ ${t('faq')}`;
-  $('#sub-title').textContent=t('subTitle'); $('#sub-help').textContent=t('subHelp'); $('#lbl-term').textContent=t('term'); $('#lbl-atm').textContent=t('atmWrite');
-  $('#orders-title').textContent=t('ordersTitle'); $('#th-num').textContent=t('num'); $('#th-prod').textContent=t('prod'); $('#th-term').textContent=t('termCol'); $('#th-meth').textContent=t('meth'); $('#th-sum').textContent=t('sum'); $('#th-st').textContent=t('st'); $('#th-date').textContent=t('date');
-  $('#ref-title').textContent=t('refTitle'); $('#ref-help').textContent=t('refHelp'); $('#ref-bind-btn').textContent=t('bind'); $('#bind-title').textContent=t('bindTitle');
-  $('#th-partner').textContent=t('partner'); $('#th-date2').textContent=t('date'); $('#th-paid').textContent=t('paid'); $('#th-reward').textContent=t('reward');
-  $('#tasks-title').textContent=t('tasksTitle');
-  $('#bal-title').textContent=t('balTitle'); $('#bal-help').textContent=t('balHelp');
-  $('#adm-title').textContent=t('adminTitle'); $('#adm-help').textContent=t('adminHelp'); $('#admin-refresh').textContent=t('refresh'); $('#admin-export').textContent=t('export');
-  $('#auth-title').textContent=(lang==='ru'?'Требуется авторизация':'Authorization required'); $('#auth-body').textContent=(lang==='ru'?'Откройте Mini App внутри Telegram (с initData).':'Open this Mini App inside Telegram (with initData).');
-  $('#pay-title').textContent=(lang==='ru'?'Оплата криптовалютой':'Crypto payment'); $('#pay-help').textContent=(lang==='ru'?'Сканируйте QR или скопируйте адрес. После оплаты нажмите «Я оплатил(а)».':'Scan QR or copy address. After payment press “I paid”.');
-  $('#lbl-recipient').textContent=t('recipient'); $('#pay-dest-select').options[0].text=t('adminEx'); $('#pay-dest-select').options[1].text=t('compAcc');
-  $('#lbl-chain').textContent=t('chain'); $('#lbl-addr').textContent=t('addr'); $('#lbl-amt').textContent=t('amount'); $('#lbl-memo').textContent=t('memo'); $('#paid-btn').textContent=t('iPaid');
-  const faq=[t('faq1'),t('faq2'),t('faq3')]; $('#faq-list').innerHTML=faq.map(x=>`<li>${x}</li>`).join('');
-}
-$('#lang-toggle').addEventListener('click',()=>{ lang = (lang==='ru'?'en':'ru'); localStorage.setItem('CATM_LANG',lang); applyLang(); renderCatalog(); });
-
-/* ====== AUTH USER ====== */
-const rawUser = tg?.initDataUnsafe?.user;
-const CURRENT_USER = rawUser ? { id:rawUser.id, username:rawUser.username||'user', name:(rawUser.first_name||'')+(rawUser.last_name?(' '+rawUser.last_name):'') } : { id:0, username:'guest', name:'Guest' };
-if(!db.users[CURRENT_USER.id]){ db.users[CURRENT_USER.id]={ id:CURRENT_USER.id, username:CURRENT_USER.username, created_at:new Date().toISOString(), atm:START_BONUS_ATM, ref_code:'REF'+(CURRENT_USER.id||Math.floor(Math.random()*1e6)), referred_by:null, orders:[], referrals:[], tasks:[], start_bonus_given:true }; saveDB(); }
-function user(){ return db.users[CURRENT_USER.id]; }
-if(ADMIN_IDS.includes(CURRENT_USER.id)) $('#tab-admin-btn').hidden=false;
-
-/* ====== STATE ====== */
-const state={ period:1, atmDiscount:0, cart:[], pay:{chain:'BEP20', dest:'admin', addr:PAY_ADDR_ADMIN.BEP20, amount:0, memo:''} };
-function currentTab(){ return location.hash.replace('#/','')||'shop'; }
-function switchTab(name){
-  $$('.page').forEach(p=>p.hidden = (p.id!=='page-'+name));
-  $$('.tbtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
-  if(name==='shop') renderCatalog();
-  if(name==='orders') renderOrders();
-  if(name==='ref') renderRefs();
-  if(name==='tasks') renderTasks();
-  if(name==='balance') renderBalance();
-  if(name==='admin') renderAdmin();
-}
-window.addEventListener('hashchange', ()=>switchTab(currentTab()));
-
-/* ====== HEADER/UTIL ====== */
-function renderHeader(){ $('#chip-name').textContent='@'+(CURRENT_USER.username||'guest'); $('#chip-atm').textContent=user().atm; $('#chip-orders').textContent=user().orders.length; $('#ref-code').value=user().ref_code; }
-function priceFor(it,months){ const disc=PERIOD_DISCOUNT[months]||0; const perMonth=Math.round(it.price*(1-disc)); return perMonth*months; }
-function updateCartUI(){
-  const eur=state.cart.reduce((s,x)=>s+x.amount,0); const atmMax=Math.floor(eur*0.25)*100;
-  const wantATM=Math.min(state.atmDiscount||0, atmMax, user().atm);
-  const eurMinus=Math.floor(wantATM/100); const finalEur=Math.max(0, eur-eurMinus);
-  $('#cart-count').textContent=state.cart.length; $('#cart-total-eur').textContent='€'+eur; $('#cart-total-atm').textContent=wantATM+' ATM'; $('#cart-total-final').textContent='€'+finalEur;
-  $('#cartbar').style.display = eur>0 ? 'flex' : 'none';
-}
-function toast(t){ if(tg?.showPopup) tg.showPopup({title:'',message:String(t),buttons:[{type:'close'}]}); else console.log('[toast]',t); }
-
-/* ====== SHOP ====== */
-function renderCatalog(){
-  const grid=$('#catalog'); grid.innerHTML='';
-  const months=state.period=parseInt($('#period').value||'1',10);
-  state.atmDiscount=Math.max(0, parseInt($('#atm-discount').value||'0',10));
-  const eur=state.cart.reduce((s,x)=>s+x.amount,0); const atmMax=Math.floor(eur*0.25)*100;
-  if(state.atmDiscount>atmMax){ state.atmDiscount=atmMax; $('#atm-discount').value=atmMax; }
-  CATALOG.forEach(it=>{
-    const total=priceFor(it,months); const inCart=state.cart.find(x=>x.code===it.code&&x.months===months);
-    const card=document.createElement('div'); card.className='col-4 card';
-    card.innerHTML=`<div class="row" style="justify-content:space-between;align-items:start">
-      <span class="badge">${it.type.toUpperCase()}</span><span class="price" style="color:var(--gold)">€${total} / ${months}м</span></div>
-      <h3 style="margin-top:6px">${it.name}</h3>
-      <p class="muted">${it.desc}</p>
-      <div class="line">
-        <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
-        ${inCart?`<button class="btn" data-act="remove" data-code="${it.code}">${t('remove')}</button>`:`<button class="btn primary" data-act="add" data-code="${it.code}">${t('add')}</button>`}
-      </div>`;
-    grid.appendChild(card);
-  });
-  updateCartUI();
-}
-function addToCart(code){ const months=state.period; const it=CATALOG.find(x=>x.code===code); if(!it) return; if(state.cart.find(x=>x.code===code&&x.months===months)) return; state.cart.push({code:it.code,name:it.name,months,amount:priceFor(it,months)}); updateCartUI(); renderCatalog(); }
-function removeFromCart(code){ const months=state.period; state.cart=state.cart.filter(x=>!(x.code===code&&x.months===months)); updateCartUI(); renderCatalog(); }
-function clearCart(){ state.cart=[]; updateCartUI(); renderCatalog(); }
-
-/* ====== ORDERS ====== */
-function renderOrders(){
-  const tb=$('#orders-table tbody'); tb.innerHTML='';
-  const rows=db.orders.filter(o=>o.user===CURRENT_USER.id).slice().reverse();
-  for(const o of rows){
-    const tr=document.createElement('tr');
-    const names=o.items.map(i=>i.name+' ×'+i.months+'м').join(', ');
-    tr.innerHTML=`<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${o.method} (${o.dest||'-'})</td><td>€${o.eur_final} ${o.atm_used?`(+${o.atm_used} ATM)`:''}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.intent_id||'—'}</td>`;
-    tb.appendChild(tr);
-  }
-}
-
-/* ====== REFERRALS ====== */
-function renderRefs(){
-  $('#ref-code').value=user().ref_code;
-  const tb=$('#ref-table tbody'); tb.innerHTML='';
-  for(const r of (user().referrals||[]).slice().reverse()){
-    const tr=document.createElement('tr'); tr.innerHTML=`<td>@${db.users[r.uid]?.username||r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid?'Да':'—'}</td><td>${r.reward||0} ATM</td>`;
-    tb.appendChild(tr);
-  }
-  const hasRef=!!user().referred_by; $('#ref-bind-input').disabled=hasRef; $('#ref-bind-btn').disabled=hasRef;
-}
-
-/* ====== TASKS ====== */
-const TASK_DEF=[{id:1,title:'TikTok subscribe',reward:100,hint:'https://...'},{id:2,title:'Repost to stories',reward:120,hint:'https://...'},{id:3,title:'Project review',reward:150,hint:'https://...'},{id:4,title:'Sticker on car',reward:500,hint:'https://...'}];
-function renderTasks(){ const holder=$('#tasks'); holder.innerHTML=''; TASK_DEF.forEach(tk=>{ const col=document.createElement('div'); col.className='col-6 card'; col.innerHTML=`<h3>#${tk.id} ${tk.title}</h3><p class="muted">+${tk.reward} ATM</p><input id="proof-${tk.id}" placeholder="${t('proofHint')}" inputmode="url"><div class="line"><span class="muted">Moderation</span><button class="btn primary" data-act="submit-task" data-id="${tk.id}">${t('submit')}</button></div>`; holder.appendChild(col); }); }
-
-/* ====== BALANCE ====== */
-function renderBalance(){ $('#atm-balance').textContent=user().atm; }
-
-/* ====== ADMIN ====== */
-function renderAdmin(){
-  const users=Object.values(db.users), o=db.orders;
-  const totalEur=o.reduce((s,x)=>s+x.eur_final,0), totalAtm=users.reduce((s,u)=>s+u.atm,0);
-  $('#admin-stats').innerHTML=`<div class="row"><div class="chip">${t('users')}: <b>${users.length}</b></div><div class="chip">${t('orders2')}: <b>${o.length}</b></div><div class="chip">${t('revenue')}: <b>€${totalEur}</b></div><div class="chip">${t('atmHold')}: <b>${totalAtm}</b></div></div>`;
-  const utb=$('#admin-users tbody'); utb.innerHTML=''; users.slice().sort((a,b)=>b.id-a.id).forEach(u=>{ const refFrom=u.referred_by?'@'+(db.users[u.referred_by]?.username||u.referred_by):'—'; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>${u.atm}</td><td>${u.orders.length}</td><td>${u.ref_code}</td><td>${refFrom}</td><td>${new Date(u.created_at).toLocaleDateString()}</td>`; utb.appendChild(tr); });
-  const otb=$('#admin-orders tbody'); otb.innerHTML=''; db.orders.slice().reverse().forEach(or=>{ const userName='@'+(db.users[or.user]?.username||or.user); const items=or.items.map(i=>i.code+'×'+i.months).join(', '); const tr=document.createElement('tr'); tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${or.method} (${or.dest||'-'})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="mark-paid" data-id="${or.id}">Оплачен</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">Отмена</button>`:''}</td>`; otb.appendChild(tr); });
-  const ttb=$('#admin-tasks tbody'); ttb.innerHTML=''; users.forEach(u=>{ (u.tasks||[]).forEach((tk,idx)=>{ if(tk.status==='pending'){ const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0,title:'#'+tk.id}; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>#${tk.id} ${def.title||''}</td><td>${tk.proof||''}</td><td>+${def.reward} ATM</td><td>${tk.status}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">Одобрить</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">Отклонить</button>`:''}</td>`; ttb.appendChild(tr); } }); });
-}
-
-/* ====== PAY / QR ====== */
-function getActiveAddr(){ const book=state.pay.dest==='company'?PAY_ADDR_COMPANY:PAY_ADDR_ADMIN; return book[state.pay.chain]; }
-function drawQR(text){ const c=$('#qr'), ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle='#000'; let seed=0; for(let i=0;i<text.length;i++) seed=((seed*33+text.charCodeAt(i))>>>0); const n=21,s=Math.floor((c.width-20)/n),off=10; for(let y=0;y<n;y++) for(let x=0;x<n;x++){ seed=(seed*1103515245+12345)>>>0; if(seed&1) ctx.fillRect(off+x*s,off+y*s,s-1,s-1);} }
-function openCryptoModal(eur, chain='BEP20', memo=''){ state.pay.chain=chain; state.pay.addr=getActiveAddr(); $('#pay-chain-select').value=chain; $('#pay-dest-select').value=state.pay.dest; $('#pay-addr').textContent=state.pay.addr; $('#pay-amount').textContent='€'+eur; $('#pay-memo').textContent=memo||'CRYPTOATM'; $('#modal-crypto').style.display='flex'; drawQR(state.pay.addr); }
-function closeCrypto(){ $('#modal-crypto').style.display='none'; }
-
-/* ====== ORDER FLOW ====== */
-function createPaymentIntent(){ return new Promise(r=>setTimeout(()=>r('intent_'+Math.random().toString(36).slice(2,9)),350)); }
-function createOrder(){
-  if(state.cart.length===0) return toast('Корзина пуста');
-  const eur=state.cart.reduce((s,x)=>s+x.amount,0); const atmMax=Math.floor(eur*0.25)*100; const wantATM=Math.min(state.atmDiscount||0, atmMax, user().atm); const eurMinus=Math.floor(wantATM/100); const finalEur=Math.max(0, eur-eurMinus); if(wantATM>0) user().atm=Math.max(0,user().atm-wantATM);
-  const memo='ORDER-'+(db.orders.length+1);
-  const order={ id:db.orders.length+1,user:CURRENT_USER.id,items:state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})),method:'crypto',dest:state.pay.dest,eur,atm_used:wantATM,eur_final:finalEur,status:'waiting',created_at:new Date().toISOString(),memo,intent_id:null };
-  db.orders.push(order); user().orders.push(order.id); saveDB();
-  state.cart=[]; state.atmDiscount=0; $('#atm-discount').value=0; updateCartUI(); renderOrders();
-  openCryptoModal(finalEur, state.pay.chain, memo);
-  createPaymentIntent().then(id=>{ order.intent_id=id; saveDB(); renderOrders(); $('#pay-memo').textContent=id; });
-}
-
-/* ====== DETAILS ====== */
-function openItemModal(code){ const it=CATALOG.find(x=>x.code===code); if(!it) return; const long=(CATALOG_LONG[code]?.bullets)||[]; $('#item-title').textContent='Товар: '+it.name; $('#item-desc').innerHTML=`<div class="muted" style="margin-bottom:8px">${it.desc}</div>${long.length?`<ul class="muted">${long.map(b=>`<li>${b}</li>`).join('')}</ul>`:''}`; $('#modal-item').style.display='flex'; }
-function closeItem(){ $('#modal-item').style.display='none'; }
-
-/* ====== EVENTS ====== */
-document.addEventListener('click',e=>{
-  const btn=e.target.closest('button,.btn'); if(!btn) return;
-  if(btn.classList.contains('tbtn')){ location.hash='#/'+btn.dataset.tab; switchTab(btn.dataset.tab); return; }
-  const act=btn.dataset.act;
-  if(act==='add'){ addToCart(btn.dataset.code); return; }
-  if(act==='remove'){ removeFromCart(btn.dataset.code); return; }
-  if(act==='details'){ openItemModal(btn.dataset.code); return; }
-  if(act==='submit-task'){ const id=+btn.dataset.id; const proof=$('#proof-'+id)?.value.trim(); if(!/^https?:\/\//i.test(proof||'')) return toast('Add a valid URL'); user().tasks=user().tasks||[]; user().tasks.push({id,proof,at:new Date().toISOString(),status:'pending'}); saveDB(); toast('Отправлено на проверку'); $('#proof-'+id).value=''; return; }
-  if(btn.id==='cart-clear'){ clearCart(); return; }
-  if(btn.id==='checkout-btn'){ createOrder(); return; }
-  if(btn.id==='ref-copy'){ navigator.clipboard.writeText(user().ref_code).then(()=>toast('Скопировано')); return; }
-  if(btn.id==='ref-bind-btn'){ const code=$('#ref-bind-input').value.trim().toUpperCase(); if(!code) return toast('Введите код'); const owner=Object.values(db.users).find(u=>u.ref_code===code); if(!owner) return toast('Код не найден'); if(owner.id===CURRENT_USER.id) return toast('Нельзя свой код'); if(user().referred_by) return toast('Код уже привязан'); user().referred_by=owner.id; owner.referrals.push({uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0}); saveDB(); renderRefs(); toast('Код привязан'); return; }
-  if(btn.id==='admin-refresh'){ renderAdmin(); return; }
-  if(btn.id==='admin-export'){ const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='cryptoatm_export.json'; a.click(); URL.revokeObjectURL(url); return; }
-  if(btn.id==='copy-addr'){ navigator.clipboard.writeText($('#pay-addr').textContent||''); toast('Address copied'); return; }
-  if(btn.id==='copy-amount'){ navigator.clipboard.writeText(($('#pay-amount').textContent||'').replace('€','')); toast('Amount copied'); return; }
-  if(btn.id==='copy-memo'){ navigator.clipboard.writeText($('#pay-memo').textContent||''); toast('Memo copied'); return; }
-  if(btn.id==='paid-btn'){ toast('Спасибо! Мы проверим оплату.'); closeCrypto(); return; }
-  if(btn.id==='close-crypto'){ closeCrypto(); return; }
-  if(btn.id==='close-item'){ closeItem(); return; }
-  if(btn.id==='auth-close'){ $('#modal-auth').style.display='none'; return; }
-  if(btn.id==='accept'){ db.disclaimerAccepted[CURRENT_USER.id]=true; saveDB(); $('#modal-disclaimer').style.display='none'; return; }
-
-  // админ
-  if(act==='mark-paid' && ADMIN_IDS.includes(CURRENT_USER.id)){ const id=+btn.dataset.id; const o=db.orders.find(x=>x.id===id); if(o){ o.status='paid'; const buyer=db.users[o.user]; if(buyer?.referred_by){ const refUser=db.users[buyer.referred_by]; const rec=(refUser.referrals||[]).find(r=>r.uid===buyer.id); if(rec && !rec.paid){ rec.paid=true; const atmReward=Math.max(0,Math.round((o.eur_final||0)*REF_BONUS_PERCENT*100)); rec.reward=atmReward; refUser.atm=(refUser.atm||0)+atmReward; } } saveDB(); renderAdmin(); renderOrders(); toast('Marked paid'); } return; }
-  if(act==='mark-cancel' && ADMIN_IDS.includes(CURRENT_USER.id)){ const id=+btn.dataset.id; const o=db.orders.find(x=>x.id===id); if(o){ o.status='canceled'; saveDB(); renderAdmin(); renderOrders(); toast('Canceled'); } return; }
-  if(act==='task-approve' && ADMIN_IDS.includes(CURRENT_USER.id)){ const uid=+btn.dataset.uid, idx=+btn.dataset.idx, u=db.users[uid]; if(u?.tasks?.[idx]){ const tk=u.tasks[idx]; const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0}; tk.status='approved'; u.atm=(u.atm||0)+def.reward; saveDB(); renderAdmin(); renderBalance(); toast('Approved'); } return; }
-  if(act==='task-reject' && ADMIN_IDS.includes(CURRENT_USER.id)){ const uid=+btn.dataset.uid, idx=+btn.dataset.idx, u=db.users[uid]; if(u?.tasks?.[idx]){ u.tasks[idx].status='rejected'; saveDB(); renderAdmin(); toast('Rejected'); } return; }
-});
-document.addEventListener('change',e=>{
-  const el=e.target;
-  if(el.id==='period'||el.id==='atm-discount'){ renderCatalog(); }
-  if(el.id==='pay-chain-select'){ state.pay.chain=el.value; state.pay.addr=getActiveAddr(); $('#pay-addr').textContent=state.pay.addr; drawQR(state.pay.addr); }
-  if(el.id==='pay-dest-select'){ state.pay.dest=el.value; state.pay.addr=getActiveAddr(); $('#pay-addr').textContent=state.pay.addr; drawQR(state.pay.addr); }
-});
-
-/* ====== BOOT ====== */
-function ensureDisclaimer(){ const ok=db.disclaimerAccepted[CURRENT_USER.id]; $('#modal-disclaimer').style.display= ok ? 'none' : 'flex'; }
-function boot(){
-  applyLang();
-  setTimeout(()=>$('#splash').style.display='none', 900);
-  if(CURRENT_USER.id===0) $('#modal-auth').style.display='flex';
-  renderHeader(); switchTab(currentTab()); renderCatalog(); ensureDisclaimer();
-  setInterval(()=>($('#chip-atm').textContent=user().atm), 1000);
-}
-boot();
-</script>
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
 </body>
 </html>
-ы
