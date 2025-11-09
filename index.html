@@ -68,6 +68,14 @@
     .visually-hidden{position:absolute;left:-9999px}
     .btn.touching{filter:brightness(1.03)}
 
+    /* splash */
+    .splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.12), transparent 60%), var(--bg);z-index:50}
+    .s-logo{width:128px;height:128px;border-radius:24px;background: radial-gradient(140% 140% at 30% 20%, var(--gold-2), var(--gold) 60%, #6e570f);box-shadow: inset 0 2px 10px rgba(255,255,255,.25), 0 8px 40px var(--gold-glow)}
+    .s-title{font-weight:900;font-size:28px;letter-spacing:.6px;margin-top:16px;text-align:center}
+    .s-sub{color:var(--muted);text-align:center;margin-top:4px}
+    @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+    .s-logo{animation:float 2.2s ease-in-out infinite}
+
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     @keyframes pop{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}
     .modal-back[style*="display: flex"]{animation:fadeIn .12s ease-out}
@@ -79,9 +87,107 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useEffect } = React;
+    const { useEffect, useState } = React;
 
+    /** i18n **/
+    const DEFAULT_LANG = localStorage.getItem('CATM_LANG') || (navigator.language||'en').toLowerCase().startsWith('ru') ? 'ru' : 'en';
+    const tdict = {
+      ru: {
+        brandSub: 'Подписки • Пакеты • Копитрейдинг • Рефералы',
+        shop: 'Магазин', orders: 'Заказы', ref: 'Рефералы', tasks: 'Задания', balance: 'Баланс', admin: 'Админ', faq: 'FAQ',
+        subTitle: 'Оформление подписки',
+        subHelp: 'Выберите срок 1/3/6 мес (скидка ~0/10/20%). ATM можно списать до 25% (100 ATM = €1).',
+        term: 'Срок', term1:'1 месяц', term3:'3 месяца', term6:'6 месяцев',
+        atmWriteOff: 'Списать ATM (макс 25%)',
+        more: 'Подробнее', add:'В корзину', remove:'Убрать',
+        history: 'История заказов', number:'№', product:'Товар', termCol:'Срок', method:'Метод', amount:'Сумма', status:'Статус', date:'Дата', intent:'Intent',
+        referralTitle:'Реферальная программа',
+        referralHelp:'Делитесь кодом и получайте 10% от оплаты подписки (в ATM). Ваш код:',
+        copy:'Скопировать',
+        bindForeign:'Привязать чужой код', bind:'Привязать',
+        partner:'Партнёр', paid:'Оплата', reward:'Вознаграждение',
+        tasksTitle:'Задания за ATM', rewardPlus:'Награда', proofHint:'URL-пруф', submit:'Отправить',
+        balanceTitle:'Баланс ATM', balanceHelp:'Коины выдаются за задания и рефералов. Можно списать до 25% заказа (100 ATM = €1).',
+        pinManage:'Управление PIN',
+        adminTitle:'Админ-панель', adminHelp:'Статистика, заказы, задания.',
+        update:'Обновить', export:'Экспорт JSON',
+        users:'Пользователи', orders2:'Заказы', revenue:'Выручка', atmOnBalances:'ATM на балансах',
+        usersTbl:'Пользователи', uid:'ID', username:'Username', atm:'ATM', ordersCount:'Заказы', refCode:'Реф-код', from:'От кого',
+        ordersTbl:'Заказы', userCol:'User', items:'Товар', euro:'€', actions:'Действия', markPaid:'Оплачен', cancel:'Отмена',
+        tasksMod:'Задания (модерация)', task:'Задание', proof:'Пруф', approve:'Одобрить', reject:'Отклонить',
+        faqTitle:'FAQ',
+        faq1:'Фиксированные цены в EUR. Оплата — на биржу админа или счёт компании.',
+        faq2:'ATM покрывают до 25% заказа (100 ATM = €1).',
+        faq3:'Реферальная награда: 10% от оплаченной подписки (в ATM).',
+        positions:'Позиций', total:'Итого', totalWithAtm:'С учётом ATM', clear:'Очистить', pay:'Оплатить',
+        authTitle:'Требуется авторизация', authBody:'Откройте Mini App внутри Telegram (с initData).', close:'Закрыть',
+        disclaimer:'Disclaimer', agree:'I agree',
+        disclaimerBody:'We strongly recommend conducting your own research before purchasing any services. CryptoATM does not provide financial advice and is not responsible for any losses. By continuing, you confirm you understand the risks and accept full responsibility.',
+        cryptoPay:'Оплата криптовалютой', scanOrCopy:'Сканируйте QR или скопируйте адрес. После оплаты нажмите «Я оплатил(а)».',
+        recipient:'Получатель', adminExch:'Биржа администратора', companyAcc:'Счёт компании',
+        chain:'Сеть', address:'Адрес', amountEur:'Сумма', memo:'Назначение', iPaid:'Я оплатил(а)',
+        item:'Товар',
+        pin:'PIN', pinSet:'Создать ПИН-код', pinSubSet:'Введите 4 цифры. ПИН хранится локально.', save:'Сохранить',
+        pinUnlock:'ПИН-код', pinSubUnlock:'Введите 4 цифры, чтобы разблокировать.', unlock:'Разблокировать', pinReset:'Сброс PIN',
+        splashTitle:'CRYPTOATM', splashSub:'Subscriptions • Alerts • Copy-trading',
+        lang:'Язык',
+        accessTitle:'Доступ', accessBody:'Введите код доступа для входа.', accessPlaceholder:'Access code', accessEnter:'Войти'
+      },
+      en: {
+        brandSub: 'Subscriptions • Bundles • Copy-trading • Referrals',
+        shop: 'Shop', orders: 'Orders', ref: 'Referrals', tasks: 'Tasks', balance: 'Balance', admin:'Admin', faq:'FAQ',
+        subTitle: 'Subscription checkout',
+        subHelp: 'Choose 1/3/6 months (~0/10/20%). You can redeem up to 25% with ATM (100 ATM = €1).',
+        term:'Term', term1:'1 month', term3:'3 months', term6:'6 months',
+        atmWriteOff:'Redeem ATM (max 25%)',
+        more:'Details', add:'Add', remove:'Remove',
+        history:'Order history', number:'#', product:'Product', termCol:'Term', method:'Method', amount:'Amount', status:'Status', date:'Date', intent:'Intent',
+        referralTitle:'Referral program',
+        referralHelp:'Share your code and earn 10% of the friend’s paid subscription (in ATM). Your code:',
+        copy:'Copy',
+        bindForeign:'Bind a referral code', bind:'Bind',
+        partner:'Partner', paid:'Paid', reward:'Reward',
+        tasksTitle:'Tasks for ATM', rewardPlus:'Reward', proofHint:'Proof URL', submit:'Submit',
+        balanceTitle:'ATM balance', balanceHelp:'Earn ATM from tasks and referrals. Redeem up to 25% (100 ATM = €1).',
+        pinManage:'PIN management',
+        adminTitle:'Admin panel', adminHelp:'Stats, orders, tasks.',
+        update:'Refresh', export:'Export JSON',
+        users:'Users', orders2:'Orders', revenue:'Revenue', atmOnBalances:'ATM on balances',
+        usersTbl:'Users', uid:'ID', username:'Username', atm:'ATM', ordersCount:'Orders', refCode:'Ref code', from:'From',
+        ordersTbl:'Orders', userCol:'User', items:'Items', euro:'€', actions:'Actions', markPaid:'Mark paid', cancel:'Cancel',
+        tasksMod:'Tasks moderation', task:'Task', proof:'Proof', approve:'Approve', reject:'Reject',
+        faqTitle:'FAQ',
+        faq1:'Fixed prices in EUR. Pay to admin exchange or company wallet.',
+        faq2:'ATM can cover up to 25% of order (100 ATM = €1).',
+        faq3:'Referral reward: 10% of the paid subscription (credited in ATM).',
+        positions:'Items', total:'Total', totalWithAtm:'With ATM', clear:'Clear', pay:'Pay',
+        authTitle:'Authorization required', authBody:'Open this Mini App inside Telegram (with initData).', close:'Close',
+        disclaimer:'Disclaimer', agree:'I agree',
+        disclaimerBody:'We strongly recommend conducting your own research before purchasing any services. CryptoATM does not provide financial advice and is not responsible for any losses. By continuing, you confirm you understand the risks and accept full responsibility.',
+        cryptoPay:'Crypto payment', scanOrCopy:'Scan QR or copy address. After payment press “I paid”.',
+        recipient:'Recipient', adminExch:'Admin exchange', companyAcc:'Company account',
+        chain:'Network', address:'Address', amountEur:'Amount', memo:'Memo', iPaid:'I paid',
+        item:'Item',
+        pin:'PIN', pinSet:'Create PIN', pinSubSet:'Enter 4 digits. PIN is stored locally.', save:'Save',
+        pinUnlock:'PIN', pinSubUnlock:'Enter 4 digits to unlock.', unlock:'Unlock', pinReset:'Reset PIN',
+        splashTitle:'CRYPTOATM', splashSub:'Subscriptions • Alerts • Copy-trading',
+        lang:'Lang',
+        accessTitle:'Access', accessBody:'Enter access code to continue.', accessPlaceholder:'Access code', accessEnter:'Enter'
+      }
+    };
+    function useI18n(){
+      const [lang,setLang] = useState(DEFAULT_LANG);
+      const t = (k)=> (tdict[lang] && tdict[lang][k]) || (tdict.en && tdict.en[k]) || k;
+      const toggle = ()=> { const next = lang==='ru' ? 'en' : 'ru'; setLang(next); localStorage.setItem('CATM_LANG', next); document.documentElement.lang = next; };
+      useEffect(()=>{ document.documentElement.lang = lang; },[lang]);
+      return {lang, t, toggle};
+    }
+
+    /** App **/
     function App(){
+      const { lang, t, toggle } = useI18n();
+      const [showSplash, setShowSplash] = useState(true);
+
       useEffect(()=>{
         const tg = window.Telegram && window.Telegram.WebApp;
         try {
@@ -90,11 +196,14 @@
           tg && tg.setBackgroundColor && tg.setBackgroundColor('#0a0b0e');
         } catch(e){}
 
-        const ADMIN_IDS = [568646738];
+        // ====== CONFIG ======
+        const ADMIN_IDS = [568646738];     // твой Telegram ID
         const START_BONUS_ATM = 250;
-        const REF_BONUS_PERCENT = 0.10; // 10% от €-суммы
-        const ATM_RATE = 100; // 100 ATM = €1
+        const REF_BONUS_PERCENT = 0.10;    // 10% от € в ATM
+        const ATM_RATE = 100;              // 100 ATM = €1
+        const ACCESS_CODE = 'CHANGE_ME';   // <==== ЗАМЕНИ на свой код доступа
 
+        // Каталог
         const CATALOG = [
           {type:'bot',code:'CRYPTO_ATM',name:'Crypto ATM Bot',price:71,desc:'BTC analytics, daily signals & levels.'},
           {type:'bot',code:'ALERTS',name:'Alerts Bot',price:39,desc:'Whales, liquidations, funding, OI & volume alerts.'},
@@ -113,6 +222,7 @@
         };
         const PERIOD_DISCOUNT = {1:0,3:0.1,6:0.2};
 
+        // Реквизиты
         const PAY_ADDR_ADMIN = {
           BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c',
           TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs',
@@ -124,41 +234,53 @@
           ERC20:'0x1111222233334444555566667777888899990000'
         };
 
+        // DOM helpers & DB
         const $ = s=>document.querySelector(s);
         const $$ = s=>Array.from(document.querySelectorAll(s));
-
-        const DBKEY='CATM_DB_HTMLv1';
-        function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)||'null') || {users:{},orders:[],tasks:[],disclaimerAccepted:{}} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:{}} } }
+        const DBKEY='CATM_DB_HTMLv2';
+        function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)||'null') || {users:{},orders:[],tasks:[],disclaimerAccepted:{},accessOK:{}} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:{},accessOK:{}} } }
         const db = loadDB();
         const saveDB = ()=> localStorage.setItem(DBKEY, JSON.stringify(db));
 
+        // Telegram auth
         const rawUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
         const CURRENT_USER = rawUser ? {
           id: rawUser.id, username: rawUser.username||'user',
           name: (rawUser.first_name||'') + (rawUser.last_name?(' '+rawUser.last_name):'')
         } : { id:0, username:'guest', name:'Guest' };
 
+        // Create user
         if (!db.users[CURRENT_USER.id]){
           db.users[CURRENT_USER.id] = {
             id: CURRENT_USER.id, username: CURRENT_USER.username, created_at: new Date().toISOString(),
             atm: START_BONUS_ATM, ref_code: 'REF'+(CURRENT_USER.id||Math.floor(Math.random()*1e6)),
-            referred_by: null, orders: [], referrals: [], tasks: [], start_bonus_given: true
+            referred_by: null, orders: [], referrals: [], tasks: [], start_bonus_given: true, pin: undefined
           };
           saveDB();
         }
         function user(){ return db.users[CURRENT_USER.id]; }
 
+        // State
         const state = { period:1, atmDiscount:0, cart:[], pay:{chain:'BEP20', dest:'admin', addr: PAY_ADDR_ADMIN.BEP20, amount:0, memo:''} };
 
         function setHash(tab){ location.hash = '#/'+tab; }
         function currentTab(){ return (location.hash.replace('#/','') || 'shop'); }
         function applyBottomOffset(){ const bar=$('#bottom-bar'); if(!bar) return; document.documentElement.style.setProperty('--bottom-h', Math.ceil(bar.getBoundingClientRect().height)+'px'); }
 
+        // I18n refreshers
+        function text(el, s){ if(el) el.textContent = s; }
+
         function renderHeader(){
-          $('#chip-name').textContent = '@'+(CURRENT_USER.username||'guest');
-          $('#chip-atm').textContent = String(user().atm);
-          $('#chip-orders').textContent = String(user().orders.length);
+          text($('#chip-name'), '@'+(CURRENT_USER.username||'guest'));
+          text($('#chip-atm'), String(user().atm));
+          text($('#chip-orders'), String(user().orders.length));
           const refCode = $('#ref-code'); if(refCode) refCode.value = user().ref_code;
+          // Tabs labels
+          $$('.tabs .tab').forEach(btn=>{
+            const tab = btn.dataset.tab;
+            const map = {shop:'shop',orders:'orders',ref:'ref',tasks:'tasks',balance:'balance',admin:'admin',faq:'faq'};
+            if(map[tab]) btn.innerText = (t(map[tab])==='admin' ? '🛠 '+t(map[tab]) : btn.innerText.replace(/^[^ ]+ /,'') ? `${btn.innerText.split(' ')[0]} ${t(map[tab])}` : t(map[tab]));
+          });
         }
 
         function priceFor(item, months){ const disc=PERIOD_DISCOUNT[months]||0; const perMonth=Math.round(item.price*(1-disc)); return perMonth*months; }
@@ -169,16 +291,15 @@
           const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
           const eurMinus = Math.floor(wantATM/ATM_RATE);
           const finalEur = Math.max(0, eur-eurMinus);
-          $('#cart-count').textContent = String(state.cart.length);
-          $('#cart-total-eur').textContent = '€'+eur;
-          $('#cart-total-atm').textContent = wantATM+' ATM';
-          $('#cart-total-final').textContent = '€'+finalEur;
+          text($('#cart-count'), String(state.cart.length));
+          text($('#cart-total-eur'), '€'+eur);
+          text($('#cart-total-atm'), wantATM+' ATM');
+          text($('#cart-total-final'), '€'+finalEur);
           renderHeader(); applyBottomOffset();
         }
 
         function renderCatalog(){
-          const grid = $('#catalog'); if(!grid) return;
-          grid.innerHTML='';
+          const grid = $('#catalog'); if(!grid) return; grid.innerHTML='';
           const months = state.period = parseInt(($('#period') && $('#period').value) || '1',10);
           state.atmDiscount = Math.max(0, parseInt(($('#atm-discount') && $('#atm-discount').value) || '0',10));
           const eur = state.cart.reduce((s,x)=>s+x.amount,0); const atmMax=Math.floor(eur*0.25)*ATM_RATE;
@@ -194,8 +315,8 @@
               <h3 style="margin-top:6px">${it.name}</h3>
               <p class="muted">${it.desc}</p>
               <div class="line">
-                <button class="btn" data-act="details" data-code="${it.code}">Подробнее</button>
-                ${ inCart ? `<button class="btn" data-act="remove" data-code="${it.code}">Убрать</button>` : `<button class="btn primary" data-act="add" data-code="${it.code}">В корзину</button>` }
+                <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
+                ${ inCart ? `<button class="btn" data-act="remove" data-code="${it.code}">${t('remove')}</button>` : `<button class="btn primary" data-act="add" data-code="${it.code}">${t('add')}</button>` }
               </div>`;
             grid.appendChild(card);
           });
@@ -227,12 +348,12 @@
           renderHeader();
         }
 
-        function toast(t){ if(tg&&tg.showPopup){ tg.showPopup({title:'',message:String(t),buttons:[{type:'close'}]}); } else { console.log('[toast]', t); } }
+        function toast(tmsg){ const tg = window.Telegram && window.Telegram.WebApp; if(tg&&tg.showPopup){ tg.showPopup({title:'',message:String(tmsg),buttons:[{type:'close'}]}); } else { console.log('[toast]', tmsg); } }
 
         function openItemModal(code){
           const it = CATALOG.find(x=>x.code===code); if(!it) return;
           const long = (CATALOG_LONG[code] && CATALOG_LONG[code].bullets) || [];
-          $('#item-title').textContent = it.name;
+          text($('#item-title'), t('item')+': '+it.name);
           $('#item-desc').innerHTML = `
             <div class="muted" style="margin-bottom:8px">${it.desc}</div>
             ${long.length ? `<ul class="muted">${long.map(b=>`<li>${b}</li>`).join('')}</ul>` : ''}
@@ -255,23 +376,21 @@
           state.pay.chain = chain; state.pay.addr = getActiveAddr();
           const chainSel = $('#pay-chain-select'), destSel = $('#pay-dest-select');
           if(chainSel) chainSel.value = chain; if(destSel) destSel.value = state.pay.dest;
-          $('#pay-addr').textContent = state.pay.addr;
-          $('#pay-amount').textContent = `€${eur}`;
-          $('#pay-memo').textContent = memo || 'CRYPTOATM';
+          text($('#pay-addr'), state.pay.addr);
+          text($('#pay-amount'), `€${eur}`);
+          text($('#pay-memo'), memo || 'CRYPTOATM');
           $('#modal-crypto').style.display='flex';
           drawQR(state.pay.addr); applyBottomOffset();
         }
         function closeCrypto(){ $('#modal-crypto').style.display='none'; }
 
         async function createPaymentIntent(order){
-          try{
-            await new Promise(r=>setTimeout(r,350));
-            return 'intent_'+Math.random().toString(36).slice(2,9);
-          }catch(e){ console.error(e); return null; }
+          try{ await new Promise(r=>setTimeout(r,350)); return 'intent_'+Math.random().toString(36).slice(2,9); }
+          catch(e){ console.error(e); return null; }
         }
 
         function createOrder(){
-          if(state.cart.length===0) return toast('Корзина пуста');
+          if(state.cart.length===0) return toast('Cart is empty');
           const eur = state.cart.reduce((s,x)=>s+x.amount,0);
           const atmMax = Math.floor(eur*0.25)*ATM_RATE;
           const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
@@ -290,7 +409,7 @@
           openCryptoModal(finalEur, state.pay.chain, memo);
 
           createPaymentIntent(order).then(id=>{
-            order.intent_id=id; saveDB(); renderOrders(); if(id) $('#pay-memo').textContent=id;
+            order.intent_id=id; saveDB(); renderOrders(); if(id) text($('#pay-memo'), id);
           });
         }
 
@@ -300,12 +419,12 @@
           const hasRef = !!user().referred_by; if($('#ref-bind-input')) $('#ref-bind-input').disabled=hasRef; if($('#ref-bind-btn')) $('#ref-bind-btn').disabled=hasRef;
         }
 
-        const TASK_DEF=[{id:1,title:'Подписка на TikTok',reward:100,hint:'URL на профиль/скрин'},{id:2,title:'Репост в сторис',reward:120,hint:'URL сторис'},{id:3,title:'Отзыв о проекте',reward:150,hint:'URL на отзыв'},{id:4,title:'Наклейка на авто',reward:500,hint:'URL на фото'}];
+        const TASK_DEF=[{id:1,title:'TikTok subscribe',reward:100,hint:'URL profile/screenshot'},{id:2,title:'Repost to stories',reward:120,hint:'URL story'},{id:3,title:'Project review',reward:150,hint:'URL post/review'},{id:4,title:'Sticker on car',reward:500,hint:'URL photo'}];
         function renderTasks(){
           const holder = $('#tasks'); if(!holder) return; holder.innerHTML='';
-          TASK_DEF.forEach(t=>{
+          TASK_DEF.forEach(tk=>{
             const col=document.createElement('div'); col.className='col-6 card';
-            col.innerHTML = `<h3>#${t.id} ${t.title}</h3><p class="muted">Награда: <b>+${t.reward} ATM</b></p><input id="proof-${t.id}" type="url" placeholder="${t.hint}"><div class="line"><span class="muted">Проверка модератором</span><button class="btn primary" data-act="submit-task" data-id="${t.id}">Отправить</button></div>`;
+            col.innerHTML = `<h3>#${tk.id} ${tk.title}</h3><p class="muted">${t('rewardPlus')}: <b>+${tk.reward} ATM</b></p><input id="proof-${tk.id}" type="url" placeholder="${t('proofHint')}"><div class="line"><span class="muted">Moderation</span><button class="btn primary" data-act="submit-task" data-id="${tk.id}">${t('submit')}</button></div>`;
             holder.appendChild(col);
           });
         }
@@ -313,11 +432,14 @@
         function renderBalance(){ const el=$('#atm-balance'); if(el) el.textContent = String(user().atm); }
 
         function renderAdmin(){
+          // hide tab for non-admin
+          const tabAdminBtn = document.querySelector('#tab-admin-btn'); if(tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
+
           const users = Object.values(db.users); const o=db.orders; const totalEur=o.reduce((s,x)=>s+x.eur_final,0); const totalAtm=users.reduce((s,u)=>s+u.atm,0);
-          const stats = $('#admin-stats'); if(stats) stats.innerHTML = `<div class="row"><div class="chip">Пользователи: <b>${users.length}</b></div><div class="chip">Заказы: <b>${o.length}</b></div><div class="chip">Выручка: <b>€${totalEur}</b></div><div class="chip">ATM на балансах: <b>${totalAtm}</b></div></div>`;
+          const stats = $('#admin-stats'); if(stats) stats.innerHTML = `<div class="row"><div class="chip">${t('users')}: <b>${users.length}</b></div><div class="chip">${t('orders2')}: <b>${o.length}</b></div><div class="chip">${t('revenue')}: <b>€${totalEur}</b></div><div class="chip">${t('atmOnBalances')}: <b>${totalAtm}</b></div></div>`;
           const utb = $('#admin-users tbody'); if(utb){ utb.innerHTML=''; users.slice().sort((a,b)=>b.id-a.id).forEach(u=>{ const refFrom=u.referred_by ? '@'+((db.users[u.referred_by] && db.users[u.referred_by].username)||u.referred_by) : '—'; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>${u.atm}</td><td>${u.orders.length}</td><td>${u.ref_code}</td><td>${refFrom}</td><td>${new Date(u.created_at).toLocaleDateString()}</td>`; utb.appendChild(tr); }); }
-          const otb = $('#admin-orders tbody'); if(otb){ otb.innerHTML=''; db.orders.slice().reverse().forEach(or=>{ const userName='@'+((db.users[or.user] && db.users[or.user].username)||or.user); const items = or.items.map(i=>i.code+'×'+i.months).join(', '); const tr=document.createElement('tr'); tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${or.method} (${or.dest||'-'})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td><button class="btn" data-act="mark-paid" data-id="${or.id}">Оплачен</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">Отмена</button></td>`; otb.appendChild(tr); }); }
-          const ttb = $('#admin-tasks tbody'); if(ttb){ ttb.innerHTML=''; users.forEach(u=>{ (u.tasks||[]).forEach((t,idx)=>{ if(t.status==='pending'){ const def=TASK_DEF.find(d=>d.id===t.id)||{reward:0,title:'#'+t.id}; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>#${t.id} ${def.title||''}</td><td>${t.proof||''}</td><td>+${def.reward} ATM</td><td>${t.status}</td><td><button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">Одобрить</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">Отклонить</button></td>`; ttb.appendChild(tr); } }) }); }
+          const otb = $('#admin-orders tbody'); if(otb){ otb.innerHTML=''; db.orders.slice().reverse().forEach(or=>{ const userName='@'+((db.users[or.user] && db.users[or.user].username)||or.user); const items = or.items.map(i=>i.code+'×'+i.months).join(', '); const tr=document.createElement('tr'); tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${or.method} (${or.dest||'-'})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td><button class="btn" data-act="mark-paid" data-id="${or.id}">${t('markPaid')}</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">${t('cancel')}</button></td>`; otb.appendChild(tr); }); }
+          const ttb = $('#admin-tasks tbody'); if(ttb){ ttb.innerHTML=''; users.forEach(u=>{ (u.tasks||[]).forEach((tk,idx)=>{ if(tk.status==='pending'){ const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0,title:'#'+tk.id}; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>#${tk.id} ${def.title||''}</td><td>${tk.proof||''}</td><td>+${def.reward} ATM</td><td>${tk.status}</td><td><button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">${t('approve')}</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">${t('reject')}</button></td>`; ttb.appendChild(tr); } }) }); }
         }
 
         function switchTab(name){
@@ -332,6 +454,7 @@
           applyBottomOffset();
         }
 
+        // PIN
         function getPinKey(uid){ return `PIN_OK_${uid}` }
         function isPinSet(){ return !!user().pin; }
         function isUnlocked(){ return !isPinSet() || sessionStorage.getItem(getPinKey(CURRENT_USER.id))==='1'; }
@@ -339,25 +462,31 @@
           const m=$('#modal-pin'), title=$('#pin-title'), sub=$('#pin-sub'), action=$('#pin-action'), reset=$('#pin-reset'), input=$('#pin-input');
           if(!m||!title||!sub||!action||!reset||!input) return;
           if(mode==='set'){
-            title.textContent='Создать ПИН-код'; sub.textContent='Введите 4 цифры. Запомните их: ПИН хранится локально.';
-            action.textContent='Сохранить'; reset.style.display='none'; input.value=''; m.style.display='flex'; input.focus();
-            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Введите 4 цифры'); user().pin=v; saveDB(); toast('ПИН сохранён'); m.style.display='none'; };
+            text(title, t('pinSet')); text(sub, t('pinSubSet')); text(action, t('save')); $('#pin-reset').style.display='none'; input.value=''; m.style.display='flex'; input.focus();
+            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Enter 4 digits'); user().pin=v; saveDB(); toast('PIN saved'); m.style.display='none'; };
           } else {
-            title.textContent='ПИН-код'; sub.textContent='Введите 4 цифры, чтобы разблокировать.';
-            action.textContent='Разблокировать'; reset.style.display = isPinSet()? 'inline-flex':'none'; input.value=''; m.style.display='flex'; input.focus();
-            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Введите 4 цифры'); if(v===user().pin){ sessionStorage.setItem(getPinKey(CURRENT_USER.id),'1'); toast('Разблокировано'); m.style.display='none'; } else toast('Неверный ПИН'); };
+            text(title, t('pinUnlock')); text(sub, t('pinSubUnlock')); text(action, t('unlock')); $('#pin-reset').style.display = isPinSet()? 'inline-flex':'none'; input.value=''; m.style.display='flex'; input.focus();
+            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Enter 4 digits'); if(v===user().pin){ sessionStorage.setItem(getPinKey(CURRENT_USER.id),'1'); toast('Unlocked'); m.style.display='none'; } else toast('Wrong PIN'); };
           }
         }
         function ensureUnlocked(){ if(!isUnlocked()){ showPinModal('unlock'); return false; } return true; }
 
+        // Disclaimer & Access code
         function ensureDisclaimer(){ const ok=db.disclaimerAccepted[CURRENT_USER.id]; $('#modal-disclaimer').style.display = ok ? 'none' : 'flex'; }
+        function ensureAccess(){
+          // Админа не спрашиваем код
+          if(ADMIN_IDS.includes(CURRENT_USER.id)){ db.accessOK[CURRENT_USER.id] = true; saveDB(); return true; }
+          const ok = !!db.accessOK[CURRENT_USER.id];
+          if(!ok){ $('#modal-access').style.display='flex'; }
+          return ok;
+        }
 
         function onHashChange(){ switchTab(currentTab()); }
         window.addEventListener('hashchange', onHashChange);
 
         function clickHandler(e){
           const btn = e.target && e.target.closest && e.target.closest('button, .btn'); if(!btn) return;
-          if(btn.classList.contains('tab')){ const t=btn.dataset.tab; if(t){ setHash(t); switchTab(t); } return; }
+          if(btn.classList.contains('tab')){ const tname=btn.dataset.tab; if(tname){ setHash(tname); switchTab(tname); } return; }
           const act=btn.dataset.act;
 
           if(act==='add'){ addToCart(btn.dataset.code); return; }
@@ -366,16 +495,21 @@
 
           if(act==='submit-task'){
             const id=+btn.dataset.id; const proofEl=$('#proof-'+id); const proof=(proofEl && proofEl.value && proofEl.value.trim()) || '';
-            if(!/^https?:\/\//i.test(proof)) return toast('Добавьте ссылку-пруф');
-            user().tasks=user().tasks||[]; user().tasks.push({id,proof,at:new Date().toISOString(),status:'pending'}); saveDB(); toast('Отправлено на проверку'); if(proofEl) proofEl.value=''; return;
+            if(!/^https?:\/\//i.test(proof)) return toast('Add a valid URL proof');
+            user().tasks=user().tasks||[]; user().tasks.push({id,proof,at:new Date().toISOString(),status:'pending'}); saveDB(); toast('Sent to moderation'); if(proofEl) proofEl.value=''; return;
           }
 
+          if(btn.id==='lang-toggle'){ toggle(); renderHeader(); renderCatalog(); return; }
+
           if(btn.id==='cart-clear'){ clearCart(); return; }
-          if(btn.id==='checkout-btn'){ if(!ensureUnlocked()) return; createOrder(); return; }
-          if(btn.id==='ref-copy'){ navigator.clipboard.writeText(user().ref_code).then(()=>toast('Скопировано')); return; }
-          if(btn.id==='ref-bind-btn'){ const inp=$('#ref-bind-input'); const code=(inp && inp.value && inp.value.trim().toUpperCase()) || ''; if(!code) return toast('Введите код'); const owner=Object.values(db.users).find(u=>u.ref_code===code); if(!owner) return toast('Код не найден'); if(owner.id===CURRENT_USER.id) return toast('Нельзя привязать свой код'); if(user().referred_by) return toast('Код уже привязан'); user().referred_by=owner.id; owner.referrals.push({uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0}); saveDB(); renderRefs(); toast('Код привязан'); return; }
+          if(btn.id==='checkout-btn'){ if(!ensureUnlocked()) return; if(!db.accessOK[CURRENT_USER.id]){ $('#modal-access').style.display='flex'; return; } createOrder(); return; }
+
+          if(btn.id==='ref-copy'){ navigator.clipboard.writeText(user().ref_code).then(()=>toast('Copied')); return; }
+          if(btn.id==='ref-bind-btn'){ const inp=$('#ref-bind-input'); const code=(inp && inp.value && inp.value.trim().toUpperCase()) || ''; if(!code) return toast('Enter code'); const owner=Object.values(db.users).find(u=>u.ref_code===code); if(!owner) return toast('Code not found'); if(owner.id===CURRENT_USER.id) return toast('Cannot bind your own code'); if(user().referred_by) return toast('Already bound'); user().referred_by=owner.id; owner.referrals.push({uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0}); saveDB(); renderRefs(); toast('Bound'); return; }
+
           if(btn.id==='admin-refresh'){ renderAdmin(); return; }
           if(btn.id==='admin-export'){ const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='cryptoatm_export.json'; a.click(); URL.revokeObjectURL(url); return; }
+
           if(btn.id==='copy-addr'){ navigator.clipboard.writeText(($('#pay-addr')?.textContent)||''); toast('Address copied'); return; }
           if(btn.id==='copy-amount'){ navigator.clipboard.writeText((($('#pay-amount')?.textContent)||'').replace('€','')); toast('Amount copied'); return; }
           if(btn.id==='copy-memo'){ navigator.clipboard.writeText(($('#pay-memo')?.textContent)||''); toast('Memo copied'); return; }
@@ -387,30 +521,42 @@
 
           if(btn.id==='pin-manage'){ if(isPinSet()){ showPinModal('unlock'); } else { showPinModal('set'); } return; }
           if(btn.id==='pin-close'){ $('#modal-pin').style.display='none'; return; }
-          if(btn.id==='pin-reset'){ if(!isPinSet()) return; user().pin=undefined; saveDB(); sessionStorage.removeItem(getPinKey(CURRENT_USER.id)); toast('ПИН удалён'); $('#modal-pin').style.display='none'; return; }
+          if(btn.id==='pin-reset'){ if(!isPinSet()) return; user().pin=undefined; saveDB(); sessionStorage.removeItem(getPinKey(CURRENT_USER.id)); toast('PIN removed'); $('#modal-pin').style.display='none'; return; }
 
+          // Access code check
+          if(btn.id==='access-enter'){
+            const v = ($('#access-input')?.value || '').trim();
+            if(!v) return toast('Enter access code');
+            if(v === ACCESS_CODE){ db.accessOK[CURRENT_USER.id] = true; saveDB(); $('#modal-access').style.display='none'; toast('Access granted'); }
+            else { toast('Wrong code'); }
+            return;
+          }
+
+          // Admin-only actions
           if(act==='mark-paid'){
-            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('Нет прав');
-            const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id); if(o){ o.status='paid';
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
+            const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id);
+            if(o){ o.status='paid';
               const buyer=db.users[o.user]; if(buyer && buyer.referred_by){ const refUser=db.users[buyer.referred_by]; if(refUser){ const rec=(refUser.referrals||[]).find(r=>r.uid===buyer.id); if(rec && !rec.paid){ rec.paid=true; const atmReward=Math.max(0, Math.round((o.eur_final||0) * REF_BONUS_PERCENT * ATM_RATE)); rec.reward=atmReward; refUser.atm=(refUser.atm||0)+atmReward; } } }
-              saveDB(); renderOrders(); renderAdmin(); toast('Статус изменён: paid'); }
+              saveDB(); renderOrders(); renderAdmin(); toast('Marked as paid'); }
             return;
           }
           if(act==='mark-cancel'){
-            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('Нет прав');
-            const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id); if(o){ o.status='canceled'; saveDB(); renderOrders(); renderAdmin(); toast('Статус изменён: canceled'); }
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
+            const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id);
+            if(o){ o.status='canceled'; saveDB(); renderOrders(); renderAdmin(); toast('Canceled'); }
             return;
           }
           if(act==='task-approve'){
-            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('Нет прав');
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
             const uid=+(btn.dataset.uid||0); const idx=+(btn.dataset.idx||-1); const u=db.users[uid];
-            if(u && u.tasks && u.tasks[idx]){ const t=u.tasks[idx]; const def=TASK_DEF.find(d=>d.id===t.id)||{reward:0}; t.status='approved'; u.atm=(u.atm||0)+(def.reward||0); saveDB(); renderAdmin(); renderBalance(); toast('Задание #'+t.id+' одобрено (+'+def.reward+' ATM)'); }
+            if(u && u.tasks && u.tasks[idx]){ const tk=u.tasks[idx]; const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0}; tk.status='approved'; u.atm=(u.atm||0)+(def.reward||0); saveDB(); renderAdmin(); renderBalance(); toast('Approved #'+tk.id+' (+'+def.reward+' ATM)'); }
             return;
           }
           if(act==='task-reject'){
-            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('Нет прав');
+            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
             const uid=+(btn.dataset.uid||0); const idx=+(btn.dataset.idx||-1); const u=db.users[uid];
-            if(u && u.tasks && u.tasks[idx]){ const t=u.tasks[idx]; t.status='rejected'; saveDB(); renderAdmin(); toast('Задание #'+t.id+' отклонено'); }
+            if(u && u.tasks && u.tasks[idx]){ const tk=u.tasks[idx]; tk.status='rejected'; saveDB(); renderAdmin(); toast('Rejected #'+tk.id); }
             return;
           }
         }
@@ -418,17 +564,27 @@
         function changeHandler(e){
           const el=e.target; if(!el) return;
           if(el.id==='period' || el.id==='atm-discount'){ renderCatalog(); }
-          if(el.id==='pay-chain-select'){ state.pay.chain = el.value; state.pay.addr=getActiveAddr(); $('#pay-addr').textContent=state.pay.addr; drawQR(state.pay.addr); }
-          if(el.id==='pay-dest-select'){ state.pay.dest = el.value; state.pay.addr=getActiveAddr(); $('#pay-addr').textContent=state.pay.addr; drawQR(state.pay.addr); }
+          if(el.id==='pay-chain-select'){ state.pay.chain = el.value; state.pay.addr=getActiveAddr(); text($('#pay-addr'), state.pay.addr); drawQR(state.pay.addr); }
+          if(el.id==='pay-dest-select'){ state.pay.dest = el.value; state.pay.addr=getActiveAddr(); text($('#pay-addr'), state.pay.addr); drawQR(state.pay.addr); }
         }
 
         function touchStart(e){ const b=e.target && e.target.closest && e.target.closest('.btn'); if(b) b.classList.add('touching'); }
         function touchEnd(){ $$('.btn.touching').forEach(b=>b.classList.remove('touching')); }
 
         function boot(){
+          // Splash end
+          setTimeout(()=> setShowSplash(false), 900);
+
+          // Admin tab visibility right away
           const tabAdminBtn = document.querySelector('#tab-admin-btn'); if(tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
+
           if(CURRENT_USER.id===0){ $('#modal-auth').style.display='flex'; }
+
           switchTab(currentTab()); renderHeader(); applyBottomOffset(); ensureDisclaimer();
+
+          // Access code
+          ensureAccess();
+
           if(isPinSet()){ sessionStorage.removeItem(getPinKey(CURRENT_USER.id)); showPinModal('unlock'); }
           setInterval(()=>{ const chip=$('#chip-atm'); if(chip) chip.textContent=String(user().atm); }, 1000);
         }
@@ -440,15 +596,25 @@
         window.addEventListener('hashchange', onHashChange);
 
         // sanity checks
-        console.assert(typeof priceFor==='function','priceFor should be defined');
         console.assert(document.getElementById('catalog')!==null,'#catalog should exist');
 
         boot();
         return ()=>{};
-      },[]);
+      },[lang]); // re-render catalog texts when language changes
 
       return (
         <>
+          {/* SPLASH */}
+          {showSplash && (
+            <div className="splash">
+              <div style={{textAlign:'center'}}>
+                <div className="s-logo" />
+                <div className="s-title">{tdict[lang].splashTitle}</div>
+                <div className="s-sub">{tdict[lang].splashSub}</div>
+              </div>
+            </div>
+          )}
+
           <div className="wrap">
             <header>
               <div className="hbar">
@@ -456,39 +622,41 @@
                   <div className="logo" aria-hidden="true"></div>
                   <div>
                     <h1 id="brand-title">CRYPTOATM.TECH</h1>
-                    <small>Подписки • Пакеты • Копитрейдинг • Рефералы</small>
+                    <small>{tdict[lang].brandSub}</small>
                   </div>
                 </div>
                 <div className="userchips">
+                  <button className="chip" id="lang-toggle" type="button">🌐 {tdict[lang].lang}: <b style={{marginLeft:6}}>{lang.toUpperCase()}</b></button>
                   <div className="chip">👤 <b id="chip-name">@guest</b></div>
                   <div className="chip">ATM: <b id="chip-atm">0</b></div>
-                  <div className="chip">Заказы: <b id="chip-orders">0</b></div>
+                  <div className="chip">{tdict[lang].orders2}: <b id="chip-orders">0</b></div>
                 </div>
               </div>
               <nav className="tabs" id="tabs" aria-label="Навигация">
-                <button className="tab active" data-tab="shop" type="button">🛒 Магазин</button>
-                <button className="tab" data-tab="orders" type="button">📄 Заказы</button>
-                <button className="tab" data-tab="ref" type="button">👥 Рефералы</button>
-                <button className="tab" data-tab="tasks" type="button">🧩 Задания</button>
-                <button className="tab" data-tab="balance" type="button">💰 Баланс</button>
-                <button className="tab" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 Админ</button>
-                <button className="tab" data-tab="faq" type="button">❓ FAQ</button>
+                <button className="tab active" data-tab="shop" type="button">🛒 {tdict[lang].shop}</button>
+                <button className="tab" data-tab="orders" type="button">📄 {tdict[lang].orders}</button>
+                <button className="tab" data-tab="ref" type="button">👥 {tdict[lang].ref}</button>
+                <button className="tab" data-tab="tasks" type="button">🧩 {tdict[lang].tasks}</button>
+                <button className="tab" data-tab="balance" type="button">💰 {tdict[lang].balance}</button>
+                <button className="tab" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 {tdict[lang].admin}</button>
+                <button className="tab" data-tab="faq" type="button">❓ {tdict[lang].faq}</button>
               </nav>
             </header>
 
             <main id="pages">
+              {/* SHOP */}
               <section id="page-shop" className="page active">
                 <div className="grid">
                   <div className="col-12 card">
-                    <h3>Оформление подписки</h3>
-                    <p className="muted">Выберите срок 1/3/6 мес (скидка ~0/10/20%). ATM можно списать до 25% (100 ATM = €1).</p>
+                    <h3>{tdict[lang].subTitle}</h3>
+                    <p className="muted">{tdict[lang].subHelp}</p>
                     <div className="row">
                       <div className="kv" style={{minWidth:240}}>
-                        <label className="label" htmlFor="period">Срок</label>
-                        <select id="period"><option value="1">1 месяц</option><option value="3">3 месяца</option><option value="6">6 месяцев</option></select>
+                        <label className="label" htmlFor="period">{tdict[lang].term}</label>
+                        <select id="period"><option value="1">{tdict[lang].term1}</option><option value="3">{tdict[lang].term3}</option><option value="6">{tdict[lang].term6}</option></select>
                       </div>
                       <div className="kv" style={{minWidth:260}}>
-                        <label className="label" htmlFor="atm-discount">Списать ATM (макс 25%)</label>
+                        <label className="label" htmlFor="atm-discount">{tdict[lang].atmWriteOff}</label>
                         <input id="atm-discount" type="number" min="0" step="50" defaultValue="0" placeholder="0" inputMode="numeric" />
                       </div>
                     </div>
@@ -497,76 +665,89 @@
                 </div>
               </section>
 
+              {/* ORDERS */}
               <section id="page-orders" className="page">
                 <div className="grid">
                   <div className="col-12 card">
-                    <h3>История заказов</h3>
-                    <table className="table" id="orders-table"><thead><tr><th>№</th><th>Товар</th><th>Срок</th><th>Метод</th><th>Сумма</th><th>Статус</th><th>Дата</th><th>Intent</th></tr></thead><tbody></tbody></table>
+                    <h3>{tdict[lang].history}</h3>
+                    <table className="table" id="orders-table">
+                      <thead>
+                        <tr>
+                          <th>{tdict[lang].number}</th><th>{tdict[lang].product}</th><th>{tdict[lang].termCol}</th><th>{tdict[lang].method}</th><th>{tdict[lang].amount}</th><th>{tdict[lang].status}</th><th>{tdict[lang].date}</th><th>{tdict[lang].intent}</th>
+                        </tr>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
                   </div>
                 </div>
               </section>
 
+              {/* REFERRALS */}
               <section id="page-ref" className="page">
                 <div className="grid">
                   <div className="col-12 card">
-                    <h3>Реферальная программа</h3>
-                    <p className="muted">Делитесь кодом и получайте <b>10%</b> от оплаты подписки (в ATM). Ваш код:</p>
-                    <div className="row"><input id="ref-code" readOnly /><button className="btn primary" id="ref-copy" type="button">Скопировать</button></div>
+                    <h3>{tdict[lang].referralTitle}</h3>
+                    <p className="muted">{tdict[lang].referralHelp}</p>
+                    <div className="row"><input id="ref-code" readOnly /><button className="btn primary" id="ref-copy" type="button">{tdict[lang].copy}</button></div>
                     <div className="line">
-                      <div className="muted">Привязать чужой код</div>
-                      <div className="row"><input id="ref-bind-input" placeholder="REF123456" /><button className="btn" id="ref-bind-btn" type="button">Привязать</button></div>
+                      <div className="muted">{tdict[lang].bindForeign}</div>
+                      <div className="row"><input id="ref-bind-input" placeholder="REF123456" /><button className="btn" id="ref-bind-btn" type="button">{tdict[lang].bind}</button></div>
                     </div>
                     <div style={{marginTop:10}}>
-                      <table className="table" id="ref-table"><thead><tr><th>Партнёр</th><th>Дата</th><th>Оплата</th><th>Вознаграждение</th></tr></thead><tbody></tbody></table>
+                      <table className="table" id="ref-table"><thead><tr><th>{tdict[lang].partner}</th><th>{tdict[lang].date}</th><th>{tdict[lang].paid}</th><th>{tdict[lang].reward}</th></tr></thead><tbody></tbody></table>
                     </div>
                   </div>
                 </div>
               </section>
 
+              {/* TASKS */}
               <section id="page-tasks" className="page">
                 <div className="grid">
                   <div className="col-12 card">
-                    <h3>Задания за ATM</h3>
+                    <h3>{tdict[lang].tasksTitle}</h3>
                     <div id="tasks" className="grid"></div>
                   </div>
                 </div>
               </section>
 
+              {/* BALANCE */}
               <section id="page-balance" className="page">
                 <div className="grid">
                   <div className="col-12 card">
-                    <h3>Баланс ATM</h3>
-                    <p className="muted">Коины выдаются за задания и рефералов. Можно списать до 25% от суммы покупки (100 ATM = €1).</p>
-                    <div className="row"><div className="chip">Текущий баланс: <b id="atm-balance">0</b></div></div>
-                    <div className="line"><span className="muted">PIN-защита</span><button className="btn" id="pin-manage" type="button">Управление PIN</button></div>
+                    <h3>{tdict[lang].balanceTitle}</h3>
+                    <p className="muted">{tdict[lang].balanceHelp}</p>
+                    <div className="row"><div className="chip">Balance: <b id="atm-balance">0</b></div></div>
+                    <div className="line"><span className="muted">PIN</span><button className="btn" id="pin-manage" type="button">{tdict[lang].pinManage}</button></div>
                   </div>
                 </div>
               </section>
 
+              {/* ADMIN */}
               <section id="page-admin" className="page">
                 <div className="grid">
                   <div className="col-12 card">
-                    <h3>Админ-панель</h3>
-                    <p className="muted">Статистика, заказы, задания.</p>
-                    <div className="row"><button className="btn" id="admin-refresh" type="button">Обновить</button><button className="btn ghost" id="admin-export" type="button">Экспорт JSON</button></div>
+                    <h3>{tdict[lang].adminTitle}</h3>
+                    <p className="muted">{tdict[lang].adminHelp}</p>
+                    <div className="row"><button className="btn" id="admin-refresh" type="button">{tdict[lang].update}</button><button className="btn ghost" id="admin-export" type="button">{tdict[lang].export}</button></div>
                     <div className="grid" style={{marginTop:12}}>
                       <div className="col-12 card" id="admin-stats"></div>
-                      <div className="col-12 card"><h3>Пользователи</h3><table className="table" id="admin-users"><thead><tr><th>ID</th><th>Username</th><th>ATM</th><th>Заказы</th><th>Реф-код</th><th>От кого</th><th>Дата</th></tr></thead><tbody></tbody></table></div>
-                      <div className="col-12 card"><h3>Заказы</h3><table className="table" id="admin-orders"><thead><tr><th>#</th><th>User</th><th>Товар</th><th>Срок</th><th>Метод</th><th>€</th><th>ATM</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
-                      <div className="col-12 card"><h3>Задания (модерация)</h3><table className="table" id="admin-tasks"><thead><tr><th>UID</th><th>User</th><th>Задание</th><th>Пруф</th><th>Награда</th><th>Статус</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
+                      <div className="col-12 card"><h3>{tdict[lang].usersTbl}</h3><table className="table" id="admin-users"><thead><tr><th>{tdict[lang].uid}</th><th>{tdict[lang].username}</th><th>{tdict[lang].atm}</th><th>{tdict[lang].ordersCount}</th><th>{tdict[lang].refCode}</th><th>{tdict[lang].from}</th><th>{tdict[lang].date}</th></tr></thead><tbody></tbody></table></div>
+                      <div className="col-12 card"><h3>{tdict[lang].ordersTbl}</h3><table className="table" id="admin-orders"><thead><tr><th>#</th><th>{tdict[lang].userCol}</th><th>{tdict[lang].items}</th><th>{tdict[lang].termCol}</th><th>{tdict[lang].method}</th><th>{tdict[lang].euro}</th><th>ATM</th><th>{tdict[lang].status}</th><th>{tdict[lang].date}</th><th>{tdict[lang].actions}</th></tr></thead><tbody></tbody></table></div>
+                      <div className="col-12 card"><h3>{tdict[lang].tasksMod}</h3><table className="table" id="admin-tasks"><thead><tr><th>{tdict[lang].uid}</th><th>{tdict[lang].userCol}</th><th>{tdict[lang].task}</th><th>{tdict[lang].proof}</th><th>{tdict[lang].reward}</th><th>{tdict[lang].status}</th><th>{tdict[lang].actions}</th></tr></thead><tbody></tbody></table></div>
                     </div>
                   </div>
                 </div>
               </section>
 
+              {/* FAQ */}
               <section id="page-faq" className="page">
                 <div className="grid">
                   <div className="col-12 card">
-                    <h3>FAQ</h3>
+                    <h3>{tdict[lang].faqTitle}</h3>
                     <ul className="muted">
-                      <li>Fixed prices in EUR. You can pay in crypto to admin exchange or company wallet.</li>
-                      <li>ATM can cover up to 25% of order (100 ATM = €1).</li>
-                      <li>Referral reward: 10% of paid subscription (credited in ATM to referrer).</li>
+                      <li>{tdict[lang].faq1}</li>
+                      <li>{tdict[lang].faq2}</li>
+                      <li>{tdict[lang].faq3}</li>
                     </ul>
                   </div>
                 </div>
@@ -574,57 +755,55 @@
             </main>
           </div>
 
+          {/* bottom bar */}
           <div className="bottom-bar" id="bottom-bar">
             <div className="bb-inner">
               <div className="row">
-                <div className="chip">Позиций: <b id="cart-count">0</b></div>
-                <div className="chip">Итого: <b id="cart-total-eur">€0</b> / <b id="cart-total-atm">0 ATM</b></div>
-                <div className="chip">С учётом ATM: <b id="cart-total-final">€0</b></div>
+                <div className="chip">{tdict[lang].positions}: <b id="cart-count">0</b></div>
+                <div className="chip">{tdict[lang].total}: <b id="cart-total-eur">€0</b> / <b id="cart-total-atm">0 ATM</b></div>
+                <div className="chip">{tdict[lang].totalWithAtm}: <b id="cart-total-final">€0</b></div>
               </div>
               <div className="row">
-                <button className="btn" id="cart-clear" type="button">Очистить</button>
-                <button className="btn primary" id="checkout-btn" type="button">Оплатить</button>
+                <button className="btn" id="cart-clear" type="button">{tdict[lang].clear}</button>
+                <button className="btn primary" id="checkout-btn" type="button">{tdict[lang].pay}</button>
               </div>
             </div>
           </div>
 
+          {/* modals */}
           <div className="modal-back" id="modal-auth" role="dialog" aria-modal="true" aria-labelledby="auth-title">
             <div className="modal">
-              <h2 id="auth-title">Authorization required</h2>
-              <p className="muted">Open this Mini App inside Telegram to continue (with initData).</p>
-              <div className="foot"><button className="btn" id="auth-close" type="button">Close</button></div>
+              <h2 id="auth-title">{tdict[lang].authTitle}</h2>
+              <p className="muted">{tdict[lang].authBody}</p>
+              <div className="foot"><button className="btn" id="auth-close" type="button">{tdict[lang].close}</button></div>
             </div>
           </div>
 
           <div className="modal-back" id="modal-disclaimer" role="dialog" aria-modal="true" aria-labelledby="disc-title">
             <div className="modal">
-              <h2 id="disc-title">Disclaimer</h2>
-              <p className="muted">
-                We strongly recommend conducting your own research before purchasing any services.
-                CryptoATM does not provide financial advice and is not responsible for any losses.
-                By continuing, you confirm you understand the risks and accept full responsibility.
-              </p>
-              <div className="foot"><button className="btn primary" id="accept" type="button">I agree</button></div>
+              <h2 id="disc-title">{tdict[lang].disclaimer}</h2>
+              <p className="muted">{tdict[lang].disclaimerBody}</p>
+              <div className="foot"><button className="btn primary" id="accept" type="button">{tdict[lang].agree}</button></div>
             </div>
           </div>
 
           <div className="modal-back" id="modal-crypto" role="dialog" aria-modal="true" aria-labelledby="pay-title">
             <div className="modal">
-              <h2 id="pay-title">Оплата криптовалютой</h2>
-              <p className="muted">Scan QR or copy address. After payment press “Я оплатил(а)”.</p>
+              <h2 id="pay-title">{tdict[lang].cryptoPay}</h2>
+              <p className="muted">{tdict[lang].scanOrCopy}</p>
               <div className="row">
                 <canvas id="qr" width="180" height="180" style={{background:'#fff',borderRadius:'8px'}}></canvas>
                 <div style={{flex:1}}>
-                  <div className="kv"><span className="label">Получатель</span>
-                    <select id="pay-dest-select"><option value="admin">Биржа администратора</option><option value="company">Счёт компании</option></select>
+                  <div className="kv"><span className="label">{tdict[lang].recipient}</span>
+                    <select id="pay-dest-select"><option value="admin">{tdict[lang].adminExch}</option><option value="company">{tdict[lang].companyAcc}</option></select>
                   </div>
-                  <div className="kv"><span className="label">Сеть</span>
+                  <div className="kv"><span className="label">{tdict[lang].chain}</span>
                     <select id="pay-chain-select"><option value="BEP20">BEP20</option><option value="TRC20">TRC20</option><option value="ERC20">ERC20</option></select>
                   </div>
-                  <div className="kv"><span className="label">Адрес</span><code id="pay-addr" style={{wordBreak:'break-all'}}></code> <button className="btn" id="copy-addr" type="button" style={{marginLeft:'8px'}}>Copy</button></div>
-                  <div className="kv"><span className="label">Сумма</span><b id="pay-amount">—</b> <button className="btn" id="copy-amount" type="button" style={{marginLeft:'8px'}}>Copy</button></div>
-                  <div className="kv"><span className="label">Назначение</span><b id="pay-memo">CRYPTOATM</b> <button className="btn" id="copy-memo" type="button" style={{marginLeft:'8px'}}>Copy</button></div>
-                  <div className="row" style={{marginTop:'8px'}}><button className="btn" id="close-crypto" type="button">Закрыть</button><button className="btn primary" id="paid-btn" type="button">Я оплатил(а)</button></div>
+                  <div className="kv"><span className="label">{tdict[lang].address}</span><code id="pay-addr" style={{wordBreak:'break-all'}}></code> <button className="btn" id="copy-addr" type="button" style={{marginLeft:'8px'}}>{tdict[lang].copy}</button></div>
+                  <div className="kv"><span className="label">{tdict[lang].amountEur}</span><b id="pay-amount">—</b> <button className="btn" id="copy-amount" type="button" style={{marginLeft:'8px'}}>{tdict[lang].copy}</button></div>
+                  <div className="kv"><span className="label">{tdict[lang].memo}</span><b id="pay-memo">CRYPTOATM</b> <button className="btn" id="copy-memo" type="button" style={{marginLeft:'8px'}}>{tdict[lang].copy}</button></div>
+                  <div className="row" style={{marginTop:'8px'}}><button className="btn" id="close-crypto" type="button">{tdict[lang].close}</button><button className="btn primary" id="paid-btn" type="button">{tdict[lang].iPaid}</button></div>
                 </div>
               </div>
             </div>
@@ -632,22 +811,31 @@
 
           <div className="modal-back" id="modal-item" role="dialog" aria-modal="true" aria-labelledby="item-title">
             <div className="modal">
-              <h2 id="item-title">Товар</h2>
+              <h2 id="item-title">{tdict[lang].item}</h2>
               <div id="item-desc" className="muted"></div>
-              <div className="foot"><button className="btn" id="close-item" type="button">Закрыть</button></div>
+              <div className="foot"><button className="btn" id="close-item" type="button">{tdict[lang].close}</button></div>
             </div>
           </div>
 
           <div className="modal-back" id="modal-pin" role="dialog" aria-modal="true" aria-labelledby="pin-title">
             <div className="modal">
-              <h2 id="pin-title">PIN</h2>
+              <h2 id="pin-title">{tdict[lang].pin}</h2>
               <p id="pin-sub" className="muted"></p>
               <input id="pin-input" inputMode="numeric" maxLength="4" placeholder="••••" />
               <div className="foot">
-                <button className="btn ghost" id="pin-reset" type="button">Сброс PIN</button>
-                <button className="btn" id="pin-close" type="button">Закрыть</button>
+                <button className="btn ghost" id="pin-reset" type="button">{tdict[lang].pinReset}</button>
+                <button className="btn" id="pin-close" type="button">{tdict[lang].close}</button>
                 <button className="btn primary" id="pin-action" type="button">OK</button>
               </div>
+            </div>
+          </div>
+
+          {/* Access code modal */}
+          <div className="modal-back" id="modal-access" role="dialog" aria-modal="true" aria-labelledby="access-title">
+            <div className="modal">
+              <h2 id="access-title">{tdict[lang].accessTitle}</h2>
+              <p className="muted">{tdict[lang].accessBody}</p>
+              <div className="row"><input id="access-input" placeholder={tdict[lang].accessPlaceholder} /><button className="btn primary" id="access-enter" type="button">{tdict[lang].accessEnter}</button></div>
             </div>
           </div>
         </>
