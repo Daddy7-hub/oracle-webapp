@@ -33,7 +33,7 @@
       -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale
     }
     :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
-    .wrap{max-width:1160px;margin:0 auto;padding: calc(10px + var(--safe-top)) 14px calc(var(--bottom-h) + 14px)}
+    .wrap{max-width:1160px;margin:0 auto;padding: calc(10px + var(--safe-top)) 14px 110px}
 
     /* Header */
     header{position:sticky; top:0; z-index:12; margin:0 -14px 14px; padding: calc(8px + var(--safe-top)) 14px 8px; background:linear-gradient(180deg, rgba(10,11,14,.95), rgba(10,11,14,.6)); backdrop-filter:saturate(120%) blur(6px); border-bottom: var(--b1)}
@@ -44,13 +44,6 @@
     .brand small{display:block;color:var(--muted);margin-top:2px;font-size:12px}
     .userchips{display:flex;gap:8px;flex-wrap:wrap}
     .chip{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:var(--b1);border-radius:999px;padding:8px 12px;color:var(--txt)}
-
-    /* Tabs/pages */
-    .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
-    .tab{appearance:none;border:var(--b1);background:var(--card);color:var(--txt);border-radius:12px;padding:8px 12px;font-weight:800;cursor:pointer}
-    .tab.active{background:linear-gradient(135deg, rgba(245,215,122,.18), rgba(212,175,55,.14));box-shadow: 0 0 0 1px rgba(212,175,55,.5) inset}
-    .page{display:none}
-    .page.active{display:block}
 
     /* Grid/Cards */
     .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
@@ -74,12 +67,20 @@
     .price{font-weight:900}
     .kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
 
-    /* Bottom bar */
-    .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96));padding:10px 10px calc(10px + var(--safe-bot))}
-    .bb-inner{max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0e1117;border:var(--b1);border-radius:16px;padding:10px 12px;pointer-events:auto}
+    /* Bottom NAV (new) */
+    .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:8px 10px calc(8px + var(--safe-bot));background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96))}
+    .tabbar-inner{max-width:1160px;margin:0 auto;display:flex;gap:8px;justify-content:space-between;background:#0e1117;border:var(--b1);border-radius:16px;padding:6px}
+    .tnav {display:grid;grid-auto-flow:column;gap:6px;overflow:auto}
+    .tnav::-webkit-scrollbar{display:none}
+    .tbtn{appearance:none;background:transparent;border:1px solid rgba(255,255,255,.08);color:var(--txt);border-radius:12px;padding:8px 10px;display:flex;align-items:center;gap:8px;min-width:110px;justify-content:center;cursor:pointer}
+    .tbtn.active{background:linear-gradient(135deg, rgba(245,215,122,.18), rgba(212,175,55,.14));box-shadow: 0 0 0 1px rgba(212,175,55,.5) inset}
+
+    /* Cart panel (shows only when cart > 0) */
+    .cartbar{display:none;align-items:center;gap:10px}
+    .cartbar .chip{background:#121621}
 
     /* Modals */
-    .modal-back{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:20px 14px}
+    .modal-back{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);padding:20px 14px}
     .modal{max-width:680px;width:100%;background:#0e1117;border:var(--b1);border-radius:18px;box-shadow:var(--shadow);padding:16px}
     .modal h2{margin:0 0 10px}
     .modal .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
@@ -94,13 +95,11 @@
     .btn.touching{filter:brightness(1.03)}
 
     /* Splash */
-    .splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.12), transparent 60%), var(--bg);z-index:50}
-    .s-logo{width:128px;height:128px;border-radius:24px;background: radial-gradient(140% 140% at 30% 20%, var(--gold-2), var(--gold) 60%, #6e570f);box-shadow: inset 0 2px 10px rgba(255,255,255,.25), 0 8px 40px var(--gold-glow)}
+    .splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.12), transparent 60%), var(--bg);z-index:60}
+    .s-logo{width:128px;height:128px;border-radius:24px;background: radial-gradient(140% 140% at 30% 20%, var(--gold-2), var(--gold) 60%, #6e570f);box-shadow: inset 0 2px 10px rgba(255,255,255,.25), 0 8px 40px var(--gold-glow);animation:float 2.2s ease-in-out infinite}
     .s-title{font-weight:900;font-size:28px;letter-spacing:.6px;margin-top:16px;text-align:center}
     .s-sub{color:var(--muted);text-align:center;margin-top:4px}
     @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
-    .s-logo{animation:float 2.2s ease-in-out infinite}
-
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     @keyframes pop{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}
     .modal-back[style*="display: flex"]{animation:fadeIn .12s ease-out}
@@ -133,7 +132,6 @@
         partner:'Партнёр', paid:'Оплата', reward:'Вознаграждение',
         tasksTitle:'Задания за ATM', rewardPlus:'Награда', proofHint:'URL-пруф', submit:'Отправить',
         balanceTitle:'Баланс ATM', balanceHelp:'Коины выдаются за задания и рефералов. Можно списать до 25% заказа (100 ATM = €1).',
-        pinManage:'Управление PIN',
         adminTitle:'Админ-панель', adminHelp:'Статистика, заказы, задания.',
         update:'Обновить', export:'Экспорт JSON',
         users:'Пользователи', orders2:'Заказы', revenue:'Выручка', atmOnBalances:'ATM на балансах',
@@ -152,11 +150,8 @@
         recipient:'Получатель', adminExch:'Биржа администратора', companyAcc:'Счёт компании',
         chain:'Сеть', address:'Адрес', amountEur:'Сумма', memo:'Назначение', iPaid:'Я оплатил(а)',
         item:'Товар',
-        pin:'PIN', pinSet:'Создать ПИН-код', pinSubSet:'Введите 4 цифры. ПИН хранится локально.', save:'Сохранить',
-        pinUnlock:'ПИН-код', pinSubUnlock:'Введите 4 цифры, чтобы разблокировать.', unlock:'Разблокировать', pinReset:'Сброс PIN',
         splashTitle:'CRYPTOATM', splashSub:'Subscriptions • Alerts • Copy-trading',
-        lang:'Язык',
-        accessTitle:'Доступ', accessBody:'Введите код доступа для входа.', accessPlaceholder:'Access code', accessEnter:'Войти'
+        lang:'Язык'
       },
       en: {
         brandSub:'Subscriptions • Bundles • Copy-trading • Referrals',
@@ -174,7 +169,6 @@
         partner:'Partner', paid:'Paid', reward:'Reward',
         tasksTitle:'Tasks for ATM', rewardPlus:'Reward', proofHint:'Proof URL', submit:'Submit',
         balanceTitle:'ATM balance', balanceHelp:'Earn ATM from tasks and referrals. Redeem up to 25% (100 ATM = €1).',
-        pinManage:'PIN management',
         adminTitle:'Admin panel', adminHelp:'Stats, orders, tasks.',
         update:'Refresh', export:'Export JSON',
         users:'Users', orders2:'Orders', revenue:'Revenue', atmOnBalances:'ATM on balances',
@@ -193,11 +187,8 @@
         recipient:'Recipient', adminExch:'Admin exchange', companyAcc:'Company account',
         chain:'Network', address:'Address', amountEur:'Amount', memo:'Memo', iPaid:'I paid',
         item:'Item',
-        pin:'PIN', pinSet:'Create PIN', pinSubSet:'Enter 4 digits. PIN is stored locally.', save:'Save',
-        pinUnlock:'PIN', pinSubUnlock:'Enter 4 digits to unlock.', unlock:'Unlock', pinReset:'Reset PIN',
         splashTitle:'CRYPTOATM', splashSub:'Subscriptions • Alerts • Copy-trading',
-        lang:'Lang',
-        accessTitle:'Access', accessBody:'Enter access code to continue.', accessPlaceholder:'Access code', accessEnter:'Enter'
+        lang:'Lang'
       }
     };
     function useI18n(){
@@ -221,21 +212,12 @@
         }catch(e){}
 
         /* ===== CONFIG ===== */
-        const ADMIN_IDS = [568646738];             // <=== ЗАМЕНИ на свой Telegram ID
+        const ADMIN_IDS = [568646738];     // <=== замени на свой Telegram ID
         const START_BONUS_ATM = 250;
-        const REF_BONUS_PERCENT = 0.10;            // 10% от € в ATM
-        const ATM_RATE = 100;                      // 100 ATM = €1
-
-        // Включалки
-        const REQUIRE_ACCESS_CODE = false;         // вход по коду (модалка) — выключено
-        const REQUIRE_PIN_AT_START = false;        // спрашивать PIN на старте — выключено
-        const REQUIRE_PIN_AT_CHECKOUT = true;      // PIN только перед оплатой — включено
-        const ACCESS_CODE = 'CHANGE_ME';           // код доступа (если включишь REQUIRE_ACCESS_CODE)
-
-        // Dev режим (тест без Telegram)
+        const REF_BONUS_PERCENT = 0.10;    // 10% от € в ATM (100 ATM = €1)
         const DEV_MODE = /\bdev=1\b/i.test(location.search) || location.hostname === 'localhost';
 
-        // Каталог и описания
+        // Каталог
         const CATALOG = [
           {type:'bot',code:'CRYPTO_ATM',name:'Crypto ATM Bot',price:71,desc:'BTC analytics, daily signals & levels.'},
           {type:'bot',code:'ALERTS',name:'Alerts Bot',price:39,desc:'Whales, liquidations, funding, OI & volume alerts.'},
@@ -255,22 +237,14 @@
         const PERIOD_DISCOUNT = {1:0,3:0.1,6:0.2};
 
         // Реквизиты
-        const PAY_ADDR_ADMIN = {
-          BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c',
-          TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs',
-          ERC20:'0x1111222233334444555566667777888899990000'
-        };
-        const PAY_ADDR_COMPANY = {
-          BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c',
-          TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs',
-          ERC20:'0x1111222233334444555566667777888899990000'
-        };
+        const PAY_ADDR_ADMIN = { BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c', TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs', ERC20:'0x1111222233334444555566667777888899990000' };
+        const PAY_ADDR_COMPANY = { BEP20:'0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c', TRC20:'TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs', ERC20:'0x1111222233334444555566667777888899990000' };
 
-        /* DB + helpers */
+        /* DB */
         const $ = s => document.querySelector(s);
         const $$ = s => Array.from(document.querySelectorAll(s));
-        const DBKEY = 'CATM_DB_HTMLv2';
-        function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)||'null') || {users:{},orders:[],tasks:[],disclaimerAccepted:{},accessOK:{}} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:{},accessOK:{}} } }
+        const DBKEY = 'CATM_DB_HTMLv4';
+        function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)||'null') || {users:{},orders:[],tasks:[],disclaimerAccepted:{}} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:{}} } }
         const db = loadDB();
         const saveDB = ()=> localStorage.setItem(DBKEY, JSON.stringify(db));
 
@@ -280,14 +254,8 @@
           id: rawUser.id, username: rawUser.username||'user',
           name: (rawUser.first_name||'') + (rawUser.last_name?(' '+rawUser.last_name):'')
         } : { id:0, username:'guest', name:'Guest' };
+        if ((!rawUser || CURRENT_USER.id===0) && DEV_MODE){ CURRENT_USER.id = ADMIN_IDS[0]||1; CURRENT_USER.username='devadmin'; }
 
-        // Dev-подмена вне Telegram
-        if ((!rawUser || CURRENT_USER.id === 0) && DEV_MODE) {
-          CURRENT_USER.id = ADMIN_IDS[0] || 1;
-          CURRENT_USER.username = 'devadmin';
-        }
-
-        // Создание пользователя
         if (!db.users[CURRENT_USER.id]){
           db.users[CURRENT_USER.id] = {
             id: CURRENT_USER.id, username: CURRENT_USER.username, created_at: new Date().toISOString(),
@@ -298,17 +266,23 @@
         }
         function user(){ return db.users[CURRENT_USER.id]; }
 
-        // Админ всегда имеет доступ (bypass access-code)
-        if (ADMIN_IDS.includes(CURRENT_USER.id)) {
-          db.accessOK[CURRENT_USER.id] = true;
-          saveDB();
+        const state = {
+          period:1, atmDiscount:0, cart:[],
+          pay:{chain:'BEP20', dest:'admin', addr: PAY_ADDR_ADMIN.BEP20, amount:0, memo:''}
+        };
+
+        function getActiveAddr(){ const book = state.pay.dest==='company'? PAY_ADDR_COMPANY : PAY_ADDR_ADMIN; return book[state.pay.chain]; }
+        function applyCartVisibility(){
+          const eur = state.cart.reduce((s,x)=>s+x.amount,0);
+          document.querySelector('.cartbar').style.display = eur>0 ? 'flex' : 'none';
+        }
+        function applyBottomPadding(){
+          const tb=document.querySelector('.tabbar-inner'); const cb=document.querySelector('.cartbar');
+          const extra = (tb?.offsetHeight||0) + ((cb?.offsetHeight||0) ? cb.offsetHeight+8 : 0) + 14;
+          document.querySelector('.wrap').style.paddingBottom = extra + 'px';
         }
 
-        const state = { period:1, atmDiscount:0, cart:[], pay:{chain:'BEP20', dest:'admin', addr: PAY_ADDR_ADMIN.BEP20, amount:0, memo:''} };
-
-        function applyBottomOffset(){ const bar=$('#bottom-bar'); if(!bar) return; document.documentElement.style.setProperty('--bottom-h', Math.ceil(bar.getBoundingClientRect().height)+'px'); }
-        function text(el, s){ if(el) el.textContent = s; }
-
+        function text(el,s){ if(el) el.textContent = s; }
         function renderHeader(){
           text($('#chip-name'), '@'+(CURRENT_USER.username||'guest'));
           text($('#chip-atm'), String(user().atm));
@@ -320,22 +294,22 @@
 
         function updateCartUI(){
           const eur = state.cart.reduce((s,x)=>s+x.amount,0);
-          const atmMax = Math.floor(eur*0.25)*ATM_RATE;
+          const atmMax = Math.floor(eur*0.25)*100;
           const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
-          const eurMinus = Math.floor(wantATM/ATM_RATE);
+          const eurMinus = Math.floor(wantATM/100);
           const finalEur = Math.max(0, eur-eurMinus);
           text($('#cart-count'), String(state.cart.length));
           text($('#cart-total-eur'), '€'+eur);
           text($('#cart-total-atm'), wantATM+' ATM');
           text($('#cart-total-final'), '€'+finalEur);
-          renderHeader(); applyBottomOffset();
+          renderHeader(); applyCartVisibility(); applyBottomPadding();
         }
 
         function renderCatalog(){
           const grid = $('#catalog'); if(!grid) return; grid.innerHTML='';
           const months = state.period = parseInt(($('#period') && $('#period').value) || '1',10);
           state.atmDiscount = Math.max(0, parseInt(($('#atm-discount') && $('#atm-discount').value) || '0',10));
-          const eur = state.cart.reduce((s,x)=>s+x.amount,0); const atmMax=Math.floor(eur*0.25)*ATM_RATE;
+          const eur = state.cart.reduce((s,x)=>s+x.amount,0); const atmMax=Math.floor(eur*0.25)*100;
           if(state.atmDiscount>atmMax){ state.atmDiscount=atmMax; if($('#atm-discount')) $('#atm-discount').value = String(atmMax); }
           CATALOG.forEach(it=>{
             const total = priceFor(it, months); const inCart = state.cart.find(x=>x.code===it.code && x.months===months);
@@ -356,17 +330,8 @@
           updateCartUI();
         }
 
-        function addToCart(code){
-          const months=state.period; const it=CATALOG.find(x=>x.code===code); if(!it) return;
-          if(state.cart.find(x=>x.code===code && x.months===months)) return;
-          state.cart.push({code:it.code,name:it.name,months,amount:priceFor(it,months)});
-          updateCartUI(); renderCatalog();
-        }
-        function removeFromCart(code){
-          const months=state.period;
-          state.cart = state.cart.filter(x=>!(x.code===code && x.months===months));
-          updateCartUI(); renderCatalog();
-        }
+        function addToCart(code){ const months=state.period; const it=CATALOG.find(x=>x.code===code); if(!it) return; if(state.cart.find(x=>x.code===code && x.months===months)) return; state.cart.push({code:it.code,name:it.name,months,amount:priceFor(it,months)}); updateCartUI(); renderCatalog(); }
+        function removeFromCart(code){ const months=state.period; state.cart = state.cart.filter(x=>!(x.code===code && x.months===months)); updateCartUI(); renderCatalog(); }
         function clearCart(){ state.cart=[]; updateCartUI(); renderCatalog(); }
 
         function renderOrders(){
@@ -378,7 +343,6 @@
             tr.innerHTML = `<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${o.method} (${o.dest||'-'})</td><td>€${o.eur_final} ${o.atm_used?`(+${o.atm_used} ATM)`:''}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.intent_id||'—'}</td>`;
             tb.appendChild(tr);
           });
-          renderHeader();
         }
 
         function toast(tmsg){ const tg = window.Telegram && window.Telegram.WebApp; if(tg&&tg.showPopup){ tg.showPopup({title:'',message:String(tmsg),buttons:[{type:'close'}]}); } else { console.log('[toast]', tmsg); } }
@@ -386,46 +350,40 @@
         function openItemModal(code){
           const it = CATALOG.find(x=>x.code===code); if(!it) return;
           const long = (CATALOG_LONG[code] && CATALOG_LONG[code].bullets) || [];
-          text($('#item-title'), t('item')+': '+it.name);
-          $('#item-desc').innerHTML = `
-            <div class="muted" style="margin-bottom:8px">${it.desc}</div>
-            ${long.length ? `<ul class="muted">${long.map(b=>`<li>${b}</li>`).join('')}</ul>` : ''}
-          `;
+          $('#item-title').textContent = t('item')+': '+it.name;
+          $('#item-desc').innerHTML = `<div class="muted" style="margin-bottom:8px">${it.desc}</div>${long.length ? `<ul class="muted">${long.map(b=>`<li>${b}</li>`).join('')}</ul>` : ''}`;
           $('#modal-item').style.display='flex';
         }
         function closeItem(){ $('#modal-item').style.display='none'; }
 
-        function getActiveAddr(){ const book = state.pay.dest==='company'? PAY_ADDR_COMPANY : PAY_ADDR_ADMIN; return book[state.pay.chain]; }
         function drawQR(text){
-          const c = $('#qr'); if(!c) return; const ctx = c.getContext && c.getContext('2d'); if(!ctx) return;
+          const c = document.getElementById('qr'); if(!c) return; const ctx = c.getContext && c.getContext('2d'); if(!ctx) return;
           ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle='#000';
           let seed=0; for(let i=0;i<text.length;i++) seed=((seed*33+text.charCodeAt(i))>>>0);
           const n=21,s=Math.floor((c.width-20)/n),off=10;
           for(let y=0;y<n;y++) for(let x=0;x<n;x++){ seed=(seed*1103515245+12345)>>>0; const v=seed&1; if(v) ctx.fillRect(off+x*s, off+y*s, s-1, s-1); }
         }
         function openCryptoModal(eur, chain='BEP20', memo=''){
-          state.pay.chain = chain; state.pay.addr = getActiveAddr();
-          const chainSel = $('#pay-chain-select'), destSel = $('#pay-dest-select');
+          state.pay.chain = chain;
+          state.pay.addr = getActiveAddr();
+          const chainSel = document.getElementById('pay-chain-select'), destSel = document.getElementById('pay-dest-select');
           if(chainSel) chainSel.value = chain; if(destSel) destSel.value = state.pay.dest;
-          text($('#pay-addr'), state.pay.addr);
-          text($('#pay-amount'), `€${eur}`);
-          text($('#pay-memo'), memo || 'CRYPTOATM');
-          $('#modal-crypto').style.display='flex';
-          drawQR(state.pay.addr); applyBottomOffset();
+          document.getElementById('pay-addr').textContent = state.pay.addr;
+          document.getElementById('pay-amount').textContent = `€${eur}`;
+          document.getElementById('pay-memo').textContent = memo || 'CRYPTOATM';
+          document.getElementById('modal-crypto').style.display='flex';
+          drawQR(state.pay.addr); applyBottomPadding();
         }
-        function closeCrypto(){ $('#modal-crypto').style.display='none'; }
+        function closeCrypto(){ document.getElementById('modal-crypto').style.display='none'; }
 
-        async function createPaymentIntent(order){
-          try{ await new Promise(r=>setTimeout(r,350)); return 'intent_'+Math.random().toString(36).slice(2,9); }
-          catch(e){ console.error(e); return null; }
-        }
+        async function createPaymentIntent(order){ try{ await new Promise(r=>setTimeout(r,350)); return 'intent_'+Math.random().toString(36).slice(2,9); } catch(e){ console.error(e); return null; } }
 
         function createOrder(){
           if(state.cart.length===0) return toast('Cart is empty');
           const eur = state.cart.reduce((s,x)=>s+x.amount,0);
-          const atmMax = Math.floor(eur*0.25)*ATM_RATE;
+          const atmMax = Math.floor(eur*0.25)*100;
           const wantATM = Math.min(state.atmDiscount||0, atmMax, user().atm);
-          const eurMinus = Math.floor(wantATM/ATM_RATE);
+          const eurMinus = Math.floor(wantATM/100);
           const finalEur = Math.max(0, eur-eurMinus);
           if(wantATM>0) user().atm = Math.max(0, user().atm - wantATM);
 
@@ -433,26 +391,27 @@
           const order = { id: db.orders.length+1, user: CURRENT_USER.id, items: state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})), method:'crypto', dest: state.pay.dest, eur, atm_used: wantATM, eur_final: finalEur, status:'waiting', created_at:new Date().toISOString(), memo, intent_id: null };
           db.orders.push(order); user().orders.push(order.id); saveDB();
 
-          state.cart=[]; state.atmDiscount=0; if($('#atm-discount')) $('#atm-discount').value='0';
+          state.cart=[]; state.atmDiscount=0; const atmInput=document.getElementById('atm-discount'); if(atmInput) atmInput.value='0';
           updateCartUI(); renderOrders();
 
           state.pay.amount=finalEur; state.pay.memo=memo;
           openCryptoModal(finalEur, state.pay.chain, memo);
 
           createPaymentIntent(order).then(id=>{
-            order.intent_id=id; saveDB(); renderOrders(); if(id) text($('#pay-memo'), id);
+            order.intent_id=id; saveDB(); renderOrders();
+            if(id){ const memoEl=document.getElementById('pay-memo'); if(memoEl) memoEl.textContent=id; }
           });
         }
 
         function renderRefs(){
-          const rc = $('#ref-code'); if(rc) rc.value = user().ref_code;
-          const tb = $('#ref-table tbody'); if(tb){ tb.innerHTML=''; for(const r of (user().referrals||[]).slice().reverse()){ const tr=document.createElement('tr'); tr.innerHTML = `<td>@${(db.users[r.uid] && db.users[r.uid].username) || r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid?'Да':'—'}</td><td>${r.reward||0} ATM</td>`; tb.appendChild(tr); } }
-          const hasRef = !!user().referred_by; if($('#ref-bind-input')) $('#ref-bind-input').disabled=hasRef; if($('#ref-bind-btn')) $('#ref-bind-btn').disabled=hasRef;
+          const rc = document.getElementById('ref-code'); if(rc) rc.value = user().ref_code;
+          const tb = document.querySelector('#ref-table tbody'); if(tb){ tb.innerHTML=''; for(const r of (user().referrals||[]).slice().reverse()){ const tr=document.createElement('tr'); tr.innerHTML = `<td>@${(db.users[r.uid] && db.users[r.uid].username) || r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid?'Да':'—'}</td><td>${r.reward||0} ATM</td>`; tb.appendChild(tr); } }
+          const hasRef = !!user().referred_by; const bindInput=document.getElementById('ref-bind-input'); const bindBtn=document.getElementById('ref-bind-btn'); if(bindInput) bindInput.disabled=hasRef; if(bindBtn) bindBtn.disabled=hasRef;
         }
 
         const TASK_DEF=[{id:1,title:'TikTok subscribe',reward:100,hint:'URL profile/screenshot'},{id:2,title:'Repost to stories',reward:120,hint:'URL story'},{id:3,title:'Project review',reward:150,hint:'URL post/review'},{id:4,title:'Sticker on car',reward:500,hint:'URL photo'}];
         function renderTasks(){
-          const holder = $('#tasks'); if(!holder) return; holder.innerHTML='';
+          const holder = document.getElementById('tasks'); if(!holder) return; holder.innerHTML='';
           TASK_DEF.forEach(tk=>{
             const col=document.createElement('div'); col.className='col-6 card';
             col.innerHTML = `<h3>#${tk.id} ${tk.title}</h3><p class="muted">${t('rewardPlus')}: <b>+${tk.reward} ATM</b></p><input id="proof-${tk.id}" type="url" placeholder="${t('proofHint')}"><div class="line"><span class="muted">Moderation</span><button class="btn primary" data-act="submit-task" data-id="${tk.id}">${t('submit')}</button></div>`;
@@ -460,78 +419,43 @@
           });
         }
 
-        function renderBalance(){ const el=$('#atm-balance'); if(el) el.textContent = String(user().atm); }
+        function renderBalance(){ const el=document.getElementById('atm-balance'); if(el) el.textContent = String(user().atm); }
 
+        /* Admin */
         function renderAdmin(){
-          const tabAdminBtn = document.querySelector('#tab-admin-btn'); if(tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
-
           const users = Object.values(db.users); const o=db.orders; const totalEur=o.reduce((s,x)=>s+x.eur_final,0); const totalAtm=users.reduce((s,u)=>s+u.atm,0);
-          const stats = $('#admin-stats'); if(stats) stats.innerHTML = `<div class="row"><div class="chip">${t('users')}: <b>${users.length}</b></div><div class="chip">${t('orders2')}: <b>${o.length}</b></div><div class="chip">${t('revenue')}: <b>€${totalEur}</b></div><div class="chip">${t('atmOnBalances')}: <b>${totalAtm}</b></div></div>`;
-          const utb = $('#admin-users tbody'); if(utb){ utb.innerHTML=''; users.slice().sort((a,b)=>b.id-a.id).forEach(u=>{ const refFrom=u.referred_by ? '@'+((db.users[u.referred_by] && db.users[u.referred_by].username)||u.referred_by) : '—'; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>${u.atm}</td><td>${u.orders.length}</td><td>${u.ref_code}</td><td>${refFrom}</td><td>${new Date(u.created_at).toLocaleDateString()}</td>`; utb.appendChild(tr); }); }
-          const otb = $('#admin-orders tbody'); if(otb){ otb.innerHTML=''; db.orders.slice().reverse().forEach(or=>{ const userName='@'+((db.users[or.user] && db.users[or.user].username)||or.user); const items = or.items.map(i=>i.code+'×'+i.months).join(', '); const tr=document.createElement('tr'); tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${or.method} (${or.dest||'-'})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td><button class="btn" data-act="mark-paid" data-id="${or.id}">${t('markPaid')}</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">${t('cancel')}</button></td>`; otb.appendChild(tr); }); }
-          const ttb = $('#admin-tasks tbody'); if(ttb){ ttb.innerHTML=''; users.forEach(u=>{ (u.tasks||[]).forEach((tk,idx)=>{ if(tk.status==='pending'){ const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0,title:'#'+tk.id}; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>#${tk.id} ${def.title||''}</td><td>${tk.proof||''}</td><td>+${def.reward} ATM</td><td>${tk.status}</td><td><button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">${t('approve')}</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">${t('reject')}</button></td>`; ttb.appendChild(tr); } }) }); }
+          const stats = document.getElementById('admin-stats'); if(stats) stats.innerHTML = `<div class="row"><div class="chip">${t('users')}: <b>${users.length}</b></div><div class="chip">${t('orders2')}: <b>${o.length}</b></div><div class="chip">${t('revenue')}: <b>€${totalEur}</b></div><div class="chip">${t('atmOnBalances')}: <b>${totalAtm}</b></div></div>`;
+          const utb = document.querySelector('#admin-users tbody'); if(utb){ utb.innerHTML=''; users.slice().sort((a,b)=>b.id-a.id).forEach(u=>{ const refFrom=u.referred_by ? '@'+((db.users[u.referred_by] && db.users[u.referred_by].username)||u.referred_by) : '—'; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>${u.atm}</td><td>${u.orders.length}</td><td>${u.ref_code}</td><td>${refFrom}</td><td>${new Date(u.created_at).toLocaleDateString()}</td>`; utb.appendChild(tr); }); }
+          const otb = document.querySelector('#admin-orders tbody'); if(otb){ otb.innerHTML=''; db.orders.slice().reverse().forEach(or=>{ const userName='@'+((db.users[or.user] && db.users[or.user].username)||or.user); const items = or.items.map(i=>i.code+'×'+i.months).join(', '); const tr=document.createElement('tr'); tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${or.method} (${or.dest||'-'})</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td><button class="btn" data-act="mark-paid" data-id="${or.id}">${t('markPaid')}</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">${t('cancel')}</button></td>`; otb.appendChild(tr); }); }
+          const ttb = document.querySelector('#admin-tasks tbody'); if(ttb){ ttb.innerHTML=''; users.forEach(u=>{ (u.tasks||[]).forEach((tk,idx)=>{ if(tk.status==='pending'){ const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0,title:'#'+tk.id}; const tr=document.createElement('tr'); tr.innerHTML=`<td>${u.id}</td><td>@${u.username}</td><td>#${tk.id} ${def.title||''}</td><td>${tk.proof||''}</td><td>+${def.reward} ATM</td><td>${tk.status}</td><td><button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">${t('approve')}</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">${t('reject')}</button></td>`; ttb.appendChild(tr); } }) }); }
         }
 
         function switchTab(name){
-          $$('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
           $$('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+name));
+          $$('.tbtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
           if(name==='shop') renderCatalog();
           if(name==='orders') renderOrders();
           if(name==='ref') renderRefs();
           if(name==='tasks') renderTasks();
           if(name==='balance') renderBalance();
           if(name==='admin') renderAdmin();
-          applyBottomOffset();
+          applyBottomPadding();
         }
         function currentTab(){ return (location.hash.replace('#/','') || 'shop'); }
         function setHash(tab){ location.hash = '#/'+tab; }
 
-        /* PIN */
-        function getPinKey(uid){ return `PIN_OK_${uid}` }
-        function isPinSet(){ return !!user().pin; }
-        function isUnlocked(){ return !isPinSet() || sessionStorage.getItem(getPinKey(CURRENT_USER.id))==='1'; }
-        function showPinModal(mode){
-          const m=$('#modal-pin'), title=$('#pin-title'), sub=$('#pin-sub'), action=$('#pin-action'), reset=$('#pin-reset'), input=$('#pin-input');
-          if(!m||!title||!sub||!action||!reset||!input) return;
-          if(mode==='set'){
-            text(title, t('pinSet')); text(sub, t('pinSubSet')); text(action, t('save')); $('#pin-reset').style.display='none'; input.value=''; m.style.display='flex'; input.focus();
-            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Enter 4 digits'); user().pin=v; saveDB(); toast('PIN saved'); m.style.display='none'; };
-          } else {
-            text(title, t('pinUnlock')); text(sub, t('pinSubUnlock')); text(action, t('unlock')); $('#pin-reset').style.display = isPinSet()? 'inline-flex':'none'; input.value=''; m.style.display='flex'; input.focus();
-            action.onclick=()=>{ const v=(input.value||'').replace(/[^0-9]/g,''); if(v.length!==4) return toast('Enter 4 digits'); if(v===user().pin){ sessionStorage.setItem(getPinKey(CURRENT_USER.id),'1'); toast('Unlocked'); m.style.display='none'; } else toast('Wrong PIN'); };
-          }
-        }
-        function ensureUnlocked(){
-          if (ADMIN_IDS.includes(CURRENT_USER.id)) return true;              // админ игнорирует PIN
-          if (!REQUIRE_PIN_AT_CHECKOUT) return true;                         // PIN не требуется
-          if(!isUnlocked()){ showPinModal('unlock'); return false; }
-          return true;
-        }
-
-        /* Disclaimer + Access */
-        function ensureDisclaimer(){ const ok=db.disclaimerAccepted[CURRENT_USER.id]; $('#modal-disclaimer').style.display = ok ? 'none' : 'flex'; }
-        function ensureAccess(){
-          if (!REQUIRE_ACCESS_CODE) return true;                             // глобально выключено
-          if (ADMIN_IDS.includes(CURRENT_USER.id)) return true;              // админ — всегда ок
-          const ok = !!db.accessOK[CURRENT_USER.id];
-          if (!ok) { $('#modal-access').style.display='flex'; }
-          return ok;
-        }
-
-        function onHashChange(){ switchTab(currentTab()); }
-        window.addEventListener('hashchange', onHashChange);
-
+        /* Handlers */
         function clickHandler(e){
           const btn = e.target && e.target.closest && e.target.closest('button, .btn'); if(!btn) return;
-          if(btn.classList.contains('tab')){ const tname=btn.dataset.tab; if(tname){ setHash(tname); switchTab(tname); } return; }
-          const act=btn.dataset.act;
+          if(btn.classList.contains('tbtn')){ const tname=btn.dataset.tab; if(tname){ setHash(tname); switchTab(tname); } return; }
 
+          const act=btn.dataset.act;
           if(act==='add'){ addToCart(btn.dataset.code); return; }
           if(act==='remove'){ removeFromCart(btn.dataset.code); return; }
           if(act==='details'){ openItemModal(btn.dataset.code); return; }
 
           if(act==='submit-task'){
-            const id=+btn.dataset.id; const proofEl=$('#proof-'+id); const proof=(proofEl && proofEl.value && proofEl.value.trim()) || '';
+            const id=+btn.dataset.id; const proofEl=document.getElementById('proof-'+id); const proof=(proofEl && proofEl.value && proofEl.value.trim()) || '';
             if(!/^https?:\/\//i.test(proof)) return toast('Add a valid URL proof');
             user().tasks=user().tasks||[]; user().tasks.push({id,proof,at:new Date().toISOString(),status:'pending'}); saveDB(); toast('Sent to moderation'); if(proofEl) proofEl.value=''; return;
           }
@@ -539,48 +463,28 @@
           if(btn.id==='lang-toggle'){ toggle(); renderHeader(); renderCatalog(); return; }
           if(btn.id==='cart-clear'){ clearCart(); return; }
 
-          if(btn.id==='checkout-btn'){
-            if (!ADMIN_IDS.includes(CURRENT_USER.id)) {
-              if (!ensureAccess()) return;           // код доступа, если включён
-              if (!ensureUnlocked()) return;         // PIN при оплате
-            }
-            createOrder();
-            return;
-          }
+          if(btn.id==='checkout-btn'){ createOrder(); return; }
 
           if(btn.id==='ref-copy'){ navigator.clipboard.writeText(user().ref_code).then(()=>toast('Copied')); return; }
-          if(btn.id==='ref-bind-btn'){ const inp=$('#ref-bind-input'); const code=(inp && inp.value && inp.value.trim().toUpperCase()) || ''; if(!code) return toast('Enter code'); const owner=Object.values(db.users).find(u=>u.ref_code===code); if(!owner) return toast('Code not found'); if(owner.id===CURRENT_USER.id) return toast('Cannot bind your own code'); if(user().referred_by) return toast('Already bound'); user().referred_by=owner.id; owner.referrals.push({uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0}); saveDB(); renderRefs(); toast('Bound'); return; }
+          if(btn.id==='ref-bind-btn'){ const inp=document.getElementById('ref-bind-input'); const code=(inp && inp.value && inp.value.trim().toUpperCase()) || ''; if(!code) return toast('Enter code'); const owner=Object.values(db.users).find(u=>u.ref_code===code); if(!owner) return toast('Code not found'); if(owner.id===CURRENT_USER.id) return toast('Cannot bind your own code'); if(user().referred_by) return toast('Already bound'); user().referred_by=owner.id; owner.referrals.push({uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0}); saveDB(); renderRefs(); toast('Bound'); return; }
 
           if(btn.id==='admin-refresh'){ renderAdmin(); return; }
           if(btn.id==='admin-export'){ const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='cryptoatm_export.json'; a.click(); URL.revokeObjectURL(url); return; }
 
-          if(btn.id==='copy-addr'){ navigator.clipboard.writeText(($('#pay-addr')?.textContent)||''); toast('Address copied'); return; }
-          if(btn.id==='copy-amount'){ navigator.clipboard.writeText((($('#pay-amount')?.textContent)||'').replace('€','')); toast('Amount copied'); return; }
-          if(btn.id==='copy-memo'){ navigator.clipboard.writeText(($('#pay-memo')?.textContent)||''); toast('Memo copied'); return; }
+          if(btn.id==='copy-addr'){ navigator.clipboard.writeText((document.getElementById('pay-addr')?.textContent)||''); toast('Address copied'); return; }
+          if(btn.id==='copy-amount'){ navigator.clipboard.writeText(((document.getElementById('pay-amount')?.textContent)||'').replace('€','')); toast('Amount copied'); return; }
+          if(btn.id==='copy-memo'){ navigator.clipboard.writeText((document.getElementById('pay-memo')?.textContent)||''); toast('Memo copied'); return; }
           if(btn.id==='paid-btn'){ toast('Thanks! We will verify the payment.'); closeCrypto(); return; }
           if(btn.id==='close-crypto'){ closeCrypto(); return; }
           if(btn.id==='close-item'){ closeItem(); return; }
-          if(btn.id==='auth-close'){ $('#modal-auth').style.display='none'; return; }
-          if(btn.id==='accept'){ db.disclaimerAccepted[CURRENT_USER.id]=true; saveDB(); $('#modal-disclaimer').style.display='none'; return; }
-
-          if(btn.id==='pin-manage'){ if(isPinSet()){ showPinModal('unlock'); } else { showPinModal('set'); } return; }
-          if(btn.id==='pin-close'){ $('#modal-pin').style.display='none'; return; }
-          if(btn.id==='pin-reset'){ user().pin=undefined; saveDB(); sessionStorage.removeItem(getPinKey(CURRENT_USER.id)); toast('PIN removed'); $('#modal-pin').style.display='none'; return; }
-
-          // Доступ по коду (если включено)
-          if(btn.id==='access-enter'){
-            const v = ($('#access-input')?.value || '').trim();
-            if(!v) return toast('Enter access code');
-            if(v === ACCESS_CODE){ db.accessOK[CURRENT_USER.id] = true; saveDB(); $('#modal-access').style.display='none'; toast('Access granted'); }
-            else { toast('Wrong code'); }
-            return;
-          }
+          if(btn.id==='auth-close'){ document.getElementById('modal-auth').style.display='none'; return; }
+          if(btn.id==='accept'){ db.disclaimerAccepted[CURRENT_USER.id]=true; saveDB(); document.getElementById('modal-disclaimer').style.display='none'; return; }
 
           // Admin actions
           if(act==='mark-paid'){
-            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
             const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id);
-            if(o){ o.status='paid';
+            if(o){
+              o.status='paid';
               const buyer=db.users[o.user];
               if(buyer && buyer.referred_by){
                 const refUser=db.users[buyer.referred_by];
@@ -588,7 +492,7 @@
                   const rec=(refUser.referrals||[]).find(r=>r.uid===buyer.id);
                   if(rec && !rec.paid){
                     rec.paid=true;
-                    const atmReward=Math.max(0, Math.round((o.eur_final||0) * REF_BONUS_PERCENT * ATM_RATE));
+                    const atmReward=Math.max(0, Math.round((o.eur_final||0) * REF_BONUS_PERCENT * 100)); // 100 ATM = €1
                     rec.reward=atmReward; refUser.atm=(refUser.atm||0)+atmReward;
                   }
                 }
@@ -598,19 +502,16 @@
             return;
           }
           if(act==='mark-cancel'){
-            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
             const id=+(btn.dataset.id||0); const o=db.orders.find(x=>x.id===id);
             if(o){ o.status='canceled'; saveDB(); renderOrders(); renderAdmin(); toast('Canceled'); }
             return;
           }
           if(act==='task-approve'){
-            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
             const uid=+(btn.dataset.uid||0); const idx=+(btn.dataset.idx||-1); const u=db.users[uid];
             if(u && u.tasks && u.tasks[idx]){ const tk=u.tasks[idx]; const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0}; tk.status='approved'; u.atm=(u.atm||0)+(def.reward||0); saveDB(); renderAdmin(); renderBalance(); toast('Approved #'+tk.id+' (+'+def.reward+' ATM)'); }
             return;
           }
           if(act==='task-reject'){
-            if(!ADMIN_IDS.includes(CURRENT_USER.id)) return toast('No permission');
             const uid=+(btn.dataset.uid||0); const idx=+(btn.dataset.idx||-1); const u=db.users[uid];
             if(u && u.tasks && u.tasks[idx]){ const tk=u.tasks[idx]; tk.status='rejected'; saveDB(); renderAdmin(); toast('Rejected #'+tk.id); }
             return;
@@ -620,45 +521,30 @@
         function changeHandler(e){
           const el=e.target; if(!el) return;
           if(el.id==='period' || el.id==='atm-discount'){ renderCatalog(); }
-          if(el.id==='pay-chain-select'){ state.pay.chain = el.value; state.pay.addr=getActiveAddr(); text($('#pay-addr'), state.pay.addr); drawQR(state.pay.addr); }
-          if(el.id==='pay-dest-select'){ state.pay.dest = el.value; state.pay.addr=getActiveAddr(); text($('#pay-addr'), state.pay.addr); drawQR(state.pay.addr); }
+          if(el.id==='pay-chain-select'){ state.pay.chain = el.value; state.pay.addr=getActiveAddr(); document.getElementById('pay-addr').textContent=state.pay.addr; drawQR(state.pay.addr); }
+          if(el.id==='pay-dest-select'){ state.pay.dest = el.value; state.pay.addr=getActiveAddr(); document.getElementById('pay-addr').textContent=state.pay.addr; drawQR(state.pay.addr); }
         }
 
         function touchStart(e){ const b=e.target && e.target.closest && e.target.closest('.btn'); if(b) b.classList.add('touching'); }
         function touchEnd(){ $$('.btn.touching').forEach(b=>b.classList.remove('touching')); }
 
+        function ensureDisclaimer(){ const ok=db.disclaimerAccepted[CURRENT_USER.id]; document.getElementById('modal-disclaimer').style.display = ok ? 'none' : 'flex'; }
+
         function boot(){
-          // Splash hide
           setTimeout(()=> setShowSplash(false), 900);
-
-          // Admin tab visibility
-          const tabAdminBtn = document.querySelector('#tab-admin-btn'); if(tabAdminBtn) tabAdminBtn.hidden = !ADMIN_IDS.includes(CURRENT_USER.id);
-
-          if(CURRENT_USER.id===0){ $('#modal-auth').style.display='flex'; }
-
-          switchTab(currentTab()); renderHeader(); applyBottomOffset(); ensureDisclaimer();
-
-          // Не блокируем старт ПИНом (если флаг выключен)
-          if (REQUIRE_PIN_AT_START && isPinSet()) {
-            sessionStorage.removeItem(getPinKey(CURRENT_USER.id));
-            showPinModal('unlock');
-          }
-
-          // Код доступа на старте — выключен глобально (REQUIRE_ACCESS_CODE=false)
-
-          setInterval(()=>{ const chip=$('#chip-atm'); if(chip) chip.textContent=String(user().atm); }, 1000);
+          if(CURRENT_USER.id===0){ document.getElementById('modal-auth').style.display='flex'; }
+          switchTab((location.hash.replace('#/','')||'shop')); renderHeader();
+          applyCartVisibility(); applyBottomPadding(); ensureDisclaimer();
+          setInterval(()=>{ const chip=document.getElementById('chip-atm'); if(chip) chip.textContent=String(user().atm); }, 1000);
         }
 
         document.addEventListener('click', clickHandler);
         document.addEventListener('change', changeHandler);
         document.addEventListener('touchstart', touchStart, {passive:true});
         document.addEventListener('touchend', touchEnd);
-        window.addEventListener('hashchange', onHashChange);
-
-        console.assert(document.getElementById('catalog')!==null,'#catalog should exist');
+        window.addEventListener('hashchange', ()=>switchTab((location.hash.replace('#/','')||'shop')));
 
         boot();
-        return ()=>{};
       },[lang]);
 
       return (
@@ -691,15 +577,6 @@
                   <div className="chip">{tdict[lang].orders2}: <b id="chip-orders">0</b></div>
                 </div>
               </div>
-              <nav className="tabs" id="tabs" aria-label="Навигация">
-                <button className="tab active" data-tab="shop" type="button">🛒 {tdict[lang].shop}</button>
-                <button className="tab" data-tab="orders" type="button">📄 {tdict[lang].orders}</button>
-                <button className="tab" data-tab="ref" type="button">👥 {tdict[lang].ref}</button>
-                <button className="tab" data-tab="tasks" type="button">🧩 {tdict[lang].tasks}</button>
-                <button className="tab" data-tab="balance" type="button">💰 {tdict[lang].balance}</button>
-                <button className="tab" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 {tdict[lang].admin}</button>
-                <button className="tab" data-tab="faq" type="button">❓ {tdict[lang].faq}</button>
-              </nav>
             </header>
 
             <main id="pages">
@@ -776,7 +653,6 @@
                     <h3>{tdict[lang].balanceTitle}</h3>
                     <p className="muted">{tdict[lang].balanceHelp}</p>
                     <div className="row"><div className="chip">Balance: <b id="atm-balance">0</b></div></div>
-                    <div className="line"><span className="muted">PIN</span><button className="btn" id="pin-manage" type="button">{tdict[lang].pinManage}</button></div>
                   </div>
                 </div>
               </section>
@@ -814,17 +690,30 @@
             </main>
           </div>
 
-          {/* bottom bar */}
-          <div className="bottom-bar" id="bottom-bar">
-            <div className="bb-inner">
-              <div className="row">
-                <div className="chip">{tdict[lang].positions}: <b id="cart-count">0</b></div>
-                <div className="chip">{tdict[lang].total}: <b id="cart-total-eur">€0</b> / <b id="cart-total-atm">0 ATM</b></div>
-                <div className="chip">{tdict[lang].totalWithAtm}: <b id="cart-total-final">€0</b></div>
+          <!-- Bottom NAV + Cart panel -->
+          <div className="tabbar">
+            <div className="tabbar-inner">
+              <div className="tnav" id="btm-nav">
+                <button className="tbtn active" data-tab="shop" type="button">🛒 {tdict[lang].shop}</button>
+                <button className="tbtn" data-tab="orders" type="button">📄 {tdict[lang].orders}</button>
+                <button className="tbtn" data-tab="ref" type="button">👥 {tdict[lang].ref}</button>
+                <button className="tbtn" data-tab="tasks" type="button">🧩 {tdict[lang].tasks}</button>
+                <button className="tbtn" data-tab="balance" type="button">💰 {tdict[lang].balance}</button>
+                <button className="tbtn" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 {tdict[lang].admin}</button>
+                <button className="tbtn" data-tab="faq" type="button">❓ {tdict[lang].faq}</button>
               </div>
-              <div className="row">
-                <button className="btn" id="cart-clear" type="button">{tdict[lang].clear}</button>
-                <button className="btn primary" id="checkout-btn" type="button">{tdict[lang].pay}</button>
+
+              <!-- Cart panel (only visible when items > 0) -->
+              <div className="cartbar">
+                <div className="row">
+                  <div className="chip">{tdict[lang].positions}: <b id="cart-count">0</b></div>
+                  <div className="chip">{tdict[lang].total}: <b id="cart-total-eur">€0</b> / <b id="cart-total-atm">0 ATM</b></div>
+                  <div className="chip">{tdict[lang].totalWithAtm}: <b id="cart-total-final">€0</b></div>
+                </div>
+                <div className="row">
+                  <button className="btn" id="cart-clear" type="button">{tdict[lang].clear}</button>
+                  <button className="btn primary" id="checkout-btn" type="button">{tdict[lang].pay}</button>
+                </div>
               </div>
             </div>
           </div>
@@ -851,18 +740,18 @@
               <h2 id="pay-title">{tdict[lang].cryptoPay}</h2>
               <p className="muted">{tdict[lang].scanOrCopy}</p>
               <div className="row">
-                <canvas id="qr" width="180" height="180" style={{background:'#fff',borderRadius:'8px'}}></canvas>
-                <div style={{flex:1}}>
+                <canvas id="qr" width="180" height="180" style="background:#fff;border-radius:8px"></canvas>
+                <div style="flex:1">
                   <div className="kv"><span className="label">{tdict[lang].recipient}</span>
                     <select id="pay-dest-select"><option value="admin">{tdict[lang].adminExch}</option><option value="company">{tdict[lang].companyAcc}</option></select>
                   </div>
                   <div className="kv"><span className="label">{tdict[lang].chain}</span>
                     <select id="pay-chain-select"><option value="BEP20">BEP20</option><option value="TRC20">TRC20</option><option value="ERC20">ERC20</option></select>
                   </div>
-                  <div className="kv"><span className="label">{tdict[lang].address}</span><code id="pay-addr" style={{wordBreak:'break-all'}}></code> <button className="btn" id="copy-addr" type="button" style={{marginLeft:'8px'}}>{tdict[lang].copy}</button></div>
-                  <div className="kv"><span className="label">{tdict[lang].amountEur}</span><b id="pay-amount">—</b> <button className="btn" id="copy-amount" type="button" style={{marginLeft:'8px'}}>{tdict[lang].copy}</button></div>
-                  <div className="kv"><span className="label">{tdict[lang].memo}</span><b id="pay-memo">CRYPTOATM</b> <button className="btn" id="copy-memo" type="button" style={{marginLeft:'8px'}}>{tdict[lang].copy}</button></div>
-                  <div className="row" style={{marginTop:'8px'}}><button className="btn" id="close-crypto" type="button">{tdict[lang].close}</button><button className="btn primary" id="paid-btn" type="button">{tdict[lang].iPaid}</button></div>
+                  <div className="kv"><span className="label">{tdict[lang].address}</span><code id="pay-addr" style="word-break:break-all"></code> <button className="btn" id="copy-addr" type="button" style="margin-left:8px">{tdict[lang].copy}</button></div>
+                  <div className="kv"><span className="label">{tdict[lang].amountEur}</span><b id="pay-amount">—</b> <button className="btn" id="copy-amount" type="button" style="margin-left:8px">{tdict[lang].copy}</button></div>
+                  <div className="kv"><span className="label">{tdict[lang].memo}</span><b id="pay-memo">CRYPTOATM</b> <button className="btn" id="copy-memo" type="button" style="margin-left:8px">{tdict[lang].copy}</button></div>
+                  <div className="row" style="margin-top:8px"><button className="btn" id="close-crypto" type="button">{tdict[lang].close}</button><button className="btn primary" id="paid-btn" type="button">{tdict[lang].iPaid}</button></div>
                 </div>
               </div>
             </div>
@@ -873,28 +762,6 @@
               <h2 id="item-title">{tdict[lang].item}</h2>
               <div id="item-desc" className="muted"></div>
               <div className="foot"><button className="btn" id="close-item" type="button">{tdict[lang].close}</button></div>
-            </div>
-          </div>
-
-          <div className="modal-back" id="modal-pin" role="dialog" aria-modal="true" aria-labelledby="pin-title">
-            <div className="modal">
-              <h2 id="pin-title">{tdict[lang].pin}</h2>
-              <p id="pin-sub" className="muted"></p>
-              <input id="pin-input" inputMode="numeric" maxLength="4" placeholder="••••" />
-              <div className="foot">
-                <button className="btn ghost" id="pin-reset" type="button">{tdict[lang].pinReset}</button>
-                <button className="btn" id="pin-close" type="button">{tdict[lang].close}</button>
-                <button className="btn primary" id="pin-action" type="button">OK</button>
-              </div>
-            </div>
-          </div>
-
-          {/* Access code modal (выключен флагом, но оставляем UI) */}
-          <div className="modal-back" id="modal-access" role="dialog" aria-modal="true" aria-labelledby="access-title">
-            <div className="modal">
-              <h2 id="access-title">{tdict[lang].accessTitle}</h2>
-              <p className="muted">{tdict[lang].accessBody}</p>
-              <div className="row"><input id="access-input" placeholder={tdict[lang].accessPlaceholder} /><button className="btn primary" id="access-enter" type="button">{tdict[lang].accessEnter}</button></div>
             </div>
           </div>
         </>
