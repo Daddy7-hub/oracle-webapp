@@ -136,7 +136,7 @@
       <div class="grid">
         <div class="col-12 card">
           <h3 id="sub-title">Оформление подписки</h3>
-          <p class="muted" id="sub-help">Выберите срок 1/3/6/12 мес (скидка 0/10/20/30%). ATM сейчас используются только как награда — тратить нельзя.</p>
+          <p class="muted" id="sub-help">Выберите срок 1/3/6/12 мес (скидка 0/10/20/30%). ATM — внутренняя награда, сейчас не расходуются.</p>
           <div class="row">
             <div class="kv" style="min-width:200px">
               <label class="label" for="period" id="lbl-term">Срок</label>
@@ -182,22 +182,12 @@
       </div>
     </section>
 
-    <!-- TASKS -->
-    <section id="page-tasks" class="page">
-      <div class="grid">
-        <div class="col-12 card">
-          <h3 id="tasks-title">Задания за ATM</h3>
-          <div id="tasks" class="grid"></div>
-        </div>
-      </div>
-    </section>
-
     <!-- BALANCE -->
     <section id="page-balance" class="page">
       <div class="grid">
         <div class="col-12 card">
           <h3 id="bal-title">Баланс ATM</h3>
-          <p class="muted" id="bal-help">ATM сейчас зарабатываются за задания, рефералов и покупки. Позже их можно будет тратить или участвовать в розыгрышах.</p>
+          <p class="muted" id="bal-help">ATM копятся за покупки и рефералов. Не имеют фиксированного эквивалента в фиатной валюте.</p>
           <div class="row"><div class="chip">Balance: <b id="atm-balance">0</b></div></div>
         </div>
       </div>
@@ -208,13 +198,12 @@
       <div class="grid">
         <div class="col-12 card">
           <h3 id="adm-title">Админ-панель</h3>
-          <p class="muted" id="adm-help">Статистика, заказы, задания.</p>
+          <p class="muted" id="adm-help">Статистика и заказы. Интерфейс доступен только админам.</p>
           <div class="row"><button class="btn" id="admin-refresh">Обновить</button><button class="btn ghost" id="admin-export">Экспорт JSON</button></div>
           <div class="grid" style="margin-top:12px">
             <div class="col-12 card" id="admin-stats"></div>
             <div class="col-12 card"><h3 id="adm-users-h">Пользователи</h3><table class="table" id="admin-users"><thead><tr><th>ID</th><th>Username</th><th>ATM</th><th>Заказы</th><th>Реф-код</th><th>От кого</th><th>Дата</th></tr></thead><tbody></tbody></table></div>
-            <div class="col-12 card"><h3 id="adm-orders-h">Заказы</h3><table class="table" id="admin-orders"><thead><tr><th>#</th><th>User</th><th>Товары</th><th>Срок</th><th>Метод</th><th>€</th><th>ATM</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
-            <div class="col-12 card"><h3 id="adm-tasks-h">Задания</h3><table class="table" id="admin-tasks"><thead><tr><th>ID</th><th>User</th><th>Задание</th><th>Пруф</th><th>Награда</th><th>Статус</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
+            <div class="col-12 card"><h3 id="adm-orders-h">Заказы</h3><table class="table" id="admin-orders"><thead><tr><th>#</th><th>User</th><th>Товары</th><th>Срок</th><th>Метод</th><th>€</th><th>Статус</th><th>Дата</th><th>Действия</th></tr></thead><tbody></tbody></table></div>
           </div>
         </div>
       </div>
@@ -241,13 +230,14 @@
         <button class="tbtn active" data-tab="shop" type="button">🛒 Магазин</button>
         <button class="tbtn" data-tab="orders" type="button">📄 Заказы</button>
         <button class="tbtn" data-tab="ref" type="button">👥 Рефералы</button>
-        <button class="tbtn" data-tab="tasks" type="button">🧩 Задания</button>
         <button class="tbtn" data-tab="balance" type="button">💰 Баланс</button>
         <button class="tbtn" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 Админ</button>
         <button class="tbtn" data-tab="faq" type="button">❓ FAQ</button>
       </div>
       <button class="tscroll" id="tnav-right" type="button" aria-label="Right">›</button>
     </div>
+
+    <!-- Cart button -->
     <button class="carticon" id="cart-open" type="button" aria-label="Cart">
       🧺 <b id="cart-count">0</b>
     </button>
@@ -259,6 +249,17 @@
 
 <!-- AUTH REQUIRED -->
 <div class="modal-back" id="modal-auth"><div class="modal"><h2 id="auth-title">Требуется авторизация</h2><p class="muted" id="auth-body">Откройте Mini App внутри Telegram (с initData).</p><div class="foot"><button class="btn" id="auth-close">Закрыть</button></div></div></div>
+
+<!-- CART SHEET -->
+<div class="modal-back" id="modal-cart">
+  <div class="modal">
+    <h2 id="cart-title">Корзина</h2>
+    <div id="cart-list" class="grid"></div>
+    <div class="line"><div><b id="cart-total-label">Итого:</b> <b id="cart-total">€0</b></div>
+      <div class="row"><button class="btn" id="cart-close" type="button">Закрыть</button><button class="btn primary" id="cart-checkout" type="button">Оформить</button></div>
+    </div>
+  </div>
+</div>
 
 <!-- PAYMENT SHEET (single destination) -->
 <div class="modal-back" id="modal-pay">
@@ -304,8 +305,9 @@ const H = (type) => { try{ tg?.HapticFeedback?.impactOccurred?.(type||'light'); 
 const ADMIN_IDS = [568646738];
 
 const START_BONUS_ATM = 250;
-const REF_BONUS_PERCENT = 0.10; // 10% в ATM (100 ATM = €1)
+const REF_BONUS_PERCENT = 0.10; // 10% в ATM от суммы подписки — начисляется как просто число монет, без курса
 const PERIOD_DISCOUNT = {1:0, 3:0.10, 6:0.20, 12:0.30};
+const ATM_REWARD_PER_ORDER = 100; // ← фикс награда ATM за любой оплаченный заказ
 
 // единый адрес для платежей
 const PAY_ADDR = "0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c"; // TODO: заменить при необходимости
@@ -332,46 +334,46 @@ const CATALOG = [
 ============================= */
 const i18n = {
   ru:{ brandSub:'Подписки • Пакеты • Копитрейдинг • Рефералы',
-       shop:'Магазин',orders:'Заказы',ref:'Рефералы',tasks:'Задания',balance:'Баланс',admin:'Админ',faq:'FAQ',
+       shop:'Магазин',orders:'Заказы',ref:'Рефералы',balance:'Баланс',admin:'Админ',faq:'FAQ',
        subTitle:'Оформление подписки',
-       subHelp:'Выберите срок 1/3/6/12 мес (скидка 0/10/20/30%). ATM сейчас используются только как награда — тратить нельзя.',
+       subHelp:'Выберите срок 1/3/6/12 мес (скидка 0/10/20/30%). ATM — внутренняя награда, сейчас не расходуются.',
        term:'Срок', more:'Подробнее', add:'В корзину', remove:'Убрать',
        popular:'Самый популярный', top:'Топ', months:'мес',
        ordersTitle:'История заказов', num:'№', prod:'Товар', termCol:'Срок', meth:'Метод', sum:'Сумма', st:'Статус', date:'Дата',
        refTitle:'Реферальная программа', refHelp:'Делитесь кодом и получайте 10% от оплаты подписки (в ATM). Ваш код:', copy:'Скопировать',
        bindTitle:'Привязать чужой код', bind:'Привязать', partner:'Партнёр', paid:'Оплата', reward:'Вознаграждение',
-       tasksTitle:'Задания за ATM', proofHint:'URL-пруф', submit:'Отправить',
-       balTitle:'Баланс ATM', balHelp:'ATM сейчас зарабатываются за задания, рефералов и покупки. Позже их можно будет тратить или участвовать в розыгрышах.',
-       adminTitle:'Админ-панель', adminHelp:'Статистика, заказы, задания.', refresh:'Обновить', export:'Экспорт JSON',
-       users:'Пользователи', orders2:'Заказы', revenue:'Выручка', atmHold:'ATM на балансах',
-       addr:'Адрес', amount:'Сумма', memo:'Memo', iPaid:'Я оплатил(а)'
+       balTitle:'Баланс ATM', balHelp:'ATM копятся за покупки и рефералов. Не имеют фиксированного эквивалента в фиатной валюте.',
+       adminTitle:'Админ-панель', adminHelp:'Статистика и заказы.', refresh:'Обновить', export:'Экспорт JSON',
+       users:'Пользователи', orders2:'Заказы', revenue:'Выручка', addr:'Адрес', amount:'Сумма', memo:'Memo',
+       iPaid:'Я оплатил(а)',
+       cart:'Корзина', total:'Итого', close:'Закрыть', checkout:'Оформить',
   },
   en:{ brandSub:'Subscriptions • Bundles • Copy-trading • Referrals',
-       shop:'Shop',orders:'Orders',ref:'Referrals',tasks:'Tasks',balance:'Balance',admin:'Admin',faq:'FAQ',
+       shop:'Shop',orders:'Orders',ref:'Referrals',balance:'Balance',admin:'Admin',faq:'FAQ',
        subTitle:'Subscription checkout',
-       subHelp:'Choose 1/3/6/12 months (discount 0/10/20/30%). ATM are rewards only for now — not spendable.',
+       subHelp:'Choose 1/3/6/12 months (discount 0/10/20/30%). ATM are internal rewards, not spendable yet.',
        term:'Term', more:'Details', add:'Add', remove:'Remove',
        popular:'Most popular', top:'Top', months:'mo',
        ordersTitle:'Order history', num:'#', prod:'Product', termCol:'Term', meth:'Method', sum:'Amount', st:'Status', date:'Date',
        refTitle:'Referral program', refHelp:'Share your code and earn 10% (in ATM). Your code:', copy:'Copy',
        bindTitle:'Bind referral code', bind:'Bind', partner:'Partner', paid:'Paid', reward:'Reward',
-       tasksTitle:'Tasks for ATM', proofHint:'Proof URL', submit:'Submit',
-       balTitle:'ATM balance', balHelp:'Earn ATM from tasks, referrals and purchases. Spending/raffles will be available later.',
-       adminTitle:'Admin panel', adminHelp:'Stats, orders, tasks.', refresh:'Refresh', export:'Export JSON',
-       users:'Users', orders2:'Orders', revenue:'Revenue', atmHold:'ATM on balances',
-       addr:'Address', amount:'Amount', memo:'Memo', iPaid:'I paid'
+       balTitle:'ATM balance', balHelp:'ATM accrue from purchases and referrals. They are not pegged to fiat.',
+       adminTitle:'Admin panel', adminHelp:'Stats & orders.', refresh:'Refresh', export:'Export JSON',
+       users:'Users', orders2:'Orders', revenue:'Revenue', addr:'Address', amount:'Amount', memo:'Memo',
+       iPaid:'I paid',
+       cart:'Cart', total:'Total', close:'Close', checkout:'Checkout',
   }
 };
 let lang = localStorage.getItem('CATM_LANG') || ((navigator.language||'en').toLowerCase().startsWith('ru')?'ru':'en');
 const t = (k)=> (i18n[lang] && i18n[lang][k]) || (i18n.en && i18n.en[k]) || k;
 
-const TAB_EMOJI = { shop:'🛒', orders:'📄', ref:'👥', tasks:'🧩', balance:'💰', admin:'🛠', faq:'❓' };
+const TAB_EMOJI = { shop:'🛒', orders:'📄', ref:'👥', balance:'💰', admin:'🛠', faq:'❓' };
 
 /* =============================
    STORAGE / USER / STATE
 ============================= */
-const DBKEY = 'CATM_DB_HTML_V3';
-function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)) || {users:{},orders:[],tasks:[],disclaimerAccepted:false} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:false} } }
+const DBKEY = 'CATM_DB_HTML_V4';
+function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)) || {users:{},orders:[],disclaimerAccepted:false} }catch(e){ return {users:{},orders:[],disclaimerAccepted:false} } }
 const db = loadDB();
 const saveDB = () => localStorage.setItem(DBKEY, JSON.stringify(db));
 
@@ -379,7 +381,7 @@ const rawUser = tg?.initDataUnsafe?.user;
 let CURRENT_USER = rawUser ? { id:rawUser.id, username:rawUser.username||'user', name:(rawUser.first_name||'')+(rawUser.last_name?(' '+rawUser.last_name):'') } : { id:0, username:'guest', name:'Guest' };
 
 if(!db.users[CURRENT_USER.id]){
-  db.users[CURRENT_USER.id]={ id:CURRENT_USER.id, username:CURRENT_USER.username, created_at:new Date().toISOString(), atm:START_BONUS_ATM, ref_code:'REF'+(CURRENT_USER.id||Math.floor(Math.random()*1e6)), referred_by:null, orders:[], referrals:[], tasks:[], start_bonus_given:true };
+  db.users[CURRENT_USER.id]={ id:CURRENT_USER.id, username:CURRENT_USER.username, created_at:new Date().toISOString(), atm:START_BONUS_ATM, ref_code:'REF'+(CURRENT_USER.id||Math.floor(Math.random()*1e6)), referred_by:null, orders:[], referrals:[], start_bonus_given:true };
   saveDB();
 }
 function user(){ return db.users[CURRENT_USER.id]; }
@@ -396,14 +398,14 @@ function applyLang(){
     const btn = document.querySelector(`.tbtn[data-tab="${key}"]`);
     if (btn) btn.textContent = `${TAB_EMOJI[key]} ${t(key)}`;
   });
-  ['sub-title','orders-title','ref-title','tasks-title','bal-title','adm-title'].forEach((id,i)=>{
-    const map={ 'sub-title':'subTitle','orders-title':'ordersTitle','ref-title':'refTitle','tasks-title':'tasksTitle','bal-title':'balTitle','adm-title':'adminTitle' };
-    const key = map[id]; if(key) document.getElementById(id).textContent = t(key);
-  });
+
+  // headings & labels
+  document.getElementById('sub-title').textContent = t('subTitle');
   document.getElementById('sub-help').textContent = t('subHelp');
   document.getElementById('lbl-term').textContent = t('term');
+  document.getElementById('orders-title').textContent=t('ordersTitle');
 
-  // orders headers
+  // order table headers
   document.getElementById('th-num').textContent=t('num');
   document.getElementById('th-prod').textContent=t('prod');
   document.getElementById('th-term').textContent=t('termCol');
@@ -412,24 +414,36 @@ function applyLang(){
   document.getElementById('th-st').textContent=t('st');
   document.getElementById('th-date').textContent=t('date');
 
-  // refs
+  // ref
+  document.getElementById('ref-title').textContent=t('refTitle');
   document.getElementById('ref-help').textContent=t('refHelp');
   document.getElementById('bind-title').textContent=t('bindTitle');
   document.getElementById('ref-bind-btn').textContent=t('bind');
-  document.getElementById('bal-help').textContent=t('balHelp');
+  document.getElementById('th-partner').textContent=t('partner');
+  document.getElementById('th-date2').textContent=t('date');
+  document.getElementById('th-paid').textContent=t('paid');
+  document.getElementById('th-reward').textContent=t('reward');
 
-  // admin
+  // balance/admin
+  document.getElementById('bal-title').textContent=t('balTitle');
+  document.getElementById('bal-help').textContent=t('balHelp');
+  document.getElementById('adm-title').textContent=t('adminTitle');
   document.getElementById('adm-help').textContent=t('adminHelp');
   document.getElementById('admin-refresh').textContent=t('refresh');
   document.getElementById('admin-export').textContent=t('export');
 
-  // payment
+  // pay sheet
   document.getElementById('lbl-addr').textContent=t('addr');
   document.getElementById('lbl-amt').textContent=t('amount');
   document.getElementById('lbl-memo').textContent=t('memo');
   document.getElementById('paid-btn').textContent=t('iPaid');
 
-  // FAQ
+  // cart sheet
+  document.getElementById('cart-title').textContent=t('cart');
+  document.getElementById('cart-total-label').textContent = t('total') + ':';
+  document.getElementById('cart-close').textContent = t('close');
+  document.getElementById('cart-checkout').textContent = t('checkout');
+
   renderFAQ();
 }
 
@@ -441,7 +455,6 @@ function switchTab(name){
   if(name==='shop') renderCatalog();
   if(name==='orders') renderOrders();
   if(name==='ref') renderRefs();
-  if(name==='tasks') renderTasks();
   if(name==='balance') renderBalance();
   if(name==='admin') renderAdmin();
 }
@@ -450,7 +463,7 @@ function switchTab(name){
    PRICING
 ============================= */
 function priceFor(item,months,opts={}){
-  if(item.type==='plan' || item.type==='onebot' || item.type==='copy'){
+  if(item.type==='plan' || item.type==='onebot'){
     const disc = PERIOD_DISCOUNT[months]||0; const perMonth = Math.round(item.price*(1-disc)); return perMonth*months;
   }
   if(item.type==='consult'){ const hours = Math.max(1, parseInt(opts.hours||1,10)); return item.price * hours; }
@@ -559,8 +572,35 @@ function renderCatalog(){
 }
 
 /* =============================
-   CART / ORDERS
+   CART
 ============================= */
+function openCart(){
+  const list = document.getElementById('cart-list'); list.innerHTML='';
+  if(state.cart.length===0){
+    list.innerHTML = `<div class="col-12 card"><p class="muted">${lang==='ru'?'Корзина пуста':'Cart is empty'}</p></div>`;
+  }else{
+    state.cart.forEach((item, idx)=>{
+      const row = document.createElement('div'); row.className='col-12 card';
+      row.innerHTML = `
+        <div class="row" style="justify-content:space-between; align-items:center">
+          <div>
+            <b>${item.name}</b> <span class="muted">• ${item.months} ${(lang==='ru'?'мес':'mo')}</span>
+          </div>
+          <div class="row" style="align-items:center">
+            <b style="margin-right:8px">€${item.amount}</b>
+            <button class="btn ghost" data-act="cart-remove" data-idx="${idx}" type="button">${t('remove')}</button>
+          </div>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+  }
+  const total = state.cart.reduce((s,x)=>s+x.amount,0);
+  document.getElementById('cart-total').textContent = '€'+total;
+  document.getElementById('modal-cart').style.display='flex';
+}
+function closeCart(){ document.getElementById('modal-cart').style.display='none'; }
+
 function addToCart(code, extraText, opts={}){
   const months = state.period;
   const it = CATALOG.find(x=>x.code===code);
@@ -568,13 +608,13 @@ function addToCart(code, extraText, opts={}){
 
   if(it.type==='training'){
     if(state.cart.find(x=>x.code===it.code)) return;
-  } else if (it.type==='plan' || it.type==='copy'){
+  } else if (it.type==='plan'){
     if(state.cart.find(x=>x.code===it.code && x.months===months)) return;
   }
 
   const amount = priceFor(it, months, opts);
   const nameBase = it.name + (extraText ? `: ${extraText}` : '');
-  const monthsCol = (it.type==='plan' || it.type==='onebot' || it.type==='copy') ? months : 1;
+  const monthsCol = (it.type==='plan' || it.type==='onebot') ? months : 1;
 
   state.cart.push({ code: it.code, name: nameBase, months: monthsCol, amount });
   H('light');
@@ -585,10 +625,11 @@ function removeFromCart(code){
   state.cart = state.cart.filter(x=>!(x.code===code && (x.months===months || x.months===1)));
   H('light');
   renderCatalog();
+  openCart(); // обновить модалку если открыта
 }
 
 /* =============================
-   REF / TASKS / BALANCE
+   ORDERS / REF / BALANCE
 ============================= */
 function renderOrders(){
   const tb = document.querySelector('#orders-table tbody'); tb.innerHTML='';
@@ -610,15 +651,6 @@ function renderRefs(){
   }
   const hasRef=!!user().referred_by; document.getElementById('ref-bind-input').disabled=hasRef; document.getElementById('ref-bind-btn').disabled=hasRef;
 }
-const TASK_DEF=[{id:1,title:'TikTok subscribe',reward:100},{id:2,title:'Repost to stories',reward:120},{id:3,title:'Project review',reward:150},{id:4,title:'Sticker on car',reward:500}];
-function renderTasks(){
-  const holder=document.getElementById('tasks'); holder.innerHTML='';
-  TASK_DEF.forEach(tk=>{
-    const col=document.createElement('div'); col.className='col-6 card';
-    col.innerHTML=`<h3>#${tk.id} ${tk.title}</h3><p class="muted">+${tk.reward} ATM</p><input id="proof-${tk.id}" placeholder="${t('proofHint')}" inputmode="url"><div class="line"><span class="muted">Moderation</span><button class="btn primary" data-act="submit-task" data-id="${tk.id}">${t('submit')}</button></div>`;
-    holder.appendChild(col);
-  });
-}
 function renderBalance(){ document.getElementById('atm-balance').textContent = user().atm; }
 
 /* =============================
@@ -626,8 +658,13 @@ function renderBalance(){ document.getElementById('atm-balance').textContent = u
 ============================= */
 function renderAdmin(){
   const users=Object.values(db.users); const o=db.orders;
-  const totalEur=o.reduce((s,x)=>s+x.eur_final,0); const totalAtm=users.reduce((s,u)=>s+u.atm,0);
-  document.getElementById('admin-stats').innerHTML = `<div class="row"><div class="chip">${t('users')}: <b>${users.length}</b></div><div class="chip">${t('orders2')}: <b>${o.length}</b></div><div class="chip">${t('revenue')}: <b>€${totalEur}</b></div><div class="chip">${t('atmHold')}: <b>${totalAtm}</b></div></div>`;
+  const totalEur=o.reduce((s,x)=>s+x.eur_final,0);
+  document.getElementById('admin-stats').innerHTML =
+    `<div class="row">
+      <div class="chip">${t('users')}: <b>${users.length}</b></div>
+      <div class="chip">${t('orders2')}: <b>${o.length}</b></div>
+      <div class="chip">${t('revenue')}: <b>€${totalEur}</b></div>
+    </div>`;
 
   const utb=document.querySelector('#admin-users tbody'); utb.innerHTML='';
   users.slice().sort((a,b)=>b.id-a.id).forEach(u=>{
@@ -643,18 +680,6 @@ function renderAdmin(){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} ${lang==='ru'?'мес':'mo'}</td><td>${or.method}</td><td>${or.eur_final}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="mark-paid" data-id="${or.id}">${lang==='ru'?'Оплачен':'Paid'}</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">${lang==='ru'?'Отмена':'Cancel'}</button>`:''}</td>`;
     otb.appendChild(tr);
-  });
-
-  const ttb=document.querySelector('#admin-tasks tbody'); ttb.innerHTML='';
-  users.forEach(u=>{
-    (u.tasks||[]).forEach((tk,idx)=>{
-      if(tk.status==='pending'){
-        const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0,title:'#'+tk.id};
-        const tr=document.createElement('tr');
-        tr.innerHTML = `<td>${u.id}</td><td>@${u.username}</td><td>#${tk.id} ${def.title||''}</td><td>${tk.proof||''}</td><td>+${def.reward} ATM</td><td>${tk.status}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">${lang==='ru'?'Одобрить':'Approve'}</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">${lang==='ru'?'Отклонить':'Reject'}</button>`:''}</td>`;
-        ttb.appendChild(tr);
-      }
-    });
   });
 }
 
@@ -672,11 +697,10 @@ function openPay(){
   document.getElementById('modal-pay').style.display='flex';
 }
 function closePay(){ document.getElementById('modal-pay').style.display='none'; }
-
 function createPaymentIntent(){ return new Promise(r=>setTimeout(()=>r('intent_'+Math.random().toString(36).slice(2,9)),300)); }
 
 /* =============================
-   COINS: sound + animation
+   COINS: sound + animation (no fiat peg)
 ============================= */
 function playCoinSound(){
   try{
@@ -704,14 +728,82 @@ function spawnCoins(count=10){
     setTimeout(()=> c.remove(), 1200);
   }
 }
-function awardATM(eur){
-  const reward = Math.max(0, Math.round(eur*100)); // 100 ATM за €1
-  user().atm = (user().atm||0) + reward;
+function awardATM(){
+  user().atm = (user().atm||0) + ATM_REWARD_PER_ORDER;
   saveDB();
   renderBalance();
   renderHeader();
   playCoinSound();
-  spawnCoins(Math.min(14, 6 + Math.floor(eur/20)));
+  spawnCoins(10);
+}
+
+/* =============================
+   ORDER FLOW
+============================= */
+function createOrder(){
+  if(state.cart.length===0) return toast(lang==='ru'?'Корзина пуста':'Cart is empty');
+  const eur=state.cart.reduce((s,x)=>s+x.amount,0);
+
+  const order = {
+    id: db.orders.length+1,
+    user: CURRENT_USER.id,
+    items: state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})),
+    method: 'pay',
+    eur,
+    eur_final: eur,
+    status:'waiting',
+    created_at:new Date().toISOString(),
+    memo: state.pay.memo
+  };
+  db.orders.push(order); user().orders.push(order.id); saveDB();
+
+  // ATM reward (fixed, not pegged)
+  awardATM();
+
+  state.cart=[]; renderCatalog(); renderOrders();
+  closeCart();
+  openPay();
+  createPaymentIntent().then(id=>{ order.memo=id; saveDB(); renderOrders(); document.getElementById('pay-memo').textContent=id; });
+}
+
+/* =============================
+   FAQ (Q/A)
+============================= */
+function renderFAQ(){
+  const qa_ru = [
+    ['Что такое CryptoATM.tech?','Набор аналитических ботов, подписок, копитрейдинга и обучения.'],
+    ['Цены в какой валюте?','Фиксированы в евро (EUR).'],
+    ['Что такое ATM-монеты?','Внутренняя награда экосистемы. Не имеют фиксированного эквивалента в фиате и сейчас не расходуются.'],
+    ['Как получить ATM?','За покупки и рефералов (при первой оплате приглашённого).'],
+    ['Можно ли выбрать одного бота?','Да, через One Bot. Можно добавить несколько разных ботов.'],
+    ['Есть пробный период?','Да: Trial на 3 дня к выбранному боту.'],
+    ['Copy-trading условия?','€50/мес + 10% от прибыли. Проценты учитываются отдельно.'],
+    ['Консалтинг и обучение?','Консалтинг — €79/час (укажите часы). Курс «Первые шаги» — €890.'],
+    ['Как оплатить?','Перевод на единый адрес. Используйте Memo из корзины.'],
+    ['Реферальная система?','10% в ATM от первой оплаченной подписки приглашённого.'],
+    ['Безопасность и риски?','Мы не даём инвестиционных советов. Рынок волатилен. Делайте собственные исследования.'],
+  ];
+  const qa_en = [
+    ['What is CryptoATM.tech?','A suite of analytics bots, subscriptions, copy-trading and education.'],
+    ['In which currency are prices?','Fixed in EUR.'],
+    ['What are ATM coins?','Internal reward tokens. Not pegged to fiat and not spendable yet.'],
+    ['How to earn ATM?','From purchases and referrals (on the first paid subscription of your invite).'],
+    ['Can I buy access to a single bot?','Yes via “One Bot”. You can add multiple different bots.'],
+    ['Trial?','Yes: 3-day trial for a selected bot.'],
+    ['Copy-trading terms?','€50/month + 10% of profit. Percentage handled separately.'],
+    ['Consulting & training?','Consulting €79/hour (choose hours). “First steps” course €890.'],
+    ['How to pay?','Transfer to a single address. Use Memo from the cart.'],
+    ['Referral system?','10% in ATM from the invitee’s first paid subscription.'],
+    ['Safety?','No investment advice. Markets are volatile — DYOR.'],
+  ];
+  const data = (lang==='ru')? qa_ru : qa_en;
+  const host=document.getElementById('faq-qa');
+  host.innerHTML = data.map(([q,a])=>(
+    `<details style="margin:6px 0; background:#0f1320;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px">
+       <summary style="cursor:pointer;font-weight:800">${q}</summary>
+       <div class="muted" style="margin-top:6px">${a}</div>
+     </details>`
+  )).join('');
 }
 
 /* =============================
@@ -735,10 +827,11 @@ document.addEventListener('click', (e)=>{
   if(act==='add-trial'){ const sel = btn.closest('.p-card').querySelector('[data-select]'); const val = sel?.value; const label = BOT_LIST.find(b=>b.code===val)?.name || val; addToCart('TRIAL', label); return; }
   if(act==='add-consult'){ const hours = Math.max(1, parseInt(document.getElementById('hours-CONSULT')?.value||'1',10)); addToCart('CONSULT', `${hours}h`, {hours}); return; }
 
-  if(act==='submit-task'){ const id=+btn.dataset.id; const val=document.getElementById('proof-'+id)?.value.trim(); if(!/^https?:\/\//i.test(val||'')) return toast(lang==='ru'?'Добавьте валидный URL':'Add a valid URL'); user().tasks=user().tasks||[]; user().tasks.push({id,proof:val,at:new Date().toISOString(),status:'pending'}); saveDB(); toast(lang==='ru'?'Отправлено на проверку':'Submitted for review'); document.getElementById('proof-'+id).value=''; return; }
-
   // cart icon
-  if(btn.id==='cart-open'){ if(state.cart.length===0) {toast(lang==='ru'?'Корзина пуста':'Cart is empty'); return;} openPay(); return; }
+  if(btn.id==='cart-open'){ openCart(); return; }
+  if(btn.id==='cart-close'){ closeCart(); return; }
+  if(btn.id==='cart-checkout'){ if(state.cart.length===0){toast(lang==='ru'?'Корзина пуста':'Cart is empty'); return;} state.pay.memo='ORDER-'+(db.orders.length+1); createOrder(); return; }
+  if(act==='cart-remove'){ const idx=+btn.dataset.idx; state.cart.splice(idx,1); openCart(); renderCatalog(); return; }
 
   // payment
   if(btn.id==='pay-close'){ closePay(); return; }
@@ -756,7 +849,8 @@ document.addEventListener('click', (e)=>{
   if(btn.id==='admin-export'){ const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='cryptoatm_export.json'; a.click(); URL.revokeObjectURL(url); return; }
   if(btn.dataset.act==='mark-paid' && ADMIN_IDS.includes(CURRENT_USER.id)){
     const id=+btn.dataset.id; const o=db.orders.find(x=>x.id===id); if(o){ o.status='paid';
-      const buyer=db.users[o.user]; if(buyer?.referred_by){ const refUser=db.users[buyer.referred_by]; const rec=(refUser.referrals||[]).find(r=>r.uid===buyer.id); if(rec && !rec.paid){ rec.paid=true; const atmReward=Math.max(0, Math.round((o.eur_final||0)*REF_BONUS_PERCENT*100)); rec.reward=atmReward; refUser.atm=(refUser.atm||0)+atmReward; } }
+      const buyer=db.users[o.user]; if(buyer?.referred_by){ const refUser=db.users[buyer.referred_by]; const rec=(refUser.referrals||[]).find(r=>r.uid===buyer.id); if(rec && !rec.paid){ rec.paid=true; const bonus=Math.round((o.eur_final||0)*REF_BONUS_PERCENT*100); // просто число ATM, без курса
+        rec.reward=bonus; refUser.atm=(refUser.atm||0)+bonus; } }
       saveDB(); renderAdmin(); renderOrders(); toast('Marked paid');
     } return;
   }
@@ -769,7 +863,7 @@ document.addEventListener('click', (e)=>{
   if(btn.id==='auth-close'){ document.getElementById('modal-auth').style.display='none'; return; }
 
   // dev login (for local)
-  if(btn.id==='dev-login'){ CURRENT_USER={id:999001, username:'guest_local'}; if(!db.users[CURRENT_USER.id]){ db.users[CURRENT_USER.id]={ id:CURRENT_USER.id, username:CURRENT_USER.username, created_at:new Date().toISOString(), atm:START_BONUS_ATM, ref_code:'REF'+CURRENT_USER.id, referred_by:null, orders:[], referrals:[], tasks:[], start_bonus_given:true }; saveDB(); } renderHeader(); switchTab(currentTab()); toast('Тест-вход'); return; }
+  if(btn.id==='dev-login'){ CURRENT_USER={id:999001, username:'guest_local'}; if(!db.users[CURRENT_USER.id]){ db.users[CURRENT_USER.id]={ id:CURRENT_USER.id, username:CURRENT_USER.username, created_at:new Date().toISOString(), atm:START_BONUS_ATM, ref_code:'REF'+CURRENT_USER.id, referred_by:null, orders:[], referrals:[], start_bonus_given:true }; saveDB(); } renderHeader(); switchTab(currentTab()); toast('Тест-вход'); return; }
 });
 
 document.addEventListener('change',(e)=>{
@@ -781,76 +875,18 @@ document.addEventListener('touchstart',(e)=>{ const b=e.target.closest('button,.
 document.addEventListener('touchend',()=> document.querySelectorAll('.touching').forEach(b=>b.classList.remove('touching')));
 
 /* =============================
-   FAQ (Q/A)
-============================= */
-function renderFAQ(){
-  const qa = [
-    {q:'Что такое CryptoATM.tech?', a:'Это набор аналитических ботов, алертов и сервисов: подписки, копитрейдинг, обучение.'},
-    {q:'В каких валютах фиксируются цены?', a:'Во всех интерфейсах цены фиксированы в EUR. Оплата — на единый адрес/реквизиты.'},
-    {q:'Можно ли потратить ATM монеты?', a:'Пока нет. ATM — это внутренняя награда. Позже их можно будет тратить/участвовать в розыгрышах.'},
-    {q:'Как получить ATM?', a:'За задания, рефералов и за покупки (автоначисление после оформления). 100 ATM = €1 номинала награды.'},
-    {q:'Как работают периоды 1/3/6/12?', a:'Чем больше период, тем выше скидка: 0/10/20/30%. Применяется к подпискам/копитрейдингу.'},
-    {q:'Можно ли купить доступ к одному боту?', a:'Да. Выберите One Bot, затем конкретного бота из списка, можно добавить несколько позиций.'},
-    {q:'Есть ли пробный период?', a:'Да, Trial на 3 дня к выбранному боту (бесплатно).'},
-    {q:'Copy-trading условия?', a:'€50/мес + 10% от прибыли. Оплачивается как подписка, проценты учитываются отдельно.'},
-    {q:'Консалтинг и обучение?', a:'Консалтинг — €79/час (укажите часы). Курс «Первые шаги» — €890 один раз.'},
-    {q:'Где реквизиты?', a:'В окне оплаты показан единый адрес. При оплате указывайте Memo из корзины.'},
-    {q:'Как работает реферальная система?', a:'Делитесь своим кодом. При первой оплаченной подписке друга вам начисляется 10% от суммы в ATM.'},
-    {q:'Насколько безопасно?', a:'Мы не храним ключи и не даём инвестиционных советов. Информация — образовательная. Волатильность высокая.'}
-  ];
-  const host=document.getElementById('faq-qa');
-  host.innerHTML = qa.map(item=>(
-    `<details style="margin:6px 0; background:#0f1320;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px">
-       <summary style="cursor:pointer;font-weight:800">${item.q}</summary>
-       <div class="muted" style="margin-top:6px">${item.a}</div>
-     </details>`
-  )).join('');
-}
-
-/* =============================
-   ORDER FLOW
-============================= */
-function createOrder(){
-  if(state.cart.length===0) return toast('Корзина пуста');
-  const eur=state.cart.reduce((s,x)=>s+x.amount,0);
-
-  const order = {
-    id: db.orders.length+1,
-    user: CURRENT_USER.id,
-    items: state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})),
-    method: 'pay',
-    eur,
-    eur_final: eur,
-    status:'waiting',
-    created_at:new Date().toISOString(),
-    memo: state.pay.memo
-  };
-  db.orders.push(order); user().orders.push(order.id); saveDB();
-
-  // ATM reward for purchase
-  awardATM(eur);
-
-  state.cart=[]; renderCatalog(); renderOrders();
-  openPay();
-  createPaymentIntent().then(id=>{ order.memo=id; saveDB(); renderOrders(); document.getElementById('pay-memo').textContent=id; });
-}
-
-/* =============================
    NAV / BOOT / DISCLOSURE
 ============================= */
 function toast(t){ try{tg?.showPopup?.({title:'',message:String(t),buttons:[{type:'close'}]});}catch(_){} console.log('[toast]', t); }
 
 function boot(){
-  // сразу магазин после дисклеймера (по умолчанию он активен)
+  // сразу магазин после дисклеймера
   if(!tg?.initDataUnsafe?.user) document.getElementById('dev-login').style.display='inline-flex';
   applyLang();
   renderHeader();
   switchTab('shop');
   renderCatalog();
-
-  // назначаем адрес в оплате (единый)
-  document.getElementById('pay-addr').textContent = PAY_ADDR;
-
+  document.getElementById('pay-addr').textContent = PAY_ADDR; // платёжный адрес
   setInterval(()=>{ document.getElementById('chip-atm').textContent=user().atm; document.getElementById('chip-orders').textContent=user().orders.length; }, 1000);
 }
 
@@ -858,7 +894,7 @@ function boot(){
 document.getElementById('agree-btn').addEventListener('click', ()=>{
   db.disclaimerAccepted=true; saveDB();
   document.getElementById('splash').style.display='none';
-  switchTab('shop'); // гарантированно в магазин
+  switchTab('shop');
 });
 if(db.disclaimerAccepted){ document.getElementById('splash').style.display='none'; }
 
@@ -870,34 +906,8 @@ document.getElementById('lang-toggle').addEventListener('click',()=>{
   renderCatalog();
 });
 
-// click handlers not covered above
-document.addEventListener('click',(e)=>{
-  const el=e.target.closest('button,.btn');
-  if(!el) return;
-  if(el.id==='cart-open'){ if(state.cart.length===0) toast(lang==='ru'?'Корзина пуста':'Cart is empty'); else { state.pay.memo='ORDER-'+(db.orders.length+1); openPay(); } }
-});
-
-// change
-document.getElementById('period').addEventListener('change', renderCatalog);
-
-// create order from payment window when user presses "I paid"? — создание уже выполнено при нажатии «Оформить».
-// В текущей версии оформляем заказ в момент нажатия «Оформить» в магазине.
-// Добавь эту кнопку в карточки при необходимости — ниже делаем глобально:
-document.addEventListener('keydown',(e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ if(state.cart.length>0) createOrder(); }});
-
-// DEV auth modal for non-TG
-document.getElementById('auth-close').addEventListener('click',()=> document.getElementById('modal-auth').style.display='none');
-
 // init
 boot();
-
-/* =============================
-   EXTRA: trigger order by double click on cart (UX shortcut)
-============================= */
-document.getElementById('cart-open').addEventListener('dblclick', ()=>{
-  if(state.cart.length>0){ state.pay.memo='ORDER-'+(db.orders.length+1); createOrder(); }
-});
-
 </script>
 </body>
 </html>
