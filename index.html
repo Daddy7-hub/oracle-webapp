@@ -79,11 +79,16 @@
 </head>
 <body>
 
-<!-- Splash (простая надпись) -->
+<!-- Splash (дисклеймер EN одной кнопкой) -->
 <div id="splash" class="splash">
-  <div style="text-align:center">
+  <div style="text-align:center;max-width:640px;padding:0 16px">
     <div class="s-title">CryptoATM.tech</div>
-    <div class="s-sub">Subscriptions • Bundles • Copy-trading</div>
+    <p class="s-sub" style="margin-top:10px">
+      By accessing this Mini App, you confirm you understand CryptoATM.tech does not provide financial or investment advice. Information is educational/analytical only. Markets are volatile; do your own research. By continuing, you agree to our Terms.
+    </p>
+    <div style="margin-top:18px">
+      <button class="btn primary" id="agree-btn" type="button">I Agree</button>
+    </div>
   </div>
 </div>
 
@@ -308,10 +313,17 @@ const BOT_LIST = [
   {code:'NEWS', name:'News Bot'}
 ];
 const CATALOG = [
+  // подписочные (учитывают период и скидки)
   {type:'onebot', code:'ONE_BOT', name:'One Bot', price:79, desc:'Выберите бота из списка и добавьте в корзину. Можно несколько позиций.', chooseFrom: BOT_LIST},
   {type:'plan', code:'STANDARD', name:'Standard', price:150, desc:'Базовый пакет для старта.'},
-  {type:'plan', code:'PREMIUM', name:'Premium', price:191, desc:'Самый популярный вариант.'},
-  {type:'plan', code:'ENTERPRISE', name:'Enterprise', price:249, desc:'Топовый план с максимумом возможностей.'},
+  {type:'plan', code:'PREMIUM', name:'Premium', price:191, desc:'Самый популярный вариант.', badge:'popular'},
+  {type:'plan', code:'ENTERPRISE', name:'Enterprise', price:249, desc:'Топовый план с максимумом возможностей.', badge:'top'},
+  {type:'plan', code:'COPY', name:'Copy-trading', price:50, desc:'€50/мес + 10% от прибыли.'},
+
+  // сервисы (НЕ умножаются на период)
+  {type:'consult', code:'CONSULT', name:'Consulting', price:79, desc:'Индивидуальные консультации по криптовалютам. €79/час. Укажите количество часов.'},
+  {type:'training', code:'TRAINING', name:'Training: First steps in crypto', price:890, desc:'Полный курс «Первые шаги в сфере криптовалют». Разовый платёж.'},
+  {type:'trial', code:'TRIAL', name:'Trial 3 days', price:0, desc:'Пробный доступ к выбранному боту на 3 дня.', chooseFrom: BOT_LIST}
 ];
 
 /* =============================
@@ -322,6 +334,7 @@ const i18n = {
        shop:'Магазин',orders:'Заказы',ref:'Рефералы',tasks:'Задания',balance:'Баланс',admin:'Админ',faq:'FAQ',
        subTitle:'Оформление подписки', subHelp:'Выберите срок 1/3/6/12 мес (скидка 0/10/20/30%). ATM можно списать до 25% (100 ATM = €1).',
        term:'Срок', atmWrite:'Списать ATM (макс 25%)', more:'Подробнее', add:'В корзину', remove:'Убрать',
+       popular:'Самый популярный', top:'Топ', months:'мес',
        ordersTitle:'История заказов', num:'№', prod:'Товар', termCol:'Срок', meth:'Метод', sum:'Сумма', st:'Статус', date:'Дата',
        refTitle:'Реферальная программа', refHelp:'Делитесь кодом и получайте 10% от оплаты подписки (в ATM). Ваш код:', copy:'Скопировать',
        bindTitle:'Привязать чужой код', bind:'Привязать', partner:'Партнёр', paid:'Оплата', reward:'Вознаграждение',
@@ -335,6 +348,7 @@ const i18n = {
        shop:'Shop',orders:'Orders',ref:'Referrals',tasks:'Tasks',balance:'Balance',admin:'Admin',faq:'FAQ',
        subTitle:'Subscription checkout', subHelp:'Choose 1/3/6/12 months (discount 0/10/20/30%). Redeem up to 25% with ATM (100 ATM = €1).',
        term:'Term', atmWrite:'Redeem ATM (max 25%)', more:'Details', add:'Add', remove:'Remove',
+       popular:'Most popular', top:'Top', months:'mo',
        ordersTitle:'Order history', num:'#', prod:'Product', termCol:'Term', meth:'Method', sum:'Amount', st:'Status', date:'Date',
        refTitle:'Referral program', refHelp:'Share your code and earn 10% (in ATM). Your code:', copy:'Copy',
        bindTitle:'Bind referral code', bind:'Bind', partner:'Partner', paid:'Paid', reward:'Reward',
@@ -348,19 +362,18 @@ const i18n = {
 let lang = localStorage.getItem('CATM_LANG') || ((navigator.language||'en').toLowerCase().startsWith('ru')?'ru':'en');
 const t = (k)=> (i18n[lang] && i18n[lang][k]) || (i18n.en && i18n.en[k]) || k;
 
+const TAB_EMOJI = { shop:'🛒', orders:'📄', ref:'👥', tasks:'🧩', balance:'💰', admin:'🛠', faq:'❓' };
+
 function applyLang(){
   document.getElementById('brand-sub').textContent = t('brandSub');
   document.getElementById('lang-code').textContent = lang.toUpperCase();
-  // bottom tabs
-  const map = [['shop','shop'],['orders','orders'],['ref','ref'],['tasks','tasks'],['balance','balance'],['admin','admin'],['faq','faq']];
-  map.forEach(([id,key])=>{
-    const btn = document.querySelector(`.tbtn[data-tab="${id}"]`);
-    if(btn) btn.innerHTML = btn.innerHTML.replace(/^[^ ]+ /,'') ? `${btn.textContent.match(/^[^\w]*(.)?/)? '' : ''}` : ''; // noop; keep emoji
-    if(btn){
-      const emoji = btn.textContent.split(' ')[0];
-      btn.textContent = `${emoji} ${t(key)}`;
-    }
+
+  // bottom tabs (переводим полностью, сохраняя эмодзи)
+  Object.keys(TAB_EMOJI).forEach(key=>{
+    const btn = document.querySelector(`.tbtn[data-tab="${key}"]`);
+    if (btn) btn.textContent = `${TAB_EMOJI[key]} ${t(key)}`;
   });
+
   // shop labels
   document.getElementById('sub-title').textContent = t('subTitle');
   document.getElementById('sub-help').textContent = t('subHelp');
@@ -408,7 +421,7 @@ function applyLang(){
 /* =============================
    STORAGE / USER / STATE
 ============================= */
-const DBKEY = 'CATM_DB_HTML_V1';
+const DBKEY = 'CATM_DB_HTML_V2';
 function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)) || {users:{},orders:[],tasks:[],disclaimerAccepted:{}} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:{}} } }
 const db = loadDB();
 const saveDB = () => localStorage.setItem(DBKEY, JSON.stringify(db));
@@ -442,8 +455,33 @@ function switchTab(name){
 window.addEventListener('hashchange', ()=> switchTab(currentTab()) );
 
 function toast(t){ try{tg?.showPopup?.({title:'',message:String(t),buttons:[{type:'close'}]});}catch(_){} console.log('[toast]', t); }
-function priceFor(item,months){ const disc = PERIOD_DISCOUNT[months]||0; const perMonth = Math.round(item.price*(1-disc)); return perMonth*months; }
-function renderHeader(){ document.getElementById('chip-name').textContent='@'+(CURRENT_USER.username||'guest'); document.getElementById('chip-atm').textContent=user().atm; document.getElementById('chip-orders').textContent=user().orders.length; document.getElementById('ref-code').value=user().ref_code; if(ADMIN_IDS.includes(CURRENT_USER.id)) document.getElementById('tab-admin-btn').hidden=false; }
+function priceFor(item,months,opts={}){
+  // подписки (plan/onebot/copy) — умножаются на месяцы с скидкой
+  if(item.type==='plan' || item.type==='onebot'){
+    const disc = PERIOD_DISCOUNT[months]||0; const perMonth = Math.round(item.price*(1-disc)); return perMonth*months;
+  }
+  if(item.type==='copy'){ // copy-trading тарифицируем как подписку (фикс €50/мес)
+    const disc = PERIOD_DISCOUNT[months]||0; const perMonth = Math.round(item.price*(1-disc)); return perMonth*months;
+  }
+  if(item.type==='consult'){ // почасовая: количество часов в opts.hours
+    const hours = Math.max(1, parseInt(opts.hours||1,10)); return item.price * hours;
+  }
+  if(item.type==='training'){ // разово
+    return item.price;
+  }
+  if(item.type==='trial'){ // бесплатно
+    return 0;
+  }
+  // дефолт
+  const disc = PERIOD_DISCOUNT[months]||0; const perMonth = Math.round(item.price*(1-disc)); return perMonth*months;
+}
+function renderHeader(){
+  document.getElementById('chip-name').textContent='@'+(CURRENT_USER.username||'guest');
+  document.getElementById('chip-atm').textContent=user().atm;
+  document.getElementById('chip-orders').textContent=user().orders.length;
+  document.getElementById('ref-code').value=user().ref_code;
+  if(ADMIN_IDS.includes(CURRENT_USER.id)) document.getElementById('tab-admin-btn').hidden=false;
+}
 
 /* =============================
    SHOP / CATALOG / CART
@@ -457,32 +495,68 @@ function renderCatalog(){
   if(state.atmDiscount>atmMax){ state.atmDiscount=atmMax; document.getElementById('atm-discount').value=atmMax; }
 
   CATALOG.forEach(it=>{
-    const total = priceFor(it, months);
+    // вычислим сумму для превью (без специфики consult/trial выбора)
+    const previewAmount = priceFor(it, months, {hours:1});
     const card = document.createElement('div'); card.className='col-4 card';
 
-    if(it.type==='onebot'){
-      const options = it.chooseFrom.map(b=>`<option value="${b.code}">${b.name}</option>`).join('');
+    // бейджи
+    let badges = `<span class="badge">${(it.type==='plan'?'PLAN':it.type.toUpperCase())}</span>`;
+    if(it.badge==='popular') badges += ` <span class="badge">${t('popular')}</span>`;
+    if(it.badge==='top') badges += ` <span class="badge">${t('top')}</span>`;
+
+    if(it.type==='onebot' || it.type==='trial'){
+      const options = (it.chooseFrom||[]).map(b=>`<option value="${b.code}">${b.name}</option>`).join('');
       card.innerHTML = `
         <div class="row" style="justify-content:space-between;align-items:start">
-          <span class="badge">ONE BOT</span>
-          <span class="price" style="color:var(--gold)">€${total} / ${months}м</span>
+          <div>${badges}</div>
+          <span class="price" style="color:var(--gold)">€${previewAmount} / ${it.type==='trial' ? '3d' : (months + t('months'))}</span>
         </div>
         <h3>${it.name}</h3>
         <p class="muted">${it.desc}</p>
         <div class="row">
-          <select data-onebot="${it.code}" class="onebot-select">${options}</select>
-          <button class="btn primary" data-act="add-one" data-code="${it.code}">${t('add')}</button>
+          <select data-select="${it.code}" class="onebot-select">${options}</select>
+          <button class="btn primary" data-act="${it.type==='trial'?'add-trial':'add-one'}" data-code="${it.code}">${t('add')}</button>
         </div>
         <div class="line"><button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button></div>
       `;
+    } else if (it.type==='consult'){
+      card.innerHTML = `
+        <div class="row" style="justify-content:space-between;align-items:start">
+          <div>${badges}</div>
+          <span class="price" style="color:var(--gold)">€${it.price}/h</span>
+        </div>
+        <h3>${it.name}</h3>
+        <p class="muted">${it.desc}</p>
+        <div class="row">
+          <label class="label" for="hours-${it.code}" style="min-width:100px">Hours</label>
+          <input id="hours-${it.code}" type="number" min="1" step="1" value="1" style="max-width:120px">
+          <button class="btn primary" data-act="add-consult" data-code="${it.code}">${t('add')}</button>
+        </div>
+        <div class="line"><button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button></div>
+      `;
+    } else if (it.type==='training'){
+      const inCart = state.cart.find(x=>x.code===it.code); // разовый — запрещаем дубль
+      card.innerHTML = `
+        <div class="row" style="justify-content:space-between;align-items:start">
+          <div>${badges}</div>
+          <span class="price" style="color:var(--gold)">€${it.price}</span>
+        </div>
+        <h3>${it.name}</h3>
+        <p class="muted">${it.desc}</p>
+        <div class="line">
+          <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
+          ${inCart?`<button class="btn" disabled>${t('add')}</button>`:`<button class="btn primary" data-act="add" data-code="${it.code}">${t('add')}</button>`}
+        </div>
+      `;
     } else {
+      // план/копитрейдинг
       const inCart = state.cart.find(x=>x.code===it.code && x.months===months);
       card.innerHTML = `
         <div class="row" style="justify-content:space-between;align-items:start">
-          <span class="badge">${it.type.toUpperCase()}</span>
-          <span class="price" style="color:var(--gold)">€${total} / ${months}м</span>
+          <div>${badges}</div>
+          <span class="price" style="color:var(--gold)">€${previewAmount} / ${months}${t('months')}</span>
         </div>
-        <h3>${it.name} ${it.code==='PREMIUM'?'<span class="badge">Most popular</span>':''} ${it.code==='ENTERPRISE'?'<span class="badge">Top</span>':''}</h3>
+        <h3>${it.name}</h3>
         <p class="muted">${it.desc}</p>
         <div class="line">
           <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
@@ -497,31 +571,35 @@ function renderCatalog(){
 }
 
 function updateCartIcon(){
-  const eur = state.cart.reduce((s,x)=>s+x.amount,0);
   document.getElementById('cart-count').textContent = state.cart.length;
   document.getElementById('atm-balance').textContent = user().atm;
   renderHeader();
 }
 
-function addToCart(code, extraLabel){
+function addToCart(code, extraText, opts={}){
   const months = state.period;
   const it = CATALOG.find(x=>x.code===code);
   if(!it) return;
-  let name = it.name;
-  if(extraLabel) name += `: ${extraLabel}`;
-  const item = { code: it.code, name, months, amount: priceFor(it, months) };
-  // One Bot допускает дубликаты с разными ботами, поэтому не фильтруем по code
-  if(it.type!=='onebot'){
+
+  // запрет дублей для разовых; для планов — один на период; для onebot можно много (разные боты)
+  if(it.type==='training'){
+    if(state.cart.find(x=>x.code===it.code)) return;
+  } else if (it.type==='plan' || it.type==='copy'){
     if(state.cart.find(x=>x.code===it.code && x.months===months)) return;
   }
-  state.cart.push(item);
+
+  const amount = priceFor(it, months, opts);
+  const nameBase = it.name + (extraText ? `: ${extraText}` : '');
+  const monthsCol = (it.type==='plan' || it.type==='onebot' || it.type==='copy') ? months : 1;
+
+  state.cart.push({ code: it.code, name: nameBase, months: monthsCol, amount });
   H('light');
   renderCatalog();
 }
 
 function removeFromCart(code){
   const months = state.period;
-  state.cart = state.cart.filter(x=>!(x.code===code && x.months===months));
+  state.cart = state.cart.filter(x=>!(x.code===code && (x.months===months || x.months===1)));
   H('light');
   renderCatalog();
 }
@@ -534,8 +612,8 @@ function renderOrders(){
   const rows = db.orders.filter(o=>o.user===CURRENT_USER.id).slice().reverse();
   for(const o of rows){
     const tr=document.createElement('tr');
-    const names=o.items.map(i=>i.name+' ×'+i.months+'м').join(', ');
-    tr.innerHTML=`<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${o.method}</td><td>€${o.eur_final} ${o.atm_used?`(+${o.atm_used} ATM)`:''}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.memo}</td>`;
+    const names=o.items.map(i=>i.name+' ×'+i.months+(i.months>1? (lang==='ru'?'м':' mo') : '')).join(', ');
+    tr.innerHTML=`<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s,i)=>s+i.months,0)} ${lang==='ru'?'мес':'mo'}</td><td>${o.method}</td><td>€${o.eur_final} ${o.atm_used?`(+${o.atm_used} ATM)`:''}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.memo}</td>`;
     tb.appendChild(tr);
   }
 }
@@ -544,7 +622,7 @@ function renderRefs(){
   const tb=document.querySelector('#ref-table tbody'); tb.innerHTML='';
   for(const r of (user().referrals||[]).slice().reverse()){
     const tr=document.createElement('tr');
-    tr.innerHTML = `<td>@${db.users[r.uid]?.username||r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid?'Да':'—'}</td><td>${r.reward||0} ATM</td>`;
+    tr.innerHTML = `<td>@${db.users[r.uid]?.username||r.uid}</td><td>${new Date(r.at).toLocaleDateString()}</td><td>${r.paid?(lang==='ru'?'Да':'Yes'):'—'}</td><td>${r.reward||0} ATM</td>`;
     tb.appendChild(tr);
   }
   const hasRef=!!user().referred_by; document.getElementById('ref-bind-input').disabled=hasRef; document.getElementById('ref-bind-btn').disabled=hasRef;
@@ -580,7 +658,7 @@ function renderAdmin(){
     const userName='@'+(db.users[or.user]?.username||or.user);
     const items=or.items.map(i=>i.name+'×'+i.months).join(', ');
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} мес</td><td>${or.method}</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="mark-paid" data-id="${or.id}">Оплачен</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">Отмена</button>`:''}</td>`;
+    tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} ${lang==='ru'?'мес':'mo'}</td><td>${or.method}</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="mark-paid" data-id="${or.id}">${lang==='ru'?'Оплачен':'Paid'}</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">${lang==='ru'?'Отмена':'Cancel'}</button>`:''}</td>`;
     otb.appendChild(tr);
   });
 
@@ -590,7 +668,7 @@ function renderAdmin(){
       if(tk.status==='pending'){
         const def=TASK_DEF.find(d=>d.id===tk.id)||{reward:0,title:'#'+tk.id};
         const tr=document.createElement('tr');
-        tr.innerHTML = `<td>${u.id}</td><td>@${u.username}</td><td>#${tk.id} ${def.title||''}</td><td>${tk.proof||''}</td><td>+${def.reward} ATM</td><td>${tk.status}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">Одобрить</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">Отклонить</button>`:''}</td>`;
+        tr.innerHTML = `<td>${u.id}</td><td>@${u.username}</td><td>#${tk.id} ${def.title||''}</td><td>${tk.proof||''}</td><td>+${def.reward} ATM</td><td>${tk.status}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="task-approve" data-uid="${u.id}" data-idx="${idx}">${lang==='ru'?'Одобрить':'Approve'}</button> <button class="btn ghost" data-act="task-reject" data-uid="${u.id}" data-idx="${idx}">${lang==='ru'?'Отклонить':'Reject'}</button>`:''}</td>`;
         ttb.appendChild(tr);
       }
     });
@@ -601,6 +679,7 @@ function renderAdmin(){
    PAYMENT (sheet from cart icon)
 ============================= */
 function openPay(){
+  if(state.cart.length===0){ toast(lang==='ru'?'Корзина пуста':'Cart is empty'); return; }
   const eur=state.cart.reduce((s,x)=>s+x.amount,0);
   const atmMax=Math.floor(eur*0.25)*100;
   const wantATM=Math.min(state.atmDiscount||0, atmMax, user().atm);
@@ -627,8 +706,16 @@ function createOrder(){
   if(wantATM>0) user().atm=Math.max(0, user().atm-wantATM);
 
   const order = {
-    id: db.orders.length+1, user: CURRENT_USER.id, items: state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})),
-    method: 'crypto', eur, atm_used: wantATM, eur_final: finalEur, status:'waiting', created_at:new Date().toISOString(), memo: state.pay.memo
+    id: db.orders.length+1,
+    user: CURRENT_USER.id,
+    items: state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})),
+    method: 'crypto',
+    eur,
+    atm_used: wantATM,
+    eur_final: finalEur,
+    status:'waiting',
+    created_at:new Date().toISOString(),
+    memo: state.pay.memo
   };
   db.orders.push(order); user().orders.push(order.id); saveDB();
 
@@ -651,24 +738,25 @@ document.addEventListener('click', (e)=>{
   if(act==='details'){ const code=btn.dataset.code; const it = CATALOG.find(x=>x.code===code); document.getElementById('item-title').textContent = it?.name||'Товар'; document.getElementById('item-desc').innerHTML = `<p class="muted">${it?.desc||''}</p>`; document.getElementById('modal-item').style.display='flex'; return; }
   if(act==='add'){ addToCart(btn.dataset.code); return; }
   if(act==='remove'){ removeFromCart(btn.dataset.code); return; }
-  if(act==='add-one'){ // one bot with selection near button
-    const sel = btn.parentElement.querySelector('.onebot-select'); const val = sel?.value; const label = BOT_LIST.find(b=>b.code===val)?.name || val; addToCart('ONE_BOT', label); return;
-  }
-  if(act==='submit-task'){ const id=+btn.dataset.id; const val=document.getElementById('proof-'+id)?.value.trim(); if(!/^https?:\/\//i.test(val||'')) return toast('Добавьте валидный URL'); user().tasks=user().tasks||[]; user().tasks.push({id,proof:val,at:new Date().toISOString(),status:'pending'}); saveDB(); toast('Отправлено на проверку'); document.getElementById('proof-'+id).value=''; return; }
+  if(act==='add-one'){ const sel = btn.parentElement.querySelector('[data-select]'); const val = sel?.value; const label = BOT_LIST.find(b=>b.code===val)?.name || val; addToCart('ONE_BOT', label); return; }
+  if(act==='add-trial'){ const sel = btn.parentElement.querySelector('[data-select]'); const val = sel?.value; const label = BOT_LIST.find(b=>b.code===val)?.name || val; addToCart('TRIAL', label); return; }
+  if(act==='add-consult'){ const hours = Math.max(1, parseInt(document.getElementById('hours-CONSULT')?.value||'1',10)); addToCart('CONSULT', `${hours}h`, {hours}); return; }
+
+  if(act==='submit-task'){ const id=+btn.dataset.id; const val=document.getElementById('proof-'+id)?.value.trim(); if(!/^https?:\/\//i.test(val||'')) return toast(lang==='ru'?'Добавьте валидный URL':'Add a valid URL'); user().tasks=user().tasks||[]; user().tasks.push({id,proof:val,at:new Date().toISOString(),status:'pending'}); saveDB(); toast(lang==='ru'?'Отправлено на проверку':'Submitted for review'); document.getElementById('proof-'+id).value=''; return; }
 
   // cart icon
-  if(btn.id==='cart-open'){ if(state.cart.length===0) {toast('Корзина пуста'); return;} openPay(); return; }
+  if(btn.id==='cart-open'){ if(state.cart.length===0) {toast(lang==='ru'?'Корзина пуста':'Cart is empty'); return;} openPay(); return; }
 
   // payment
   if(btn.id==='pay-close'){ closePay(); return; }
   if(btn.id==='copy-addr'){ navigator.clipboard.writeText(document.getElementById('pay-addr').textContent||''); toast('Address copied'); return; }
   if(btn.id==='copy-amount'){ navigator.clipboard.writeText((document.getElementById('pay-amount').textContent||'').replace('€','')); toast('Amount copied'); return; }
   if(btn.id==='copy-memo'){ navigator.clipboard.writeText(document.getElementById('pay-memo').textContent||''); toast('Memo copied'); return; }
-  if(btn.id==='paid-btn'){ toast('Спасибо! Мы отметим заказ после проверки.'); closePay(); return; }
+  if(btn.id==='paid-btn'){ toast(lang==='ru'?'Спасибо! Мы отметим заказ после проверки.':'Thanks! We will mark your order after verification.'); closePay(); return; }
 
-  // shop other buttons
-  if(btn.id==='ref-copy'){ navigator.clipboard.writeText(user().ref_code).then(()=>toast('Скопировано')); return; }
-  if(btn.id==='ref-bind-btn'){ const code=document.getElementById('ref-bind-input').value.trim().toUpperCase(); if(!code) return toast('Введите код'); const owner = Object.values(db.users).find(u=>u.ref_code===code); if(!owner) return toast('Код не найден'); if(owner.id===CURRENT_USER.id) return toast('Нельзя свой код'); if(user().referred_by) return toast('Код уже привязан'); user().referred_by = owner.id; owner.referrals.push({uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0}); saveDB(); renderRefs(); toast('Код привязан'); return; }
+  // refs
+  if(btn.id==='ref-copy'){ navigator.clipboard.writeText(user().ref_code).then(()=>toast(lang==='ru'?'Скопировано':'Copied')); return; }
+  if(btn.id==='ref-bind-btn'){ const code=document.getElementById('ref-bind-input').value.trim().toUpperCase(); if(!code) return toast(lang==='ru'?'Введите код':'Enter code'); const owner = Object.values(db.users).find(u=>u.ref_code===code); if(!owner) return toast(lang==='ru'?'Код не найден':'Code not found'); if(owner.id===CURRENT_USER.id) return toast(lang==='ru'?'Нельзя свой код':'Cannot use own code'); if(user().referred_by) return toast(lang==='ru'?'Код уже привязан':'Code already bound'); user().referred_by = owner.id; owner.referrals.push({uid:CURRENT_USER.id, at:new Date().toISOString(), paid:false, reward:0}); saveDB(); renderRefs(); toast(lang==='ru'?'Код привязан':'Code bound'); return; }
 
   // admin
   if(btn.id==='admin-refresh'){ renderAdmin(); return; }
@@ -701,12 +789,25 @@ document.addEventListener('touchstart',(e)=>{ const b=e.target.closest('button,.
 document.addEventListener('touchend',()=> document.querySelectorAll('.touching').forEach(b=>b.classList.remove('touching')));
 
 /* =============================
+   SPLASH & LANG
+============================= */
+document.getElementById('agree-btn').addEventListener('click', ()=>{
+  localStorage.setItem('disclaimerAccepted','1');
+  document.getElementById('splash').style.display='none';
+});
+if(localStorage.getItem('disclaimerAccepted')) document.getElementById('splash').style.display='none';
+
+document.getElementById('lang-toggle').addEventListener('click',()=>{
+  lang=(lang==='ru'?'en':'ru');
+  localStorage.setItem('CATM_LANG',lang);
+  applyLang();
+  renderCatalog();
+});
+
+/* =============================
    BOOT
 ============================= */
 function boot(){
-  // Splash hide
-  setTimeout(()=>{ const s=document.getElementById('splash'); if(s) s.style.display='none'; }, 700);
-
   // Show dev-login outside Telegram
   if(!tg?.initDataUnsafe?.user) document.getElementById('dev-login').style.display='inline-flex';
 
@@ -718,7 +819,6 @@ function boot(){
   // update chip counters
   setInterval(()=>{ document.getElementById('chip-atm').textContent=user().atm; document.getElementById('chip-orders').textContent=user().orders.length; }, 1000);
 }
-document.getElementById('lang-toggle').addEventListener('click',()=>{ lang=(lang==='ru'?'en':'ru'); localStorage.setItem('CATM_LANG',lang); applyLang(); renderCatalog(); });
 boot();
 </script>
 </body>
