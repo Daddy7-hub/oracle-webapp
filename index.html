@@ -30,13 +30,17 @@
     .brand small{display:block;color:var(--muted);margin-top:2px;font-size:12px}
     .userchips{display:flex;gap:8px;flex-wrap:wrap}
     .chip{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:var(--b1);border-radius:999px;padding:8px 12px;color:var(--txt)}
+
     .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
     .col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}
     @media(max-width:1020px){.col-8,.col-6,.col-4{grid-column:span 12}}
+
     .card{background:var(--card);border:var(--b1);border-radius:var(--r-xl);padding:14px;box-shadow:var(--shadow);animation:fadein .3s ease}
     .card h3{margin:0 0 8px}
     .muted{color:var(--muted)}
     .badge{display:inline-block;background:rgba(255,255,255,.06);border:var(--b1);border-radius:8px;padding:4px 8px;color:var(--muted);font-size:12px}
+
+    /* Buttons / inputs */
     .btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;transition:transform .04s ease, box-shadow .2s ease;background:#1a2030;color:var(--txt);border:1px solid rgba(255,255,255,.1)}
     .btn.primary{background:linear-gradient(135deg, #715d1d, #f3d46b 40%, #c9a529);color:#0b0b0c;text-shadow:0 1px 0 rgba(255,255,255,.35);border:1px solid rgba(245,215,122,.65);box-shadow: 0 4px 18px rgba(212,175,55,.28), 0 1px 0 rgba(255,255,255,.25) inset}
     .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.3)}
@@ -49,16 +53,24 @@
     .price{font-weight:900}
     .kv{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
 
-    /* Bottom swipeable nav */
+    /* PRODUCT CARD LAYOUT (equal height) */
+    .p-card{display:flex;flex-direction:column;min-height:260px}
+    .p-head{display:flex;align-items:flex-start;justify-content:space-between}
+    .p-body{margin-top:6px;flex:1 1 auto}
+    .p-actions{border-top:1px dashed rgba(255,255,255,.1);padding-top:10px;margin-top:10px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+
+    /* Bottom swipeable nav (with arrows) */
     .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:8px 10px calc(8px + var(--safe-bot));background:linear-gradient(180deg, rgba(10,11,14,0), rgba(10,11,14,.96))}
     .tabbar-inner{max-width:1160px;margin:0 auto;display:flex;gap:8px;justify-content:space-between;background:#0e1117;border:var(--b1);border-radius:16px;padding:6px}
-    .tnav{display:grid;grid-auto-flow:column;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+    .tnav-wrap{display:flex;align-items:center;gap:6px;flex:1}
+    .tnav{flex:1;display:grid;grid-auto-flow:column;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
     .tnav::-webkit-scrollbar{display:none}
-    .tbtn{appearance:none;background:transparent;border:1px solid rgba(255,255,255,.08);color:var(--txt);border-radius:12px;padding:8px 10px;display:flex;align-items:center;gap:8px;min-width:120px;justify-content:center;cursor:pointer;scroll-snap-align:center}
+    .tbtn{appearance:none;background:transparent;border:1px solid rgba(255,255,255,.08);color:var(--txt);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px;min-width:130px;justify-content:center;cursor:pointer;scroll-snap-align:center;font-weight:800}
     .tbtn.active{background:linear-gradient(135deg, rgba(245,215,122,.18), rgba(212,175,55,.14));box-shadow:0 0 0 1px rgba(212,175,55,.5) inset}
+    .tscroll{appearance:none;border:1px solid rgba(255,255,255,.1);background:#171b26;color:var(--txt);border-radius:12px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 
     /* Cart icon */
-    .carticon{appearance:none;background:linear-gradient(135deg, #272c3a, #171b26);border:1px solid rgba(255,255,255,.1);color:var(--txt);border-radius:12px;min-width:64px;padding:0 10px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;position:relative}
+    .carticon{appearance:none;background:linear-gradient(135deg, #272c3a, #171b26);border:1px solid rgba(255,255,255,.1);color:var(--txt);border-radius:12px;min-width:64px;padding:0 10px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
     .carticon b{background:#d4af37;color:#0a0b0e;border-radius:999px;padding:2px 8px;font-weight:900}
 
     /* Modal basics */
@@ -71,6 +83,10 @@
     .splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 50% -200px, rgba(212,175,55,.12), transparent 60%), var(--bg);z-index:60}
     .s-title{font-weight:900;font-size:28px;letter-spacing:.6px}
     .s-sub{color:var(--muted);text-align:center;margin-top:4px}
+
+    /* Coins animation */
+    .coin{position:fixed;left:50%;top:-20px;font-size:22px;animation:fall 900ms ease-in forwards;pointer-events:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+    @keyframes fall{0%{transform:translate(-50%, -40px) rotate(0);opacity:.9} 70%{opacity:1} 100%{transform:translate(-50%, 70vh) rotate(360deg);opacity:0}}
 
     .page{display:none}.page.active{display:block}
     .touching{filter:brightness(1.03)}
@@ -120,15 +136,11 @@
       <div class="grid">
         <div class="col-12 card">
           <h3 id="sub-title">Оформление подписки</h3>
-          <p class="muted" id="sub-help">Выберите срок 1/3/6/12 мес (скидка 0/10/20/30%). ATM можно списать до 25% (100 ATM = €1).</p>
+          <p class="muted" id="sub-help">Выберите срок 1/3/6/12 мес (скидка 0/10/20/30%). ATM сейчас используются только как награда — тратить нельзя.</p>
           <div class="row">
             <div class="kv" style="min-width:200px">
               <label class="label" for="period" id="lbl-term">Срок</label>
               <select id="period"><option value="1">1</option><option value="3">3</option><option value="6">6</option><option value="12">12</option></select>
-            </div>
-            <div class="kv" style="min-width:240px">
-              <label class="label" for="atm-discount" id="lbl-atm">Списать ATM (макс 25%)</label>
-              <input id="atm-discount" type="number" min="0" step="50" value="0" inputmode="numeric" />
             </div>
           </div>
         </div>
@@ -185,7 +197,7 @@
       <div class="grid">
         <div class="col-12 card">
           <h3 id="bal-title">Баланс ATM</h3>
-          <p class="muted" id="bal-help">Коины выдаются за задания и рефералов. Списание до 25% (100 ATM = €1).</p>
+          <p class="muted" id="bal-help">ATM сейчас зарабатываются за задания, рефералов и покупки. Позже их можно будет тратить или участвовать в розыгрышах.</p>
           <div class="row"><div class="chip">Balance: <b id="atm-balance">0</b></div></div>
         </div>
       </div>
@@ -213,11 +225,7 @@
       <div class="grid">
         <div class="col-12 card">
           <h3>FAQ</h3>
-          <ul class="muted" id="faq-list">
-            <li>Фиксированные цены в EUR. Оплата — на биржу админа или счёт компании.</li>
-            <li>ATM покрывают до 25% заказа (100 ATM = €1).</li>
-            <li>Реферальная награда: 10% от оплаченной подписки (в ATM).</li>
-          </ul>
+          <div id="faq-qa"></div>
         </div>
       </div>
     </section>
@@ -227,14 +235,18 @@
 <!-- Bottom swipeable nav -->
 <div class="tabbar">
   <div class="tabbar-inner">
-    <div class="tnav" id="tnav">
-      <button class="tbtn active" data-tab="shop" type="button">🛒 Магазин</button>
-      <button class="tbtn" data-tab="orders" type="button">📄 Заказы</button>
-      <button class="tbtn" data-tab="ref" type="button">👥 Рефералы</button>
-      <button class="tbtn" data-tab="tasks" type="button">🧩 Задания</button>
-      <button class="tbtn" data-tab="balance" type="button">💰 Баланс</button>
-      <button class="tbtn" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 Админ</button>
-      <button class="tbtn" data-tab="faq" type="button">❓ FAQ</button>
+    <div class="tnav-wrap">
+      <button class="tscroll" id="tnav-left" type="button" aria-label="Left">‹</button>
+      <div class="tnav" id="tnav">
+        <button class="tbtn active" data-tab="shop" type="button">🛒 Магазин</button>
+        <button class="tbtn" data-tab="orders" type="button">📄 Заказы</button>
+        <button class="tbtn" data-tab="ref" type="button">👥 Рефералы</button>
+        <button class="tbtn" data-tab="tasks" type="button">🧩 Задания</button>
+        <button class="tbtn" data-tab="balance" type="button">💰 Баланс</button>
+        <button class="tbtn" data-tab="admin" id="tab-admin-btn" type="button" hidden>🛠 Админ</button>
+        <button class="tbtn" data-tab="faq" type="button">❓ FAQ</button>
+      </div>
+      <button class="tscroll" id="tnav-right" type="button" aria-label="Right">›</button>
     </div>
     <button class="carticon" id="cart-open" type="button" aria-label="Cart">
       🧺 <b id="cart-count">0</b>
@@ -248,17 +260,13 @@
 <!-- AUTH REQUIRED -->
 <div class="modal-back" id="modal-auth"><div class="modal"><h2 id="auth-title">Требуется авторизация</h2><p class="muted" id="auth-body">Откройте Mini App внутри Telegram (с initData).</p><div class="foot"><button class="btn" id="auth-close">Закрыть</button></div></div></div>
 
-<!-- PAYMENT SHEET -->
+<!-- PAYMENT SHEET (single destination) -->
 <div class="modal-back" id="modal-pay">
   <div class="modal">
     <h2 id="pay-title">Оплата</h2>
     <div class="grid">
       <div class="col-12 card">
         <div class="row">
-          <div class="kv" style="min-width:220px">
-            <span class="label" id="lbl-chain">Сеть</span>
-            <select id="pay-chain"><option value="BEP20">BEP20</option><option value="TRC20">TRC20</option><option value="ERC20">ERC20</option></select>
-          </div>
           <div class="kv" style="min-width:420px">
             <span class="label" id="lbl-addr">Адрес</span>
             <code id="pay-addr" style="word-break:break-all"></code>
@@ -299,12 +307,8 @@ const START_BONUS_ATM = 250;
 const REF_BONUS_PERCENT = 0.10; // 10% в ATM (100 ATM = €1)
 const PERIOD_DISCOUNT = {1:0, 3:0.10, 6:0.20, 12:0.30};
 
-// адреса для сетей (можно поменять)
-const PAY_ADDR = {
-  BEP20: "0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c",
-  TRC20: "TYcRjK3fFvV2W1k2p7t1B5u8A9XyZqQrTs",
-  ERC20: "0x1111222233334444555566667777888899990000",
-};
+// единый адрес для платежей
+const PAY_ADDR = "0x5af48f9d26edb82e7c30247e105fbf61d2dd1a5c"; // TODO: заменить при необходимости
 
 // ассортимент
 const BOT_LIST = [
@@ -313,14 +317,11 @@ const BOT_LIST = [
   {code:'NEWS', name:'News Bot'}
 ];
 const CATALOG = [
-  // подписочные (учитывают период и скидки)
   {type:'onebot', code:'ONE_BOT', name:'One Bot', price:79, desc:'Выберите бота из списка и добавьте в корзину. Можно несколько позиций.', chooseFrom: BOT_LIST},
   {type:'plan', code:'STANDARD', name:'Standard', price:150, desc:'Базовый пакет для старта.'},
   {type:'plan', code:'PREMIUM', name:'Premium', price:191, desc:'Самый популярный вариант.', badge:'popular'},
   {type:'plan', code:'ENTERPRISE', name:'Enterprise', price:249, desc:'Топовый план с максимумом возможностей.', badge:'top'},
   {type:'plan', code:'COPY', name:'Copy-trading', price:50, desc:'€50/мес + 10% от прибыли.'},
-
-  // сервисы (НЕ умножаются на период)
   {type:'consult', code:'CONSULT', name:'Consulting', price:79, desc:'Индивидуальные консультации по криптовалютам. €79/час. Укажите количество часов.'},
   {type:'training', code:'TRAINING', name:'Training: First steps in crypto', price:890, desc:'Полный курс «Первые шаги в сфере криптовалют». Разовый платёж.'},
   {type:'trial', code:'TRIAL', name:'Trial 3 days', price:0, desc:'Пробный доступ к выбранному боту на 3 дня.', chooseFrom: BOT_LIST}
@@ -332,31 +333,33 @@ const CATALOG = [
 const i18n = {
   ru:{ brandSub:'Подписки • Пакеты • Копитрейдинг • Рефералы',
        shop:'Магазин',orders:'Заказы',ref:'Рефералы',tasks:'Задания',balance:'Баланс',admin:'Админ',faq:'FAQ',
-       subTitle:'Оформление подписки', subHelp:'Выберите срок 1/3/6/12 мес (скидка 0/10/20/30%). ATM можно списать до 25% (100 ATM = €1).',
-       term:'Срок', atmWrite:'Списать ATM (макс 25%)', more:'Подробнее', add:'В корзину', remove:'Убрать',
+       subTitle:'Оформление подписки',
+       subHelp:'Выберите срок 1/3/6/12 мес (скидка 0/10/20/30%). ATM сейчас используются только как награда — тратить нельзя.',
+       term:'Срок', more:'Подробнее', add:'В корзину', remove:'Убрать',
        popular:'Самый популярный', top:'Топ', months:'мес',
        ordersTitle:'История заказов', num:'№', prod:'Товар', termCol:'Срок', meth:'Метод', sum:'Сумма', st:'Статус', date:'Дата',
        refTitle:'Реферальная программа', refHelp:'Делитесь кодом и получайте 10% от оплаты подписки (в ATM). Ваш код:', copy:'Скопировать',
        bindTitle:'Привязать чужой код', bind:'Привязать', partner:'Партнёр', paid:'Оплата', reward:'Вознаграждение',
        tasksTitle:'Задания за ATM', proofHint:'URL-пруф', submit:'Отправить',
-       balTitle:'Баланс ATM', balHelp:'Коины выдаются за задания и рефералов. Списание до 25% (100 ATM = €1).',
+       balTitle:'Баланс ATM', balHelp:'ATM сейчас зарабатываются за задания, рефералов и покупки. Позже их можно будет тратить или участвовать в розыгрышах.',
        adminTitle:'Админ-панель', adminHelp:'Статистика, заказы, задания.', refresh:'Обновить', export:'Экспорт JSON',
        users:'Пользователи', orders2:'Заказы', revenue:'Выручка', atmHold:'ATM на балансах',
-       chain:'Сеть', addr:'Адрес', amount:'Сумма', memo:'Memo', iPaid:'Я оплатил(а)'
+       addr:'Адрес', amount:'Сумма', memo:'Memo', iPaid:'Я оплатил(а)'
   },
   en:{ brandSub:'Subscriptions • Bundles • Copy-trading • Referrals',
        shop:'Shop',orders:'Orders',ref:'Referrals',tasks:'Tasks',balance:'Balance',admin:'Admin',faq:'FAQ',
-       subTitle:'Subscription checkout', subHelp:'Choose 1/3/6/12 months (discount 0/10/20/30%). Redeem up to 25% with ATM (100 ATM = €1).',
-       term:'Term', atmWrite:'Redeem ATM (max 25%)', more:'Details', add:'Add', remove:'Remove',
+       subTitle:'Subscription checkout',
+       subHelp:'Choose 1/3/6/12 months (discount 0/10/20/30%). ATM are rewards only for now — not spendable.',
+       term:'Term', more:'Details', add:'Add', remove:'Remove',
        popular:'Most popular', top:'Top', months:'mo',
        ordersTitle:'Order history', num:'#', prod:'Product', termCol:'Term', meth:'Method', sum:'Amount', st:'Status', date:'Date',
        refTitle:'Referral program', refHelp:'Share your code and earn 10% (in ATM). Your code:', copy:'Copy',
        bindTitle:'Bind referral code', bind:'Bind', partner:'Partner', paid:'Paid', reward:'Reward',
        tasksTitle:'Tasks for ATM', proofHint:'Proof URL', submit:'Submit',
-       balTitle:'ATM balance', balHelp:'Earn via tasks & referrals. Redeem up to 25% (100 ATM = €1).',
+       balTitle:'ATM balance', balHelp:'Earn ATM from tasks, referrals and purchases. Spending/raffles will be available later.',
        adminTitle:'Admin panel', adminHelp:'Stats, orders, tasks.', refresh:'Refresh', export:'Export JSON',
        users:'Users', orders2:'Orders', revenue:'Revenue', atmHold:'ATM on balances',
-       chain:'Network', addr:'Address', amount:'Amount', memo:'Memo', iPaid:'I paid'
+       addr:'Address', amount:'Amount', memo:'Memo', iPaid:'I paid'
   }
 };
 let lang = localStorage.getItem('CATM_LANG') || ((navigator.language||'en').toLowerCase().startsWith('ru')?'ru':'en');
@@ -364,65 +367,11 @@ const t = (k)=> (i18n[lang] && i18n[lang][k]) || (i18n.en && i18n.en[k]) || k;
 
 const TAB_EMOJI = { shop:'🛒', orders:'📄', ref:'👥', tasks:'🧩', balance:'💰', admin:'🛠', faq:'❓' };
 
-function applyLang(){
-  document.getElementById('brand-sub').textContent = t('brandSub');
-  document.getElementById('lang-code').textContent = lang.toUpperCase();
-
-  // bottom tabs (переводим полностью, сохраняя эмодзи)
-  Object.keys(TAB_EMOJI).forEach(key=>{
-    const btn = document.querySelector(`.tbtn[data-tab="${key}"]`);
-    if (btn) btn.textContent = `${TAB_EMOJI[key]} ${t(key)}`;
-  });
-
-  // shop labels
-  document.getElementById('sub-title').textContent = t('subTitle');
-  document.getElementById('sub-help').textContent = t('subHelp');
-  document.getElementById('lbl-term').textContent = t('term');
-  document.getElementById('lbl-atm').textContent = t('atmWrite');
-  // orders table headers
-  document.getElementById('orders-title').textContent=t('ordersTitle');
-  document.getElementById('th-num').textContent=t('num');
-  document.getElementById('th-prod').textContent=t('prod');
-  document.getElementById('th-term').textContent=t('termCol');
-  document.getElementById('th-meth').textContent=t('meth');
-  document.getElementById('th-sum').textContent=t('sum');
-  document.getElementById('th-st').textContent=t('st');
-  document.getElementById('th-date').textContent=t('date');
-  // refs
-  document.getElementById('ref-title').textContent=t('refTitle');
-  document.getElementById('ref-help').textContent=t('refHelp');
-  document.getElementById('bind-title').textContent=t('bindTitle');
-  document.getElementById('ref-bind-btn').textContent=t('bind');
-  document.getElementById('th-partner').textContent=t('partner');
-  document.getElementById('th-date2').textContent=t('date');
-  document.getElementById('th-paid').textContent=t('paid');
-  document.getElementById('th-reward').textContent=t('reward');
-  // tasks/balance/admin
-  document.getElementById('tasks-title').textContent=t('tasksTitle');
-  document.getElementById('bal-title').textContent=t('balTitle');
-  document.getElementById('bal-help').textContent=t('balHelp');
-  document.getElementById('adm-title').textContent=t('adminTitle');
-  document.getElementById('adm-help').textContent=t('adminHelp');
-  document.getElementById('admin-refresh').textContent=t('refresh');
-  document.getElementById('admin-export').textContent=t('export');
-  // payment labels
-  document.getElementById('lbl-chain').textContent=t('chain');
-  document.getElementById('lbl-addr').textContent=t('addr');
-  document.getElementById('lbl-amt').textContent=t('amount');
-  document.getElementById('lbl-memo').textContent=t('memo');
-  document.getElementById('paid-btn').textContent=t('iPaid');
-  // faq
-  const faq=[ (lang==='ru'?'Фиксированные цены в EUR. Оплата — на биржу админа или счёт компании.':'Fixed EUR prices. Pay to admin exchange or company wallet.'),
-              (lang==='ru'?'ATM покрывают до 25% заказа (100 ATM = €1).':'ATM can cover up to 25% (100 ATM = €1).'),
-              (lang==='ru'?'Реферальная награда: 10% от оплаченной подписки (в ATM).':'Referral reward: 10% of paid subscription (in ATM).') ];
-  document.getElementById('faq-list').innerHTML = faq.map(x=>`<li>${x}</li>`).join('');
-}
-
 /* =============================
    STORAGE / USER / STATE
 ============================= */
-const DBKEY = 'CATM_DB_HTML_V2';
-function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)) || {users:{},orders:[],tasks:[],disclaimerAccepted:{}} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:{}} } }
+const DBKEY = 'CATM_DB_HTML_V3';
+function loadDB(){ try{ return JSON.parse(localStorage.getItem(DBKEY)) || {users:{},orders:[],tasks:[],disclaimerAccepted:false} }catch(e){ return {users:{},orders:[],tasks:[],disclaimerAccepted:false} } }
 const db = loadDB();
 const saveDB = () => localStorage.setItem(DBKEY, JSON.stringify(db));
 
@@ -435,11 +384,55 @@ if(!db.users[CURRENT_USER.id]){
 }
 function user(){ return db.users[CURRENT_USER.id]; }
 
-const state={ period:1, atmDiscount:0, cart:[], pay:{ chain:'BEP20', addr:PAY_ADDR.BEP20, amount:0, memo:'' } };
+const state={ period:1, cart:[], pay:{ addr:PAY_ADDR, amount:0, memo:'' } };
 
 /* =============================
-   LAYOUT / NAV / HELPERS
+   HELPERS / UI
 ============================= */
+function applyLang(){
+  document.getElementById('brand-sub').textContent = t('brandSub');
+  document.getElementById('lang-code').textContent = lang.toUpperCase();
+  Object.keys(TAB_EMOJI).forEach(key=>{
+    const btn = document.querySelector(`.tbtn[data-tab="${key}"]`);
+    if (btn) btn.textContent = `${TAB_EMOJI[key]} ${t(key)}`;
+  });
+  ['sub-title','orders-title','ref-title','tasks-title','bal-title','adm-title'].forEach((id,i)=>{
+    const map={ 'sub-title':'subTitle','orders-title':'ordersTitle','ref-title':'refTitle','tasks-title':'tasksTitle','bal-title':'balTitle','adm-title':'adminTitle' };
+    const key = map[id]; if(key) document.getElementById(id).textContent = t(key);
+  });
+  document.getElementById('sub-help').textContent = t('subHelp');
+  document.getElementById('lbl-term').textContent = t('term');
+
+  // orders headers
+  document.getElementById('th-num').textContent=t('num');
+  document.getElementById('th-prod').textContent=t('prod');
+  document.getElementById('th-term').textContent=t('termCol');
+  document.getElementById('th-meth').textContent=t('meth');
+  document.getElementById('th-sum').textContent=t('sum');
+  document.getElementById('th-st').textContent=t('st');
+  document.getElementById('th-date').textContent=t('date');
+
+  // refs
+  document.getElementById('ref-help').textContent=t('refHelp');
+  document.getElementById('bind-title').textContent=t('bindTitle');
+  document.getElementById('ref-bind-btn').textContent=t('bind');
+  document.getElementById('bal-help').textContent=t('balHelp');
+
+  // admin
+  document.getElementById('adm-help').textContent=t('adminHelp');
+  document.getElementById('admin-refresh').textContent=t('refresh');
+  document.getElementById('admin-export').textContent=t('export');
+
+  // payment
+  document.getElementById('lbl-addr').textContent=t('addr');
+  document.getElementById('lbl-amt').textContent=t('amount');
+  document.getElementById('lbl-memo').textContent=t('memo');
+  document.getElementById('paid-btn').textContent=t('iPaid');
+
+  // FAQ
+  renderFAQ();
+}
+
 function setHash(tab){ location.hash = '#/'+tab; }
 function currentTab(){ return (location.hash.replace('#/','') || 'shop'); }
 function switchTab(name){
@@ -452,29 +445,23 @@ function switchTab(name){
   if(name==='balance') renderBalance();
   if(name==='admin') renderAdmin();
 }
-window.addEventListener('hashchange', ()=> switchTab(currentTab()) );
 
-function toast(t){ try{tg?.showPopup?.({title:'',message:String(t),buttons:[{type:'close'}]});}catch(_){} console.log('[toast]', t); }
+/* =============================
+   PRICING
+============================= */
 function priceFor(item,months,opts={}){
-  // подписки (plan/onebot/copy) — умножаются на месяцы с скидкой
-  if(item.type==='plan' || item.type==='onebot'){
+  if(item.type==='plan' || item.type==='onebot' || item.type==='copy'){
     const disc = PERIOD_DISCOUNT[months]||0; const perMonth = Math.round(item.price*(1-disc)); return perMonth*months;
   }
-  if(item.type==='copy'){ // copy-trading тарифицируем как подписку (фикс €50/мес)
-    const disc = PERIOD_DISCOUNT[months]||0; const perMonth = Math.round(item.price*(1-disc)); return perMonth*months;
-  }
-  if(item.type==='consult'){ // почасовая: количество часов в opts.hours
-    const hours = Math.max(1, parseInt(opts.hours||1,10)); return item.price * hours;
-  }
-  if(item.type==='training'){ // разово
-    return item.price;
-  }
-  if(item.type==='trial'){ // бесплатно
-    return 0;
-  }
-  // дефолт
+  if(item.type==='consult'){ const hours = Math.max(1, parseInt(opts.hours||1,10)); return item.price * hours; }
+  if(item.type==='training'){ return item.price; }
+  if(item.type==='trial'){ return 0; }
   const disc = PERIOD_DISCOUNT[months]||0; const perMonth = Math.round(item.price*(1-disc)); return perMonth*months;
 }
+
+/* =============================
+   HEADER / COUNTERS
+============================= */
 function renderHeader(){
   document.getElementById('chip-name').textContent='@'+(CURRENT_USER.username||'guest');
   document.getElementById('chip-atm').textContent=user().atm;
@@ -482,106 +469,103 @@ function renderHeader(){
   document.getElementById('ref-code').value=user().ref_code;
   if(ADMIN_IDS.includes(CURRENT_USER.id)) document.getElementById('tab-admin-btn').hidden=false;
 }
-
-/* =============================
-   SHOP / CATALOG / CART
-============================= */
-function renderCatalog(){
-  const grid = document.getElementById('catalog'); grid.innerHTML='';
-  const months = state.period = parseInt(document.getElementById('period').value||'1',10);
-  state.atmDiscount = Math.max(0, parseInt(document.getElementById('atm-discount').value||'0',10));
-  const eur = state.cart.reduce((s,x)=>s+x.amount,0);
-  const atmMax = Math.floor(eur*0.25)*100;
-  if(state.atmDiscount>atmMax){ state.atmDiscount=atmMax; document.getElementById('atm-discount').value=atmMax; }
-
-  CATALOG.forEach(it=>{
-    // вычислим сумму для превью (без специфики consult/trial выбора)
-    const previewAmount = priceFor(it, months, {hours:1});
-    const card = document.createElement('div'); card.className='col-4 card';
-
-    // бейджи
-    let badges = `<span class="badge">${(it.type==='plan'?'PLAN':it.type.toUpperCase())}</span>`;
-    if(it.badge==='popular') badges += ` <span class="badge">${t('popular')}</span>`;
-    if(it.badge==='top') badges += ` <span class="badge">${t('top')}</span>`;
-
-    if(it.type==='onebot' || it.type==='trial'){
-      const options = (it.chooseFrom||[]).map(b=>`<option value="${b.code}">${b.name}</option>`).join('');
-      card.innerHTML = `
-        <div class="row" style="justify-content:space-between;align-items:start">
-          <div>${badges}</div>
-          <span class="price" style="color:var(--gold)">€${previewAmount} / ${it.type==='trial' ? '3d' : (months + t('months'))}</span>
-        </div>
-        <h3>${it.name}</h3>
-        <p class="muted">${it.desc}</p>
-        <div class="row">
-          <select data-select="${it.code}" class="onebot-select">${options}</select>
-          <button class="btn primary" data-act="${it.type==='trial'?'add-trial':'add-one'}" data-code="${it.code}">${t('add')}</button>
-        </div>
-        <div class="line"><button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button></div>
-      `;
-    } else if (it.type==='consult'){
-      card.innerHTML = `
-        <div class="row" style="justify-content:space-between;align-items:start">
-          <div>${badges}</div>
-          <span class="price" style="color:var(--gold)">€${it.price}/h</span>
-        </div>
-        <h3>${it.name}</h3>
-        <p class="muted">${it.desc}</p>
-        <div class="row">
-          <label class="label" for="hours-${it.code}" style="min-width:100px">Hours</label>
-          <input id="hours-${it.code}" type="number" min="1" step="1" value="1" style="max-width:120px">
-          <button class="btn primary" data-act="add-consult" data-code="${it.code}">${t('add')}</button>
-        </div>
-        <div class="line"><button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button></div>
-      `;
-    } else if (it.type==='training'){
-      const inCart = state.cart.find(x=>x.code===it.code); // разовый — запрещаем дубль
-      card.innerHTML = `
-        <div class="row" style="justify-content:space-between;align-items:start">
-          <div>${badges}</div>
-          <span class="price" style="color:var(--gold)">€${it.price}</span>
-        </div>
-        <h3>${it.name}</h3>
-        <p class="muted">${it.desc}</p>
-        <div class="line">
-          <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
-          ${inCart?`<button class="btn" disabled>${t('add')}</button>`:`<button class="btn primary" data-act="add" data-code="${it.code}">${t('add')}</button>`}
-        </div>
-      `;
-    } else {
-      // план/копитрейдинг
-      const inCart = state.cart.find(x=>x.code===it.code && x.months===months);
-      card.innerHTML = `
-        <div class="row" style="justify-content:space-between;align-items:start">
-          <div>${badges}</div>
-          <span class="price" style="color:var(--gold)">€${previewAmount} / ${months}${t('months')}</span>
-        </div>
-        <h3>${it.name}</h3>
-        <p class="muted">${it.desc}</p>
-        <div class="line">
-          <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
-          ${inCart?`<button class="btn" data-act="remove" data-code="${it.code}">${t('remove')}</button>`:`<button class="btn primary" data-act="add" data-code="${it.code}">${t('add')}</button>`}
-        </div>
-      `;
-    }
-    grid.appendChild(card);
-  });
-
-  updateCartIcon();
-}
-
 function updateCartIcon(){
   document.getElementById('cart-count').textContent = state.cart.length;
   document.getElementById('atm-balance').textContent = user().atm;
   renderHeader();
 }
 
+/* =============================
+   CATALOG
+============================= */
+function renderCatalog(){
+  const grid = document.getElementById('catalog'); grid.innerHTML='';
+  const months = state.period = parseInt(document.getElementById('period').value||'1',10);
+
+  CATALOG.forEach(it=>{
+    const previewAmount = priceFor(it, months, {hours:1});
+    const card = document.createElement('div'); card.className='col-4 card p-card';
+
+    let badges = `<span class="badge">${(it.type==='plan'?'PLAN':it.type.toUpperCase())}</span>`;
+    if(it.badge==='popular') badges += ` <span class="badge">${t('popular')}</span>`;
+    if(it.badge==='top') badges += ` <span class="badge">${t('top')}</span>`;
+
+    let body = '';
+    let actions = '';
+
+    if(it.type==='onebot' || it.type==='trial'){
+      const options = (it.chooseFrom||[]).map(b=>`<option value="${b.code}">${b.name}</option>`).join('');
+      body = `
+        <p class="muted">${it.desc}</p>
+        <div class="row"><select data-select="${it.code}" class="onebot-select">${options}</select></div>
+      `;
+      actions = `
+        <div class="p-actions">
+          <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
+          <button class="btn primary" data-act="${it.type==='trial'?'add-trial':'add-one'}" data-code="${it.code}">${t('add')}</button>
+        </div>
+      `;
+    } else if (it.type==='consult'){
+      body = `
+        <p class="muted">${it.desc}</p>
+        <div class="row">
+          <label class="label" for="hours-${it.code}" style="min-width:100px">Hours</label>
+          <input id="hours-${it.code}" type="number" min="1" step="1" value="1" style="max-width:120px">
+        </div>
+      `;
+      actions = `
+        <div class="p-actions">
+          <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
+          <button class="btn primary" data-act="add-consult" data-code="${it.code}">${t('add')}</button>
+        </div>
+      `;
+    } else if (it.type==='training'){
+      const inCart = state.cart.find(x=>x.code===it.code);
+      body = `<p class="muted">${it.desc}</p>`;
+      actions = `
+        <div class="p-actions">
+          <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
+          ${inCart?`<button class="btn" disabled>${t('add')}</button>`:`<button class="btn primary" data-act="add" data-code="${it.code}">${t('add')}</button>`}
+        </div>
+      `;
+    } else {
+      const inCart = state.cart.find(x=>x.code===it.code && x.months===months);
+      body = `<p class="muted">${it.desc}</p>`;
+      actions = `
+        <div class="p-actions">
+          <button class="btn" data-act="details" data-code="${it.code}">${t('more')}</button>
+          ${inCart?`<button class="btn" data-act="remove" data-code="${it.code}">${t('remove')}</button>`:`<button class="btn primary" data-act="add" data-code="${it.code}">${t('add')}</button>`}
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="p-head">
+        <div>${badges}</div>
+        <span class="price" style="color:var(--gold)">
+          ${it.type==='trial' ? 'Free' : `€${previewAmount}`} ${it.type==='trial'?'': (it.type==='consult'||it.type==='training' ? '' : `/ ${months}${t('months')}`)}
+        </span>
+      </div>
+      <div class="p-body">
+        <h3>${it.name}</h3>
+        ${body}
+      </div>
+      ${actions}
+    `;
+    grid.appendChild(card);
+  });
+
+  updateCartIcon();
+}
+
+/* =============================
+   CART / ORDERS
+============================= */
 function addToCart(code, extraText, opts={}){
   const months = state.period;
   const it = CATALOG.find(x=>x.code===code);
   if(!it) return;
 
-  // запрет дублей для разовых; для планов — один на период; для onebot можно много (разные боты)
   if(it.type==='training'){
     if(state.cart.find(x=>x.code===it.code)) return;
   } else if (it.type==='plan' || it.type==='copy'){
@@ -596,7 +580,6 @@ function addToCart(code, extraText, opts={}){
   H('light');
   renderCatalog();
 }
-
 function removeFromCart(code){
   const months = state.period;
   state.cart = state.cart.filter(x=>!(x.code===code && (x.months===months || x.months===1)));
@@ -605,7 +588,7 @@ function removeFromCart(code){
 }
 
 /* =============================
-   ORDERS / REFERRALS / TASKS
+   REF / TASKS / BALANCE
 ============================= */
 function renderOrders(){
   const tb = document.querySelector('#orders-table tbody'); tb.innerHTML='';
@@ -613,7 +596,7 @@ function renderOrders(){
   for(const o of rows){
     const tr=document.createElement('tr');
     const names=o.items.map(i=>i.name+' ×'+i.months+(i.months>1? (lang==='ru'?'м':' mo') : '')).join(', ');
-    tr.innerHTML=`<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s,i)=>s+i.months,0)} ${lang==='ru'?'мес':'mo'}</td><td>${o.method}</td><td>€${o.eur_final} ${o.atm_used?`(+${o.atm_used} ATM)`:''}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.memo}</td>`;
+    tr.innerHTML=`<td>${o.id}</td><td>${names}</td><td>${o.items.reduce((s,i)=>s+i.months,0)} ${lang==='ru'?'мес':'mo'}</td><td>${o.method}</td><td>€${o.eur_final}</td><td>${o.status}</td><td>${new Date(o.created_at).toLocaleString()}</td><td>${o.memo}</td>`;
     tb.appendChild(tr);
   }
 }
@@ -658,7 +641,7 @@ function renderAdmin(){
     const userName='@'+(db.users[or.user]?.username||or.user);
     const items=or.items.map(i=>i.name+'×'+i.months).join(', ');
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} ${lang==='ru'?'мес':'mo'}</td><td>${or.method}</td><td>${or.eur_final}</td><td>${or.atm_used}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="mark-paid" data-id="${or.id}">${lang==='ru'?'Оплачен':'Paid'}</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">${lang==='ru'?'Отмена':'Cancel'}</button>`:''}</td>`;
+    tr.innerHTML=`<td>${or.id}</td><td>${userName}</td><td>${items}</td><td>${or.items.reduce((s,i)=>s+i.months,0)} ${lang==='ru'?'мес':'mo'}</td><td>${or.method}</td><td>${or.eur_final}</td><td>${or.status}</td><td>${new Date(or.created_at).toLocaleString()}</td><td>${ADMIN_IDS.includes(CURRENT_USER.id)?`<button class="btn" data-act="mark-paid" data-id="${or.id}">${lang==='ru'?'Оплачен':'Paid'}</button> <button class="btn ghost" data-act="mark-cancel" data-id="${or.id}">${lang==='ru'?'Отмена':'Cancel'}</button>`:''}</td>`;
     otb.appendChild(tr);
   });
 
@@ -676,53 +659,59 @@ function renderAdmin(){
 }
 
 /* =============================
-   PAYMENT (sheet from cart icon)
+   PAYMENT (single address)
 ============================= */
 function openPay(){
   if(state.cart.length===0){ toast(lang==='ru'?'Корзина пуста':'Cart is empty'); return; }
   const eur=state.cart.reduce((s,x)=>s+x.amount,0);
-  const atmMax=Math.floor(eur*0.25)*100;
-  const wantATM=Math.min(state.atmDiscount||0, atmMax, user().atm);
-  const eurMinus=Math.floor(wantATM/100);
-  const finalEur=Math.max(0, eur-eurMinus);
-  state.pay.amount=finalEur;
+  state.pay.amount=eur;
   state.pay.memo='ORDER-'+(db.orders.length+1);
-  document.getElementById('pay-chain').value=state.pay.chain;
   document.getElementById('pay-addr').textContent=state.pay.addr;
-  document.getElementById('pay-amount').textContent='€'+finalEur;
+  document.getElementById('pay-amount').textContent='€'+eur;
   document.getElementById('pay-memo').textContent=state.pay.memo;
   document.getElementById('modal-pay').style.display='flex';
 }
 function closePay(){ document.getElementById('modal-pay').style.display='none'; }
 
 function createPaymentIntent(){ return new Promise(r=>setTimeout(()=>r('intent_'+Math.random().toString(36).slice(2,9)),300)); }
-function createOrder(){
-  if(state.cart.length===0) return toast('Корзина пуста');
-  const eur=state.cart.reduce((s,x)=>s+x.amount,0);
-  const atmMax=Math.floor(eur*0.25)*100;
-  const wantATM=Math.min(state.atmDiscount||0, atmMax, user().atm);
-  const eurMinus=Math.floor(wantATM/100);
-  const finalEur=Math.max(0, eur-eurMinus);
-  if(wantATM>0) user().atm=Math.max(0, user().atm-wantATM);
 
-  const order = {
-    id: db.orders.length+1,
-    user: CURRENT_USER.id,
-    items: state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})),
-    method: 'crypto',
-    eur,
-    atm_used: wantATM,
-    eur_final: finalEur,
-    status:'waiting',
-    created_at:new Date().toISOString(),
-    memo: state.pay.memo
-  };
-  db.orders.push(order); user().orders.push(order.id); saveDB();
-
-  state.cart=[]; state.atmDiscount=0; document.getElementById('atm-discount').value=0;
-  renderCatalog(); renderOrders();
-  openPay();
-  createPaymentIntent().then(id=>{ order.memo=id; saveDB(); renderOrders(); document.getElementById('pay-memo').textContent=id; });
+/* =============================
+   COINS: sound + animation
+============================= */
+function playCoinSound(){
+  try{
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const now = ac.currentTime;
+    const seq = [880,1320,1760,2200];
+    seq.forEach((f,i)=>{
+      const o = ac.createOscillator(); const g=ac.createGain();
+      o.type='square'; o.frequency.value=f;
+      o.connect(g); g.connect(ac.destination);
+      g.gain.setValueAtTime(0.0001, now+i*0.05);
+      g.gain.exponentialRampToValueAtTime(0.2, now+i*0.05+0.03);
+      g.gain.exponentialRampToValueAtTime(0.001, now+i*0.05+0.11);
+      o.start(now+i*0.05); o.stop(now+i*0.05+0.12);
+    });
+  }catch(e){}
+}
+function spawnCoins(count=10){
+  for(let i=0;i<count;i++){
+    const c=document.createElement('div'); c.className='coin'; c.textContent='🪙';
+    const dx = (Math.random()*60-30);
+    c.style.left = `calc(50% + ${dx}vw)`;
+    c.style.animationDelay = (Math.random()*0.25)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=> c.remove(), 1200);
+  }
+}
+function awardATM(eur){
+  const reward = Math.max(0, Math.round(eur*100)); // 100 ATM за €1
+  user().atm = (user().atm||0) + reward;
+  saveDB();
+  renderBalance();
+  renderHeader();
+  playCoinSound();
+  spawnCoins(Math.min(14, 6 + Math.floor(eur/20)));
 }
 
 /* =============================
@@ -734,12 +723,16 @@ document.addEventListener('click', (e)=>{
   // bottom tabs
   if(btn.classList.contains('tbtn')){ H('light'); setHash(btn.dataset.tab); switchTab(btn.dataset.tab); return; }
 
+  // bottom scrollers
+  if(btn.id==='tnav-left'){ document.getElementById('tnav').scrollBy({left:-220,behavior:'smooth'}); return; }
+  if(btn.id==='tnav-right'){ document.getElementById('tnav').scrollBy({left:220,behavior:'smooth'}); return; }
+
   const act = btn.dataset.act;
   if(act==='details'){ const code=btn.dataset.code; const it = CATALOG.find(x=>x.code===code); document.getElementById('item-title').textContent = it?.name||'Товар'; document.getElementById('item-desc').innerHTML = `<p class="muted">${it?.desc||''}</p>`; document.getElementById('modal-item').style.display='flex'; return; }
   if(act==='add'){ addToCart(btn.dataset.code); return; }
   if(act==='remove'){ removeFromCart(btn.dataset.code); return; }
-  if(act==='add-one'){ const sel = btn.parentElement.querySelector('[data-select]'); const val = sel?.value; const label = BOT_LIST.find(b=>b.code===val)?.name || val; addToCart('ONE_BOT', label); return; }
-  if(act==='add-trial'){ const sel = btn.parentElement.querySelector('[data-select]'); const val = sel?.value; const label = BOT_LIST.find(b=>b.code===val)?.name || val; addToCart('TRIAL', label); return; }
+  if(act==='add-one'){ const sel = btn.closest('.p-card').querySelector('[data-select]'); const val = sel?.value; const label = BOT_LIST.find(b=>b.code===val)?.name || val; addToCart('ONE_BOT', label); return; }
+  if(act==='add-trial'){ const sel = btn.closest('.p-card').querySelector('[data-select]'); const val = sel?.value; const label = BOT_LIST.find(b=>b.code===val)?.name || val; addToCart('TRIAL', label); return; }
   if(act==='add-consult'){ const hours = Math.max(1, parseInt(document.getElementById('hours-CONSULT')?.value||'1',10)); addToCart('CONSULT', `${hours}h`, {hours}); return; }
 
   if(act==='submit-task'){ const id=+btn.dataset.id; const val=document.getElementById('proof-'+id)?.value.trim(); if(!/^https?:\/\//i.test(val||'')) return toast(lang==='ru'?'Добавьте валидный URL':'Add a valid URL'); user().tasks=user().tasks||[]; user().tasks.push({id,proof:val,at:new Date().toISOString(),status:'pending'}); saveDB(); toast(lang==='ru'?'Отправлено на проверку':'Submitted for review'); document.getElementById('proof-'+id).value=''; return; }
@@ -781,22 +774,95 @@ document.addEventListener('click', (e)=>{
 
 document.addEventListener('change',(e)=>{
   const el=e.target;
-  if(el.id==='period' || el.id==='atm-discount'){ renderCatalog(); }
-  if(el.id==='pay-chain'){ state.pay.chain = el.value; state.pay.addr = PAY_ADDR[state.pay.chain]; document.getElementById('pay-addr').textContent = state.pay.addr; }
+  if(el.id==='period'){ renderCatalog(); }
 });
 
 document.addEventListener('touchstart',(e)=>{ const b=e.target.closest('button,.btn'); if(b) b.classList.add('touching');},{passive:true});
 document.addEventListener('touchend',()=> document.querySelectorAll('.touching').forEach(b=>b.classList.remove('touching')));
 
 /* =============================
-   SPLASH & LANG
+   FAQ (Q/A)
 ============================= */
-document.getElementById('agree-btn').addEventListener('click', ()=>{
-  localStorage.setItem('disclaimerAccepted','1');
-  document.getElementById('splash').style.display='none';
-});
-if(localStorage.getItem('disclaimerAccepted')) document.getElementById('splash').style.display='none';
+function renderFAQ(){
+  const qa = [
+    {q:'Что такое CryptoATM.tech?', a:'Это набор аналитических ботов, алертов и сервисов: подписки, копитрейдинг, обучение.'},
+    {q:'В каких валютах фиксируются цены?', a:'Во всех интерфейсах цены фиксированы в EUR. Оплата — на единый адрес/реквизиты.'},
+    {q:'Можно ли потратить ATM монеты?', a:'Пока нет. ATM — это внутренняя награда. Позже их можно будет тратить/участвовать в розыгрышах.'},
+    {q:'Как получить ATM?', a:'За задания, рефералов и за покупки (автоначисление после оформления). 100 ATM = €1 номинала награды.'},
+    {q:'Как работают периоды 1/3/6/12?', a:'Чем больше период, тем выше скидка: 0/10/20/30%. Применяется к подпискам/копитрейдингу.'},
+    {q:'Можно ли купить доступ к одному боту?', a:'Да. Выберите One Bot, затем конкретного бота из списка, можно добавить несколько позиций.'},
+    {q:'Есть ли пробный период?', a:'Да, Trial на 3 дня к выбранному боту (бесплатно).'},
+    {q:'Copy-trading условия?', a:'€50/мес + 10% от прибыли. Оплачивается как подписка, проценты учитываются отдельно.'},
+    {q:'Консалтинг и обучение?', a:'Консалтинг — €79/час (укажите часы). Курс «Первые шаги» — €890 один раз.'},
+    {q:'Где реквизиты?', a:'В окне оплаты показан единый адрес. При оплате указывайте Memo из корзины.'},
+    {q:'Как работает реферальная система?', a:'Делитесь своим кодом. При первой оплаченной подписке друга вам начисляется 10% от суммы в ATM.'},
+    {q:'Насколько безопасно?', a:'Мы не храним ключи и не даём инвестиционных советов. Информация — образовательная. Волатильность высокая.'}
+  ];
+  const host=document.getElementById('faq-qa');
+  host.innerHTML = qa.map(item=>(
+    `<details style="margin:6px 0; background:#0f1320;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px">
+       <summary style="cursor:pointer;font-weight:800">${item.q}</summary>
+       <div class="muted" style="margin-top:6px">${item.a}</div>
+     </details>`
+  )).join('');
+}
 
+/* =============================
+   ORDER FLOW
+============================= */
+function createOrder(){
+  if(state.cart.length===0) return toast('Корзина пуста');
+  const eur=state.cart.reduce((s,x)=>s+x.amount,0);
+
+  const order = {
+    id: db.orders.length+1,
+    user: CURRENT_USER.id,
+    items: state.cart.map(x=>({code:x.code,name:x.name,months:x.months,amount:x.amount})),
+    method: 'pay',
+    eur,
+    eur_final: eur,
+    status:'waiting',
+    created_at:new Date().toISOString(),
+    memo: state.pay.memo
+  };
+  db.orders.push(order); user().orders.push(order.id); saveDB();
+
+  // ATM reward for purchase
+  awardATM(eur);
+
+  state.cart=[]; renderCatalog(); renderOrders();
+  openPay();
+  createPaymentIntent().then(id=>{ order.memo=id; saveDB(); renderOrders(); document.getElementById('pay-memo').textContent=id; });
+}
+
+/* =============================
+   NAV / BOOT / DISCLOSURE
+============================= */
+function toast(t){ try{tg?.showPopup?.({title:'',message:String(t),buttons:[{type:'close'}]});}catch(_){} console.log('[toast]', t); }
+
+function boot(){
+  // сразу магазин после дисклеймера (по умолчанию он активен)
+  if(!tg?.initDataUnsafe?.user) document.getElementById('dev-login').style.display='inline-flex';
+  applyLang();
+  renderHeader();
+  switchTab('shop');
+  renderCatalog();
+
+  // назначаем адрес в оплате (единый)
+  document.getElementById('pay-addr').textContent = PAY_ADDR;
+
+  setInterval(()=>{ document.getElementById('chip-atm').textContent=user().atm; document.getElementById('chip-orders').textContent=user().orders.length; }, 1000);
+}
+
+// Disclaimer button
+document.getElementById('agree-btn').addEventListener('click', ()=>{
+  db.disclaimerAccepted=true; saveDB();
+  document.getElementById('splash').style.display='none';
+  switchTab('shop'); // гарантированно в магазин
+});
+if(db.disclaimerAccepted){ document.getElementById('splash').style.display='none'; }
+
+// language toggle
 document.getElementById('lang-toggle').addEventListener('click',()=>{
   lang=(lang==='ru'?'en':'ru');
   localStorage.setItem('CATM_LANG',lang);
@@ -804,22 +870,34 @@ document.getElementById('lang-toggle').addEventListener('click',()=>{
   renderCatalog();
 });
 
-/* =============================
-   BOOT
-============================= */
-function boot(){
-  // Show dev-login outside Telegram
-  if(!tg?.initDataUnsafe?.user) document.getElementById('dev-login').style.display='inline-flex';
+// click handlers not covered above
+document.addEventListener('click',(e)=>{
+  const el=e.target.closest('button,.btn');
+  if(!el) return;
+  if(el.id==='cart-open'){ if(state.cart.length===0) toast(lang==='ru'?'Корзина пуста':'Cart is empty'); else { state.pay.memo='ORDER-'+(db.orders.length+1); openPay(); } }
+});
 
-  applyLang();
-  renderHeader();
-  switchTab(currentTab());
-  renderCatalog();
+// change
+document.getElementById('period').addEventListener('change', renderCatalog);
 
-  // update chip counters
-  setInterval(()=>{ document.getElementById('chip-atm').textContent=user().atm; document.getElementById('chip-orders').textContent=user().orders.length; }, 1000);
-}
+// create order from payment window when user presses "I paid"? — создание уже выполнено при нажатии «Оформить».
+// В текущей версии оформляем заказ в момент нажатия «Оформить» в магазине.
+// Добавь эту кнопку в карточки при необходимости — ниже делаем глобально:
+document.addEventListener('keydown',(e)=>{ if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ if(state.cart.length>0) createOrder(); }});
+
+// DEV auth modal for non-TG
+document.getElementById('auth-close').addEventListener('click',()=> document.getElementById('modal-auth').style.display='none');
+
+// init
 boot();
+
+/* =============================
+   EXTRA: trigger order by double click on cart (UX shortcut)
+============================= */
+document.getElementById('cart-open').addEventListener('dblclick', ()=>{
+  if(state.cart.length>0){ state.pay.memo='ORDER-'+(db.orders.length+1); createOrder(); }
+});
+
 </script>
 </body>
 </html>
